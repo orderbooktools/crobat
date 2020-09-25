@@ -1,14 +1,16 @@
 import pandas as pd
 import copy
 from bisect import bisect
-
+import numpy as np
+#import fixed_tick_LOB as ftLOB
 # LOB_funcs.py contains the functions that are used in the class that interacts with the WebSocket. 
 # The initial functions price
+
 def price_match(x,y):
     if y == x:
         return True
     else:
-        return False       
+        return False            
 #This function converts my ...
 def convert_array_to_list_dict(history, pos_limit=5):
     temp_dict = {}
@@ -17,11 +19,11 @@ def convert_array_to_list_dict(history, pos_limit=5):
         temp_dict.update({"time":history[i][0]})
         for n in range(pos_limit):
             temp_dict.update({str(n):history[i][1][n][1]})
-            return_list.append(temp_dict)
-            temp_dict = {}
+        return_list.append(temp_dict)
+        temp_dict = {}
     return return_list
 
-def pd_excel_save(title,hist_obj_dict):
+def pd_excel_save(title, hist_obj_dict):
     hist_obj_df = pd.DataFrame(hist_obj_dict)
     hist_obj_df = hist_obj_df[1:]
     writer = pd.ExcelWriter(title, engine='xlsxwriter')
@@ -41,7 +43,19 @@ class history(object):
         self.token = False
         self.position = 0
         self.event_size = 0
-        self.snapshot_token = False
+
+    def initialize_snap_events(self, msg, time):
+        time = time
+        self.snapshot_bid = msg['bids'][:3800]#[:3800] #creates the list of [[price, size], ... [price, size]] which is what we'll be working on
+        self.snapshot_ask = msg['asks'][:3800] 
+        self.bid_range = [float(self.snapshot_bid[i][0]) for i in range(len(self.snapshot_bid))]
+        self.ask_range = [float(self.snapshot_ask[i][0]) for i in range(len(self.snapshot_ask))] # x_range is the range in prices from our initial observation
+        self.bid_volm  = [float(self.snapshot_bid[i][1]) for i in range(len(self.snapshot_bid))] # x_volm is the associated volum from our initial observation 
+        self.ask_volm  = [float(self.snapshot_ask[i][1]) for i in range(len(self.snapshot_ask))]
+        self.snapshot_bid = [[self.bid_range[i], self.bid_volm[i]] for i in range(len(self.snapshot_bid))]
+        self.snapshot_ask = [[self.ask_range[i], self.ask_volm[i]] for i in range(len(self.snapshot_ask))] #convert x from str into floats #convert x from str into floats
+        self.bid_history.append([time, self.snapshot_bid]) # append this initial instance of x to history
+        self.ask_history.append([time, self.snapshot_ask]) # append this initial instance of x to history
 
     # event that will happen when a market order arrives defined in the ticker class, on message function
     def add_market_order_message(self, message, events):
@@ -148,10 +162,13 @@ class history(object):
         return self.snapshot_ask, self.ask_range
 
     def trim_coordinator(self, position, bound):
-        if position>bound:
+        try:
+            if position>bound:
+                self.token = False
+            else:
+                pass
+        except:
             self.token = False
-        else:
-            pass
         return self.token
 
     def append_snapshot_bid(self, time, price_level):
@@ -178,22 +195,6 @@ class history(object):
                 i = orders.index('cancelation') -2
                 del events[i]
     
-    def check_snapshot(self):
-        if self.snapshot_token:
-            pass
-        else:
-            self.bid_history=[]#snapshot.x_history #an empty list that will hold the history of the list tuples we're going to be working on 
-            self.ask_history=[]
-            self.snapshot_bid = []# snapshot.x #an empty list that will hold the current instance of the list tuples we're going to be working on 
-            self.snapshot_ask = []
-            self.bid_events = []# list two elemtnts classification, ,price, and size ['insertion', 0.3105 XRP-USD, 12345 XRP] 
-            self.ask_events = []
-            self.order_type = None
-            self.token = False
-            self.position = 0
-            self.event_size = 0
-            self.snapshot_token = False
-
 def UpdateSnapshot_bid_Seq(hist_obj, time, side, price_level, level_depth, pre_level_depth, price_match_index):
     hist_obj.snapshot_bid, pre_level_depth = hist_obj.update_level_depth(hist_obj.snapshot_bid, level_depth, price_match_index, pre_level_depth)        
     hist_obj.snapshot_bid = hist_obj.remove_price_level(hist_obj.snapshot_bid, level_depth, price_match_index) # needs price range update, 
@@ -213,3 +214,4 @@ def UpdateSnapshot_ask_Seq(hist_obj, time, side, price_level, level_depth, pre_l
     if hist_obj.token:
         hist_obj.append_snapshot_ask(time, price_level)
         hist_obj.check_mkt_can_overlap(hist_obj.ask_events)
+        
