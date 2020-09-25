@@ -113,19 +113,19 @@ Since this is an orderbook <u>recorder</u> my use until now has been to record t
 2. We change the ```settings``` variable in the ```input_args.py``` file that has arguments for:
 
     | Parameter                | Function Arg  | Type |  Description | 
-|---------------------------|-------------------|------| -----|
-| Recording Duration | duration      | int  | recording time in seconds | 
-| Position Range     | position_range| int  | ordinal distance from the best bid(ask) |
-| Currency Pair      | currency_pair | str  | [List of currency pairs supported by Coinbase](https://help.coinbase.com/en/pro/trading-and-funding/cryptocurrency-trading-pairs/locations-and-trading-pairs)|
+    |---------------------------|-------------------|------| -----|
+    | Recording Duration | duration      | int  | recording time in seconds | 
+    | Position Range     | position_range| int  | ordinal distance from the best bid(ask) |
+    | Currency Pair      | currency_pair | str  | [List of currency pairs supported by Coinbase](https://help.coinbase.com/en/pro/trading-and-funding/cryptocurrency-trading-pairs/locations-and-trading-pairs)|
 
 3. When you are ready, you can start the build. When it finishes you should get a message ```Connection Closed``` from ```CoPrA```. And the files for the limit orderbook for each side should be created with a timestamp:
 
     |Filename|side|description|
-|----|----|----|
-|L2_orderbook_events_askYYYY-MM-DDTHH:MM:SS.ffffff| ask| Order book events on the ask side|
-|L2_orderbook_events_bidYYYY-MM-DDTHH:MM:SS.ffffff| bid| Order book events on the bid side |
-|L2_orderbook_askYYYY-MM-DDTHH:MM:SS.ffffff| ask |Images of orderbook on the ask side |
-|L2_orderbook_bidYYYY-MM-DDTHH:MM:SS.ffffff| bid |Images of orderbook on the bid side |
+    |----|----|----|
+    |L2_orderbook_events_askYYYY-MM-DDTHH:MM:SS.ffffff| ask| Order book events on the ask side|
+    |L2_orderbook_events_bidYYYY-MM-DDTHH:MM:SS.ffffff| bid| Order book events on the bid side |
+    |L2_orderbook_askYYYY-MM-DDTHH:MM:SS.ffffff| ask |Images of orderbook on the ask side |
+    |L2_orderbook_bidYYYY-MM-DDTHH:MM:SS.ffffff| bid |Images of orderbook on the bid side |
 
 #### Understanding The Raw Order Book Data
 
