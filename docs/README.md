@@ -84,6 +84,7 @@ As the project grew I wanted to make a tool that could be used by academics look
 
 3. [Cont R., Kukanov A. and Stoikov S. - The price impact of order book events](https://arxiv.org/pdf/1011.6402.pdf) 
 
+4. [Cont R., Kukanov A. and Stoikov S. - The price impact of order book events](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3431139) 
 
 <!-- GETTING STARTED -->
 ## Getting Started
