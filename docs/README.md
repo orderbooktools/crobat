@@ -98,6 +98,7 @@ You can use  ```requirements.txt``` to see what is necessary but they are also l
 **requisite modules:** [copra](https://www.neuraldump.net/2018/07/copra-an-asyncronous-python-websocket-client-for-coinbase-pro/),  pandas, numpy
 
 ### Installation
+Given that this is still very much a work in progress, it may make more sense to fork the project, and build ```input_args.py``` with the appropriate settings. Note: depending on the popularity of the asset and the computational power of your PC, you may run into errors arising from the computer not being able to keep up with the market (especially BTC-USD). I would suggest experimenting with an unpopular pair XRP-USD, or a crypto-crypto pair (e.g., XRP-BTC) outside of NYSE, and London Stock Exchange trading hours as they tend to have less activity.  
 
 ```sh
 pip3 install crobat
