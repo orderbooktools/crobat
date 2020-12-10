@@ -86,6 +86,10 @@ As the project grew I wanted to make a tool that could be used by academics look
 
 4. [Cartea. A, Jaimungal S. and Wang Y. - Spoofing and Price Manipulation in Order Driven Markets](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3431139) 
 
+5. [Silyantev, E. - Order flow analysis of cryptocurrency markets  ](https://link.springer.com/article/10.1007/s42521-019-00007-w#article-info)
+
+The last paper, 5, shows a working model implementing Order Flow Imbalance (OFI) and Trade Flow Imbalance to BTC-USD trades was done by [Ed Silyantev](https://medium.com/@eliquinox/order-flow-analysis-of-cryptocurrency-markets-b479a0216ad8). He developed a tool to assess OFI and TFI of XBT-USD pair. 
+
 <!-- GETTING STARTED -->
 ## Getting Started
 
@@ -99,31 +103,42 @@ You can use  ```requirements.txt``` to see what is necessary but they are also l
 **requisite modules:** [copra](https://www.neuraldump.net/2018/07/copra-an-asyncronous-python-websocket-client-for-coinbase-pro/),  pandas, numpy
 
 ### Installation
-Given that this is still very much a work in progress, it may make more sense to fork the project, and build ```input_args.py``` with the appropriate settings. Note: depending on the popularity of the asset and the computational power of your PC, you may run into errors arising from the computer not being able to keep up with the market (especially BTC-USD). I would suggest experimenting with an unpopular pair XRP-USD, or a crypto-crypto pair (e.g., XRP-BTC) outside of NYSE, and London Stock Exchange trading hours as they tend to have less activity.  
+Given that this is still very much a work in progress, it may make more sense to fork the project, or download the project as a compressed folder, and build ```CSV_out_test.py``` with your preferred settings.
 
+ *Note*: depending on the popularity of the asset and the computational power of your PC, you may run into errors arising from the computer not being able to keep up with the market (especially BTC-USD). I would suggest experimenting with an unpopular pair, (e.g.,  XRP-USD), or a crypto-crypto pair (e.g., XRP-BTC), and timing your queries outside of NYSE, and London Stock Exchange trading hours as they tend to have less activity.
+
+however if you want an easy installation: 
+
+ ```pip3 install crobat``` 
+ 
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Since this is an orderbook <u>recorder</u> my use until now has been to record the orderbook. I should write acessors to get the latest event or orderbook snapshot in realtime.
+Since this is an orderbook <u>recorder</u> my use until now has been to record the orderbook. However there are accessors in the ```LOB_funcs.py``` file, under in the *history* class. In the /test folder there is a small usecase if you would like to see it but documentation is pending.
 
-1. For now we only have the full orderbook, with no regard for ticksize, and we call that ```recorder_full.py``` (I'm still working on fixed tick).
+1. For now we only have the full orderbook, with no regard for ticksize, and we call that ```recorder_full.py```. 
 
-2. We change the ```settings``` variable in the ```input_args.py``` file that has arguments for:
+2. We change the ```settings``` variable in the ```CSV_out_test.py``` file that has arguments for:
 
     | Parameter                | Function Arg  | Type |  Description | 
-    |---------------------------|-------------------|------| -----|
+    |-------------------------|-------------------|------| -------|
     | Recording Duration | duration      | int  | recording time in seconds | 
     | Position Range     | position_range| int  | ordinal distance from the best bid(ask) |
-    | Currency Pair      | currency_pair | str  | [List of currency pairs supported by Coinbase](https://help.coinbase.com/en/pro/trading-and-funding/cryptocurrency-trading-pairs/locations-and-trading-pairs)|
+    | Currency Pair      | currency_pair | str  | [List of currency pairs supported by Coinbase](https://help.coinbase.com/en/pro/trading-and-funding/cryptocurrency-trading-pairs/locations-and-trading-pairs) |
 
 3. When you are ready, you can start the build. When it finishes you should get a message ```Connection Closed``` from ```CoPrA```. And the files for the limit orderbook for each side should be created with a timestamp:
 
     |Filename|side|description|
     |----|----|----|
-    |L2_orderbook_events_askYYYY-MM-DDTHH:MM:SS.ffffff| ask| Order book events on the ask side|
-    |L2_orderbook_events_bidYYYY-MM-DDTHH:MM:SS.ffffff| bid| Order book events on the bid side |
-    |L2_orderbook_askYYYY-MM-DDTHH:MM:SS.ffffff| ask |Images of orderbook on the ask side |
-    |L2_orderbook_bidYYYY-MM-DDTHH:MM:SS.ffffff| bid |Images of orderbook on the bid side |
+    |L2_orderbook_events_askYYYY-MM-DDTHH:MM:SS.ffffff| ask|Time series of order book events on the ask side|
+    |L2_orderbook_events_bidYYYY-MM-DDTHH:MM:SS.ffffff| bid| Time series of order book events on the bid side |
+    |L2_orderbook_events_signedYYYY-MM-DDTHH:MM:SS.ffffff| both | Time series of order book events on both sides, - sign for bid, +sign for ask|
+    |L2_orderbook_ask_volmYYYY-MM-DDTHH:MM:SS.ffffff| ask |Time series of the volume snapshots of order book on the ask side |
+    |L2_orderbook_bid_volmYYYY-MM-DDTHH:MM:SS.ffffff| bid |Time series of the volume snapshots of order book on the bid side |
+    |L2_orderbook_signed_volmYYYY-MM-DDTHH:MM:SS.ffffff | both |Time series of the volume  snapshots of the signed order book, - for bid, + for ask|
+    |L2_orderbook_ask_volmYYYY-MM-DDTHH:MM:SS.ffffff| ask |Time series of the price snapshots of order book on the ask side |
+    |L2_orderbook_bid_volmYYYY-MM-DDTHH:MM:SS.ffffff| bid |Time series of the price snapshots of order book on the bid side |
+    |L2_orderbook_signed_volmYYYY-MM-DDTHH:MM:SS.ffffff | both |Time series of the price snapshots of the signed order book, - for bid, + for ask|
 
 #### Understanding The Raw Order Book Data
 
@@ -131,17 +146,34 @@ The coinbase exchange operates using the double auction model, the [Coinbase Pro
 
 #### Orderbook Snapshots
 
-Below there is a graph of the snapshot where bids (green) show open limit orders to buy the 1 unit of the cryptocurrency below $7085.930, and asks (red) show open limit orders to buy 1 unit above $7085.930. The x-axis shows the price points, and the y-axis is the aggregate size at the price level.
+Below there is a graph of the snapshot where bids (green) show open limit orders to buy the 1 unit of the cryptocurrency below $7085.930, and asks (red) show open limit orders to buy 1 unit above $7085.930. The x-axis shows the price points, and the y-axis is the aggregate size at the price level. Note that  the signed orderbook calls volume on the bid side negative. 
 
 <img src="https://raw.githubusercontent.com/orderbooktools/crobat/master/images/figure_1.png" >
 
-Early and current works relied on exchanges and private data providers (e.g., [NASDAQ - BookViewer](https://data.nasdaq.com/BookViewer.aspx), [LOBSTER](https://lobsterdata.com/)) to provide reconstructions of orderbooks. Earlier works were limited to taking snapshots and inferring the possible sequence of orderbook events between states. Coinbase and by extension crobat update the levels on the instance of a update message from the exchange so there is no guess as to what happened between states of the order book. The current format of the orderbook snapshot is not aggregated. The format of the orderbook snapshot is shown below
+Early and current works relied on exchanges and private data providers (e.g., [NASDAQ - BookViewer](https://data.nasdaq.com/BookViewer.aspx), [LOBSTER](https://lobsterdata.com/)) to provide reconstructions of orderbooks. Earlier works were limited to taking snapshots and inferring the possible sequence of orderbook events between states. Coinbase and by extension crobat update the levels on the instance of a update message from the exchange so there is no guess as to what happened between states of the order book. The current format of the orderbook snapshot is not aggregated. The format of the orderbook snapshot for a single side is shown below
 
-| Timestamp | 0 | 1| 2| ...| position range -1|
+| Timestamp | 1 | 2| 3| ...| position range |
 |--------------------------------------|------------------------------|-----------------------------|-------------------------------|----| -------------------|
-|YYYY-MM-DDTHH:MM:SS.ffffff| total BTC at position 0 |total BTC at position 1| total BTC at position 2 | ... |  total BTC at position range -1|
+|YYYY-MM-DDTHH:MM:SS.ffffff| total BTC at position 1 |total BTC at position 2| total BTC at position 3 | ... |  total BTC at position range |
 
-This has some limitations as you cannot get market depth in the quote currency. These snapshots in the future will include the price at each position for studies involving market depth. The Event Recorder does retain price point information.
+The associated price quote (price quote (USD per XTC))snapshot is also generated, to make generation of market depth feasible. 
+
+| Timestamp | 1 | 2| 3| ...| position range |
+|--------------------------------------|------------------------------|-----------------------------|-------------------------------|----| -------------------|
+|YYYY-MM-DDTHH:MM:SS.ffffff| price quote  at position 1 |price quote at position 2| price quote at position 3 | ... |  price quote at  position range |
+
+The signed orderbook takes a different approach to position labelling so please keep that in mind. (note: I should  shift the position index to start at 1, for singe side order book snapshot time series). The signed orderbook snapshot is generated in a similar fashion with a volume, and price at each position. However, it uses the convention established in [3] for the signed order book. where positions on the bid are negative, with negative volume (XTC). I'll show the default setting that displays the 5 best bids and asks on each side.
+
+| Timestamp | -5 | -4| -3| -2| -1 | 1| 2|3|4|5|
+|-----------------------------|---------------------------|-----------------------------|-------------------------------|----| -------------------|----| -----|------|------|-----|
+|YYYY-MM-DDTHH:MM:SS.ffffff| total XTC at the 5<sup>th </sup> best bid |total XTC at the 4<sup>th</sup> best bid| total XTC at the 3<sup>rd</sup> best bid | total XTC at the 2<sup>nd</sup> best bid |  total XTC at the best bid| total XTC at the best ask|total XTC at the best 2<sup>nd</sup> ask|total XTC at the 3<sup>rd</sup>  best ask|total XTC at the 4<sup>th</sup> best ask|total XTC at the 5<sup>th</sup> best ask|
+
+Similar to the single side implementation, there is an associated price quote  (e.g., USD per XTC) snapshot generated at each timepoint. The default format is given below:
+
+| Timestamp | -5 | -4| -3| -2| -1 | 1| 2|3|4|5|
+|-----------------------------|---------------------------|-----------------------------|-------------------------------|----| -------------------|----| -----|------|------|-----|
+|YYYY-MM-DDTHH:MM:SS.ffffff| price quote at the 5<sup>th </sup> best bid | price quote  at the 4<sup>th</sup> best bid| price quote at the 3<sup>rd</sup> best bid | price quote at the 2<sup>nd</sup> best bid |  price quote at the best bid| price quote at the best ask| price quote at the best 2<sup>nd</sup> ask|price quote at the 3<sup>rd</sup>  best ask|price quote at the 4<sup>th</sup> best ask|price quote at the 5<sup>th</sup> best ask|
+
 
 #### Event Recordings
  Event recording are a timeseries of MO, LO, CO's as afforded from the ```l2_update``` messages which are used to update the price, volume pair size at each price level. The format of the Event recorder is as follows:
@@ -150,15 +182,23 @@ This has some limitations as you cannot get market depth in the quote currency. 
  |--------------------------------------|----------------------------|---------------|--------------|-------------|-------------|--------------------|
 |YYYY-MM-DDTHH:MM:SS.ffffff| MO, LO, CO | price level in quote currency| event size in base currency |position | (best-ask + best-bid)/2 |  best-ask - best-bid range|
 
+Signed event recordings follow the convention from [The Price impact of Orderbook events](https://arxiv.org/pdf/1011.6402.pdf), where positive order flow is due to MO's on the buy side, CO on the sell side, and LO on the buy side. Conversely,  negative order flow is due to MO's on the sell side, CO on the buy side, and LO on the buy side. The format is similar to the single side order book events timeseries, but the order volume is signed based on the aforementioned construction. 
+
+ | Timestamp | order type | price level | event size | position |side| mid price| bid-ask spread|
+ |--------------------------------------|----------------------------|---------------|-------|-------|-------------|-------------|--------------------|
+|YYYY-MM-DDTHH:MM:SS.ffffff| MO, LO, CO | price level in quote currency| event size in base currency |signed position(- for bids, + for asks) |buy/sell | (best-ask + best-bid)/2 |  best-ask - best-bid range|
+
 <!-- ROADMAP -->
 ## Roadmap
 ####Features that need to be developed in order of priority:
 
-1. fixed tick orderbook snapshots and event recording
-2. market depth recording in both base and quote currencies.
-3. Acessor functions
-4. modernizing/optimizing iteration and classes
+1. fixed tick orderbook snapshots and event recording 
+2. ~~market depth recording in both base and quote currencies.~~
+3. ~~Acessor functions~~(*documentation pending*)
+4. ~~modernizing/optimizing iteration and classes~~(replaced sort instances with insert, and a little bit of logic)
+5. **Finding a way to call the classes outside of the AsyncIO or WebSocket Loop (help me figure this one out!)**
 
+ 
 See the [open issues](https://github.com/orderbooktools/crobat/issues) for a list of proposed features (and known issues).
 
 <!-- CONTRIBUTING -->
