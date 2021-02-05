@@ -1,0 +1,16 @@
+\paragraph{\textit{function} \textcolor{blue}{\texttt{on\_open}}\texttt{(self)}}
+\hfill\break
+\textbf{Description:} From class \texttt{Client} uses method \texttt{on\_open}\texttt{()} to set things up. See ACoPrA \texttt{on\_open()} for more information.
+
+\noindent \textit{restated from} \texttt{CoPrA}:\hfill\break
+\fbox{\begin{minipage}{\textwidth}
+		\texttt{on\_open} is called as soon as the initial WebSocket opening handshake is complete. The connection is open, but the client is not yet subscribed.
+		
+		If you override this method it is important that you still call it from your subclass’ \texttt{on\_open} method, since the parent method sends the initial subscription request to the WebSocket server. Somewhere in your \texttt{on\_open} method you should have \texttt{super().on\_open()}.
+		
+		In addition to sending the subscription request, this method also logs that the connection was opened.
+\end{minipage}}
+
+\textbf{paramters:} None
+
+\textbf{returns:} None
