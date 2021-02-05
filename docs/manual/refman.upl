@@ -1,0 +1,159 @@
+This is version 2.0e[2006/11/18] of the refman class family for LaTeX2e
+
+Refman is based on classes.dtx (1.4a) and the Refman.sty version 1.1.
+
+This new class is a class by it's own and no style-option.
+I've made this change to support some things which would have
+been difficult with a style-option.
+
+The new class consists of
+refart.cls	an article-like style (former refman-s)
+refrep.cls	a report-like style (former refman)
+
+There is only a little difference between refart and refrep:
+
+Refrep supports chapters, has a titlepage by default and uses
+chaptermark and sectionmark in footings and headings.
+Refrep supports \pageperchapter
+
+Refart supports an optional titlepage and uses sectionmark
+and subsectionmark in footings and headings.
+
+Changes:
+========
+
+Both classes support different papersizes in the same way as the
+original LaTeX2e-classes, including the landscape option.
+There is a new option to produce a square-layout.
+
+The pagelayout is not 100% compatible to refman.sty due to the
+multiple-papersize-support.
+The running head and foot is not compatible to refman.sty.
+
+I've changed the footnote-layout since a not indended footnote-
+layout fits better to a not indended textlayout. (There have been lots of 
+fixed for the footnote layout, seems to be a reall problem.)
+
+I've tried to support an index-environment.
+The index is set in twocolumn-layout.
+
+The maketitle-command sets title *and* autor *and* date. If you
+don't want the date use \date{} before calling \maketitle.
+
+I've followed the example of Markus Kohm and renamed the classes
+to refart.cls and refrep.cls. Thus it is easier to remember what is
+what and it can't be confused with refman.sty
+
+Obsolete commands:
+==================
+
+The command setleftmarginwidth is no longer supported. There is no
+use setting the leftmargin to a fixed value if you don't know
+the fullwidth. (See new commands)
+
+The makeauthor is no longer supported, this is done by maketitle.
+
+New commands (not in refman.sty v. 1.1)
+=======================================
+There are some commands I consider usefull in a reference
+manual style:
+
+\pageperchapter
+This will give you new pagenumbers each chapter,
+looking like 1-1, 1-2, 1-3, 2-1 ...
+Prefacepages will be numberer 1,2,3 since 0-1 is not desireable.
+The pagepc-package will implement this for the LaTeX-standard 
+classes. (This is still experimental and does not work well
+with MakeIndex)
+
+A hack to make MakeIndex happy is included, but sadly MakeIndex
+can no longer use the "|" command anymore since it is used to
+format the indexentries.
+
+\settextfraction{fraction}
+This will reset the horizontal layout, giving you a textwidth
+of fraction*fullwidth. The restriction to lines with 60-70 chars has
+been removed.
+
+Both commands should only be used in the preamble.
+
+A new option smallborder has been introduced. It reduces the border
+around the page from 1 in to 0.25 in (1/4 in for users in the USA). This
+will reduce the amout of screen area wasted when preparing online
+documentation. Since the result are rather long lines, you should use this
+only with smaller papersizes, like a5paper.
+
+History:
+========
+
+1.9 a Included redefinition of pagestyle{plain} for twoside printing
+1.9 b Refman now works with LaTeX2e [1994/06/01] and is in sync
+      with classes 1.2 s
+1.9 c Fixed refman: There should be an opening { in markright
+      (every pagestyle, except for plain and empty)
+      Moved changing of topmargin inside ps definition
+1.9 d Fixed the pagestyles for oneside printing
+      Changed chapter layout (uses fullwidth now)
+      Changed typeout to ClassError where needed
+1.9 e Renamed refman to refrep and refman-s to refart.
+      Cleaned up fullwidth-environment, now it works on
+      even-sides too:-)
+      Added \pageperchapter to refrep.cls
+      Added \settextfraction
+      Removed ref{10|11|12}.clo. Refman is now using the
+      size{10|11|12}.clo files.
+1.9 f Synced with classes.dtx v. 1.2x
+      Ref{art,rep} needs now LaTeX2e[1994/12/01]
+      Pagestyle plain does not center the pagenumber, it is 
+      always printed at the outside-margin.
+      Documentation added (layout.tex layout2.tex)
+1.9 g Final test release synced with LaTeX2e[1995/06/01]
+      (Classes.dtx v.1.3e)
+      Pagestyle plain did center the pagenumber in one-side
+      documents, fixed it this time.
+      Fixed fullpage-environment to reset leftmarginwidth and 
+      set hsize to the correct value. (You may now start a new 
+      chapter inside a fullpage environment.(Not encouraged))
+      Made settextfraction an onlypreamble-command.
+      Changed the \pageperchapter-command and included pagepc.sty
+      which can be used with other LaTeX2e-classes (like report 
+      and scrreprt) In pageperchapter-mode, the index will be in 
+      a chapter of it's own and no longer belong to the last 
+      appendix.
+1.9 h Corrected some typos where the a in normalfont was missing
+      Added my e-mail address to the dtx-file, so bug reports can
+      reach me faster. Corrected typo in condbreak (There is seems to
+      be at least one user who uses it)
+      Synced with classes 1.3p, thus saving some memory.
+1.9 i Corrected footnote in titlepage (refart only)
+      Removed . after the chapternumber.
+      Changed format of chapter-title. It now hangs after the
+      chapter number.
+1.9 k Corrected appendix in refrep. Now the chapter-counter is used
+      to generate the chapter-number
+1.9 l Again fixes to to the footnote-layout of refart. Now titlepage
+      and normal text use the same code.
+1.9 m Added a forgotten \ to listfigurename
+2.0   Synced with Classes 1.3u
+2.0a  Added missing \renewcommand\thetable in refrep
+2.0b  Added english documentation, changed layout of footnote again
+      (Added more space between footnotesymbol and text) Changed the
+      footnote layout on the titlepage to be compatible with the 
+      footnotelayout used within the class.
+2.0c  Changed the licence to "LaTeX Project Public License"
+      Fixed some typos in the documentation
+      \attention now takes an optional argument
+      Added \attentionsymbol to allow the use of different symbols for the 
+      \attention command
+      Added the manfnt package to access symbols from the manfnt font
+      The manfnt package has been removed from refman. it is now a package 
+      of it's own. No other file has changed, the version number is 
+      unchanged.
+2.0d  Fixed a typo using the wrong penalty, updated e-mail address.
+2.0e  Fixed many typos in the documentation, added option smallborder
+      Changed calculation of textheight and textwidth, please report
+      errors.
+      Added option dvips, pdftex and pagesize to export the pagesize.
+      Changes pagestyle for titlepage to empty since plain does not work
+      with pagestyle{headings}. No longer change the pagestyle for the
+      index.

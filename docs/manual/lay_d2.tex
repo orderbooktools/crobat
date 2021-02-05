@@ -1,0 +1,877 @@
+% LAYOUT2.TEX - Anhang von LAYOUT.TEX (PA 1988)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\clearpage
+
+\section*{Anhang}
+\addcontentsline{toc}{section}{Anhang}
+
+\appendix
+
+\section{Die Seitenaufteilung in \LaTeX}
+
+In diesem Anhang wird angegeben, aus welchen Komponenten der 
+Seitenaufbau besteht und wie die einzelnen Parameter in \LaTeX\ 
+definiert sind (siehe auch \seealso{Abb.\,\ref{bild}} 
+Abbildung~\ref{bild}, die von Nelson Beebe an der University of Utah 
+erzeugt wurde).
+
+\begin{description}
+
+\item[Textbereich]
+        Der normale Textbereich ("`Body"') umfa"st den laufenden 
+        Text einschlie"s"-lich Fu"snoten, Tabellen und Abbildungen. 
+        \emph{Nicht} zu diesem Bereich geh"oren Kopfzeilen, 
+        Fu"szeilen und Randnoten.
+
+        Der Textbereich hat die Breite \cs{text"-width} und die 
+        H"ohe \cs{text"-height}.
+
+	Bei zweispaltiger Ausgabe enth"alt der Textbereich zwei Spalten, die
+	jeweils \cs{column"-width} breit sind, und zwischen ihnen einen
+	Abstand der Breite \cs{column"-sep}. Die Spaltenbreite
+	\cs{column"-width} ist also etwas geringer als die H"alfte von
+	\cs{text"-width}.
+
+        \cs{text"-width} bzw.\ \cs{column"-width} soll ein 
+        Vielfaches der Buchstabenbreite des \texttt{tt}-Fonts sein.
+
+        \cs{text"-height} soll ein Vielfaches der 
+        Zeilenh"ohe \cs{baseline"-skip}, vermehrt um die Konstante 
+        \cs{top"-skip}, sein.
+
+	Innerhalb des Textbereichs werden Einr"uckungen mit \cs{left"-skip}
+	und \cs{right"-skip} festgelegt. Diese beiden Gr"o"sen sollen nicht
+	explizit ver"-"andert werden sondern nur implizit durch die
+	Environments.
+
+\item[linker Rand]
+        Der Rand links vom Textbereich ist um 1~Inch mehr als \cs{
+        odd-} bzw.\ \cs{even"-side"-margin}, je nachdem ob die 
+        Seitennummer ungerade oder gerade ist. Normalerweise sind beide 
+        Gr"o"sen gleich, nur bei der Option \texttt{twoside} werden rechte 
+        (=""ungerade) und linke (=""gerade) Seiten verschieden gesetzt.
+
+\item[oberer Rand]
+        Der Rand oberhalb des Textbereichs ist um 1~Inch mehr als die 
+        Summe von \cs{top"-margin}, \cs{head"-height} und 
+        \cs{head"-sep}.
+
+\item[rechter Rand]
+        Der Rand rechts vom Textbereich ergibt sich aus der 
+        Papierbreite minus der Breite von linkem Rand und Textbereich.
+
+\item[unterer Rand]
+        Der Rand unterhalb des Textbereichs ergibt sich aus der 
+        Papier"-h"ohe minus der H"ohe von oberem Rand und Textbereich.
+
+\item[Kopfzeilen]\index{Kopfzeilen}
+        Kopfzeilen ("`Header"') stehen innerhalb des oberen Randes, und 
+        zwar so, da"s zwischen dem unteren Rand der Kopfzeile und dem 
+        oberen Rand des Textbereichs der Abstand \cs{head"-sep} 
+        bleibt. Oberhalb der Kopfzeile bleibt ein freier Rand von 
+        1~Inch mehr als \cs{top"-margin}.
+
+\item[Fu"szeilen]\index{Fu{\ss}zeilen}
+        Fu"szeilen ("`Footer"') stehen innerhalb des unteren Randes, 
+        und zwar so, da"s der Abstand vom unteren Rand des 
+        Textbereichs zum unteren Rand der Fu"s"-zeile \cs{
+        foot"-skip} ist.
+
+\item[Randnoten]\index{Randnoten}
+        Randnoten ("`Margin Notes"') stehen innerhalb des rechten oder 
+        linken Randes. Sie haben eine Breite von \cs{
+        margin"-par"-width}, und zwischen den Randnoten und dem 
+        Textbereich bleibt ein horizontaler Abstand von \cs{
+        margin"-par"-sep}. Der vertikale Abstand zwischen 
+        aufeinanderfolgenden Randnoten ist mindestens \cs{
+        margin"-par"-push}.
+
+\end{description}
+
+Die Papierh"ohe setzt sich also von oben nach unten
+aus folgenden Elementen zusammen:
+\begin{verse}
+\rm 1 Inch \\*[2pt]
+\cs{topmargin} \\*[2pt]
+\cs{headheight} \\*[2pt]
+\cs{headsep} \\*[2pt]
+\cs{textheight} \\*[2pt]
+\cs{footskip} \\*[2pt]
+\rm Rest der Seite
+\end{verse}
+
+Bei Seiten mit rechten Randnoten
+-- was der Standardfall ist --
+setzt sich die Papierbreite
+von links nach rechts aus folgenden Elementen zusammen:
+\begin{verse}
+1 Inch \\*[2pt]
+\cs{oddsidemargin}\ \ bzw.\ \ \cs{evensidemargin} \\*[2pt]
+\cs{textwidth} \\*[2pt]
+\cs{marginparsep} \\*[2pt]
+\cs{marginparwidth} \\*[2pt]
+\rm Rest der Seite
+\end{verse}
+Bei der Option \texttt{twoside} besteht die Seitenbreite
+von linken Seiten mit linken Randnoten
+aus folgenden Elementen:
+\begin{verse}
+\rm 1 Inch \\*[2pt]
+\cs{evensidemargin} \\*[2pt]
+\cs{textwidth} \\*[2pt]
+\rm Rest der Seite
+\end{verse}
+
+\marginlabel{Anmerkungen:}
+Die Gr"o"sen \cs{topmargin}, \cs{oddside"-margin} und \cs{evenside"-margin}
+k"onnen auch negative Werte haben, dann ergibt sich an der betreffenden
+Stelle ein Rand von weniger als 1~Inch.  Auch \cs{left"-skip} und
+\cs{right"-skip} k"onnen negative Werte haben, dann ragt der Text
+entsprechend aus dem Textbereich heraus. Ausf"uhrlichere Hinweise und
+Skizzen zu diesem Thema findet man unter anderem in der Zeitschrift {\sc
+TUGboat} Vol.9, No.1 (April 1988).
+
+Die Gr"o"se \cs{footheight} ist in \LaTeX2e\ \emph{nicht} 
+mehr definiert, da sie anscheinend von niemandem benutzt wurde.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{fullpage}
+%%%%%%%%%%%%%%%%
+
+
+% Bild von Nelson Beebe, mit geringen "Anderungen von PA:
+\newcommand{\X}[1]{{#1}\index{{#1}}}
+% NB: For computed dimension parameters, we cannot use
+% \newcommand{}, because this expands to a TeX \def which does
+% not evaluate the definition before assigning it to the control
+% sequence name; we use \xdef directly to force evaluation
+\newcount\T      % temporary counter for arithmetic calculations
+\T=0
+
+% **********************************************************************
+% WARNING: Do not insert ANY aditional whitespace in these
+% macros--otherwise it ends up in the TeX boxes and ruins the
+% positioning, sigh....
+% **********************************************************************
+
+% NAMEBOX{x}{y}{dx}{dy}{width}{height}{pos}{label} -- framed label with
+% box lower-left corner at (x+dx,y+dy)
+\newcommand{\NAMEBOX}[8]{\put(#1,#2){\begin{picture}(0,0)(-#3,-#4)\ignorespaces
+    \framebox(#5,#6)[#7]{#8}\end{picture}}}
+
+% HARROW{x}{y}{dx}{dy}{length}{side}{pos}{label} -- horizontal
+% labeled arrow with left point at (x+dx,y+dy), label on bottom
+% (side=b) or top (side=t) of arrow, in makebox[pos]
+\newcommand{\HARROW}[8]{\put(#1,#2){\begin{picture}(0,0)(-#3,-#4)\ignorespaces
+    \put(0,0){\vector(1,0){#5}}\ignorespaces
+    \put(#5,0){\vector(-1,0){#5}}\ignorespaces
+    \ifthenelse{\equal{#6}{b}}{\ignorespaces
+      \put(0,-\TAD){\makebox(#5,0)[#7]{#8}}
+    }{\ignorespaces
+    \ifthenelse{\equal{#6}{t}}{}{\ignorespaces
+      \typeout{Side #6 must be ``b'' or ``t''--``t'' assumed}}\ignorespaces
+      \put(0,\TAD){\makebox(#5,0)[#7]{#8}}
+    }
+    \end{picture}}}
+
+% VARROW{x}{y}{dx}{dy}{length}{side}{pos}{label} -- vertical
+% labeled arrow with left point at (x+dx,y+dy), label on left
+% (side=l) or right (side=r) of arrow, in makebox[pos]
+\newcommand{\VARROW}[8]{\put(#1,#2){\begin{picture}(0,0)(-#3,-#4)\ignorespaces
+    \put(0,0){\vector(0,1){#5}}\ignorespaces
+    \put(0,#5){\vector(0,-1){#5}}\ignorespaces
+    \ifthenelse{\equal{#6}{l}}{\ignorespaces
+      \put(-\TAD,0){\makebox(0,#5)[#7]{#8}}
+    }{\ignorespaces
+      \ifthenelse{\equal{#6}{r}}{}{\ignorespaces
+        \typeout{Side #6 must be ``r'' or ``l''--``r'' assumed}}\ignorespaces
+        \put(\TAD,0){\makebox(0,#5)[#7]{#8}}
+    }
+    \end{picture}}}
+
+% VRULE{x}{y}{dx}{dy}{length}{side}{pos}{label} -- vertical
+% rule with left point at (x+dx,y+dy), label on left
+% (side=l) or right (side=r) of rule, in makebox[pos]
+\newcommand{\VRULE}[8]{\put(#1,#2){\begin{picture}(0,0)(-#3,-#4)\ignorespaces
+    \put(0,0){\line(0,1){#5}}\ignorespaces
+    \ifthenelse{\equal{#6}{l}}{\ignorespaces
+      \put(0,0){\makebox(0,#5)[#7]{$\rightarrow${}#8}}
+    }{\ignorespaces
+      \ifthenelse{\equal{#6}{r}}{}{\ignorespaces
+        \typeout{Side #6 must be ``r'' or ``l''--``r'' assumed}}\ignorespaces
+        \put(0,0){\makebox(0,#5)[#7]{$\leftarrow${}#8}}
+    }
+  \end{picture}}}
+% **********************************************************************
+% If you wish to change any of these values:
+%       * definitions are mostly in alphabetical order
+%       * remember units are in centipoints for accurate
+%         positioning
+%       * most parameters are taken directly from values in
+%         BK11.STY, but in order to improve the appearance of the
+%         figure, a few have been increased to avoid overlap of
+%         labels and/or boxes, or to loosen up the figure
+%       * ALL parameters which depend on others are defined by
+%         computation and \xdef's below; they must NEVER be
+%         changed
+%
+%- For 11pt BOOK style, \textwidth / \pagewidth(8.5in) = 0.5294
+%- Anything larger than this will generate an overfull box.  We
+%- choose 0.50 since that makes scaling trivial for the reader
+%- \newcommand{\UNITLENGTH}{0.005pt}
+%- \newcommand{\SCALEFACTOR}{50\%}
+%
+%-----> We use a larger picture with 0.70 on our DIN-A4 paper:
+\newcommand{\UNITLENGTH}{0.007pt}
+\newcommand{\SCALEFACTOR}{70\%}
+% <------------------------------
+%
+% US papersize...
+%
+\newcommand{\PAGEHEIGHT}{79497}         % 11in in centipoints
+\newcommand{\PAGEWIDTH}{61430}          % 8.5in in centipoints
+%
+% Typical dimensions from BK10.DOC
+%
+\newcommand{\BASELINESKIP}{2000}        % really 1000, but this is
+                                        % too tight for the figure
+\newcommand{\COLUMNSEP}{1000}
+\newcommand{\COLUMNSEPRULE}{0}
+
+% DVI drivers put top left corner at (1in,1in) from physical page
+% left corner
+\newcommand{\DVIXOFFSET}{7227}
+\newcommand{\DVIYOFFSET}{7227}
+
+\newcommand{\EVENSIDEMARGIN}{10841}
+
+\newcommand{\FOOTHEIGHT}{2400} % really 1200, but too tight
+\newcommand{\FOOTNOTESEP}{665}
+\newcommand{\FOOTSKIP}{4207}    % really 2529, but too tight; for symmetry,
+                                % make FOOTSKIP=HEADSEP+FOOTHEIGHT
+\newcommand{\HEAdHEIGHT}{2400}  % really 1200, but too tight
+\newcommand{\HEADSEP}{1807}
+
+\newcommand{\MARGINPARPUSH}{2000}       % really 500, but too tight
+\newcommand{\MARGINPARSEP}{2800}        % really 700, but too tight
+\newcommand{\MARGINPARWIDTH}{7227}
+\newcommand{\MARGINNOTEHEIGHT}{4444}    % arbitrary value (holds
+                                        % ``Margin Note A'' on
+                                        % 2 lines)
+
+\newcommand{\ODDSIDEMARGIN}{3613}
+%
+% Upper left page corner (0,0) is at (1in,1in) on physical page
+% for DVI drivers.  Position the LOWER left corner at
+% (\PAGEXORIGIN,\PAGEYORIGIN), where \PAGEYORIGIN is computed
+% below
+\newcommand{\PAGEXORIGIN}{\DVIXOFFSET}
+
+\newcommand{\TAD}{800}     % how far to move labels from their arrows
+\newcommand{\TEXTHEIGHT}{50400}
+\newcommand{\TEXTWIDTH}{32522}
+\newcommand{\TOPMARGIN}{5420}
+
+% **********************************************************************
+% DO NOT CHANGE any of these computed parameters
+%
+
+%
+\T=\TEXTWIDTH
+\advance\T by -\COLUMNSEP
+\divide\T by 2
+\xdef\COLUMNWIDTH{\the\T}
+
+\T=\TEXTWIDTH
+\divide\T by 2
+\advance\T by \ODDSIDEMARGIN
+\xdef\COLUMNXMIDDLE{\the\T}     % 0.5*TEXTWIDTH+ODDSIDEMARGIN
+
+\T=\COLUMNWIDTH
+\advance\T by \ODDSIDEMARGIN
+\advance\T by \COLUMNSEP
+\xdef\COLUMNTWOX{\the\T}        % COLUMNWIDTH+COLUMNSEP+ODDSIDEMARGIN
+
+\T=\FOOTSKIP
+\advance\T by \TEXTHEIGHT
+\advance\T by \HEADSEP
+\xdef\HEADYORIGIN{\the\T}           % FOOTSKIP+TEXTHEIGHT+HEADSEP
+%
+% Inner TeX page dimensions are (\INNERWIDTH,\INNERHEIGHT).  All TeX
+% coordinates are relative to (0,0) at upper-left corner of this
+% page, although for the figures, we put (0,0) at lower-left
+% corner.
+%
+\T=\TOPMARGIN
+\advance\T by \HEAdHEIGHT
+\advance\T by \HEADSEP
+\advance\T by \TEXTHEIGHT
+\advance\T by \FOOTSKIP
+% INNERHEIGHT=TOPMARGIN+HEAdHEIGHT+HEADSEP+TEXTHEIGHT+FOOTSKIP
+\xdef\INNERHEIGHT{\the\T}
+
+\T=\ODDSIDEMARGIN
+\advance\T by \TEXTWIDTH
+\advance\T by \EVENSIDEMARGIN
+\xdef\INNERWIDTH{\the\T}  % ODDSIDEMARGIN+TEXTWIDTH+EVENSIDEMARGIN
+
+\T=\ODDSIDEMARGIN
+\advance\T by \TEXTWIDTH
+\advance\T by \MARGINPARSEP
+\xdef\MARGINNOTEXORIGIN{\the\T} % ODDSIDEMARGIN+TEXTWIDTH+MARGINPARSEP
+
+\T=\TEXTHEIGHT
+\multiply\T by 75
+\divide\T by 100
+\advance\T by \FOOTSKIP
+\xdef\MARGINNOTEYA{\the\T}      % .75*TEXTHEIGHT+FOOTSKIP
+
+\T=\MARGINNOTEYA
+\advance\T by -\MARGINNOTEHEIGHT
+\advance\T by -\MARGINPARPUSH
+\xdef\MARGINNOTEYB{\the\T}      % MARGINNOTEYA-MARGINNOTEHEIGHT-MARGINPARPUSH
+
+\T=\MARGINNOTEYA
+\advance\T by \MARGINNOTEHEIGHT
+\xdef\MARGINNOTEYC{\the\T}      % MARGINNOTEYA+MARGINNOTEHEIGHT
+
+\T=\PAGEHEIGHT
+\advance\T by -\DVIYOFFSET
+\xdef\PAGEYTOP{\the\T}          % PAGEHEIGHT-DVIYOFFSET
+
+\T=\PAGEYTOP
+\advance\T by -\INNERHEIGHT
+\xdef\PAGEYORIGIN{\the\T}       % PAGEYTOP-INNERHEIGHT
+
+\T=\ODDSIDEMARGIN
+\advance\T by \TEXTWIDTH
+\xdef\RIGHTEDGE{\the\T}         % ODDSIDEMARGIN+TEXTWIDTH
+
+\T=\TEXTHEIGHT
+\multiply\T by 4
+\divide\T by 10
+\xdef\TEXTY{\the\T}             % TEXTY = 0.4*TEXTHEIGHT (we put
+                                % sample text here)
+
+\T=\TEXTHEIGHT
+\divide\T by 3
+\xdef\TEXTWIDTHY{\the\T}        % TEXTWIDTHY = TEXTHEIGHT/3 (we
+                                % put \textwidth label here)
+  \begin{figure}
+  %%%%%%%%%%%%%%
+
+ \caption{Seiten-Layout}
+ \label{bild}
+
+    \begin{center}
+      \begin{small}       % make text somewhat smaller
+      \setlength{\unitlength}{\UNITLENGTH}
+        \begin{picture}(\PAGEWIDTH,\PAGEHEIGHT)   % sizes in centipoints
+
+%
+          \NAMEBOX{0}{0}{0}{0}{\PAGEWIDTH}{\PAGEHEIGHT}{}{}
+%
+          \HARROW{0}{\PAGEYTOP}{0}{0}{\PAGEXORIGIN}{b}{}{1in}
+%
+          \VARROW{\PAGEXORIGIN}{\PAGEYTOP}{0}{0}{\DVIYOFFSET}{r}{l}{1in}
+%
+          \put(\PAGEXORIGIN,\PAGEYORIGIN){
+          \begin{picture}(\INNERWIDTH,\INNERHEIGHT)
+            % Draw 3-sided inner page frame--no bottom side
+            % because it is not significant for dimensioning
+            \put(0,0){\line(0,1){\INNERHEIGHT}}
+            \put(0,\INNERHEIGHT){\line(1,0){\INNERWIDTH}}
+            \put(\INNERWIDTH,0){\line(0,1){\INNERHEIGHT}}
+%
+            \NAMEBOX{\ODDSIDEMARGIN}{\TEXTY}{0}{0}{\TEXTWIDTH}{
+                \BASELINESKIP}{l}{A line of text\ldots}
+            \NAMEBOX{\ODDSIDEMARGIN}{\TEXTY}{0}{-\BASELINESKIP}{
+                \TEXTWIDTH}{\BASELINESKIP}{l}{Next line\ldots}
+%
+            \VARROW{\COLUMNXMIDDLE}{\TEXTY}{0}{-\BASELINESKIP}{
+              \BASELINESKIP}{r}{l}{\tt\string\baselinestretch
+              $\times$\string\baselineskip}
+%
+            \HARROW{0}{\TEXTHEIGHT}{0}{0}{\ODDSIDEMARGIN}{t}{}{
+              \tt\string\oddsidemargin}
+            \HARROW{0}{\TEXTHEIGHT}{0}{0}{\ODDSIDEMARGIN}{b}{}{
+              \tt\string\evensidemargin}
+            %
+            % Page text label
+            \NAMEBOX{\ODDSIDEMARGIN}{\FOOTSKIP}{0}{0}{\TEXTWIDTH}{
+              \TEXTHEIGHT}{}{Page Text}
+            % Page footer box, arrow, and label
+            \NAMEBOX{\ODDSIDEMARGIN}{0}{0}{0}{\TEXTWIDTH}{
+              \FOOTHEIGHT}{}{Page Footer}
+            %
+            \VARROW{\ODDSIDEMARGIN}{0}{-\TAD}{0}{\FOOTHEIGHT}{l}{r}{
+              \tt\string\footheight}
+            %
+            % Footskip arrow and label
+            \VARROW{\RIGHTEDGE}{0}{\TAD}{0}{\FOOTSKIP}{r}{l}{
+              \tt\string\footskip}
+            %
+            \HARROW{\ODDSIDEMARGIN}{\TEXTWIDTHY}{0}{0}{\TEXTWIDTH}{b}{}{
+              \tt\string\textwidth}
+            %
+            \VARROW{\ODDSIDEMARGIN}{\FOOTSKIP}{-\TAD}{0}{
+              \TEXTHEIGHT}{l}{r}{\tt\string\textheight$\rightarrow$}
+            %
+            \VARROW{\ODDSIDEMARGIN}{\HEADYORIGIN}{-\TAD}{0}{
+              \HEAdHEIGHT}{l}{r}{\tt\string\headHeight}
+            %
+            \VARROW{\RIGHTEDGE}{\HEADYORIGIN}{\TAD}{-\HEADSEP}{
+              \HEADSEP}{r}{l}{\tt\string\headsep}
+            %
+            \VARROW{\RIGHTEDGE}{\INNERHEIGHT}{\TAD}{-\TOPMARGIN}{
+              \TOPMARGIN}{r}{l}{\tt\string\topmargin}
+            %
+            \NAMEBOX{\ODDSIDEMARGIN}{\HEADYORIGIN}{0}{0}{\TEXTWIDTH}{
+              \HEAdHEIGHT}{}{Page Header}
+            %
+            \NAMEBOX{\MARGINNOTEXORIGIN}{\MARGINNOTEYA}{0}{0}{
+              \MARGINPARWIDTH}{\MARGINNOTEHEIGHT}{}{\shortstack{
+              Margin\\note A}}
+            %
+            \VARROW{\MARGINNOTEXORIGIN}{\MARGINNOTEYA}{-\TAD}{
+              -\MARGINPARPUSH}{\MARGINPARPUSH}{l}{r}{
+            \tt\string\marginparpush}
+            %
+            \NAMEBOX{\MARGINNOTEXORIGIN}{\MARGINNOTEYB}{0}{0}{
+              \MARGINPARWIDTH}{\MARGINNOTEHEIGHT}{}{\shortstack{Margin\\note B}}
+            %
+            \HARROW{\MARGINNOTEXORIGIN}{\MARGINNOTEYB}{0}{-\TAD}{
+              \MARGINPARWIDTH}{b}{}{\tt\string\marginparwidth}
+            %
+            \HARROW{\MARGINNOTEXORIGIN}{\MARGINNOTEYC}{
+              -\MARGINPARSEP}{\TAD}{\MARGINPARSEP}{t}{}{
+              \tt\string\marginparsep}
+            %
+          \end{picture}}
+        \end{picture}
+      \end{small}
+    \end{center}
+  \end{figure}
+  %%%%%%%%%%%%
+
+  \clearpage
+  %%%%%%%%%%
+
+\end{fullpage}
+%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Beschreibung der Dokumentklasse Refman}
+\label{refman}
+
+Am EDV-Zentrum der TU Wien wurde -- aufbauend auf den in 
+den vorangegangenen Kapiteln angef"uhrten Grunds"atzen -- eine 
+Style-Option \texttt{refman} zu den \LaTeX-Styles \texttt{article} und
+\texttt{report} entwickelt, die ein Layout f"ur Reference Manuals, technische 
+Beschreibungen und dergleichen realisiert. Das Layout entspricht im 
+wesentlichen den Angaben in Abschnitt~\ref{refmanex}: Die normalen 
+Textseiten haben einen breiten linken Rand, der f"ur "Uberschriften 
+und Randnoten ben"utzt wird, und nur einen eher knappen freien Rand 
+oben, rechts und unten.
+
+F"ur \LaTeX2e\ wurde diese Option in eine echte Class 
+umgewandelt. Dadurch ist es leichter m"oglich, verschiedene 
+Papierformate zu unterst"uzen. Au"serdem gibt es neben der 
+\texttt{report}-"ahnliche 
+\texttt{refrep}-Class\index{Refrep.cls} eine 
+\texttt{article}-"ahnliche 
+\texttt{refart}-Class\index{Refart.cls}, die sich durch andere 
+Eintr"age in Kopf- und Fu"s-Zeile sowie das Fehlen der 
+Gliederungsebene \texttt{chapter} von \texttt{refrep} 
+unterscheidet.
+
+Die derzeitige Version dieser Class wird im folgenden kurz in Hinblick 
+auf ihre Anwendeung beschrieben. Dies soll gleichzeitig als Beispiel 
+daf"ur dienen, welche "Anderungen und zus"atzliche Komponenten ein 
+typischer neuer \LaTeX-Style enthalten kann.
+
+Das vorliegende Handbuch wurde mit der Documentclass 
+\texttt{refart} gesetzt. Es ist also gleichzeitig ein Beispiel 
+f"ur das von dieser Class bewirkte Layout.
+
+
+\subsection{Aufruf}
+\index{Refart,Aufruf}
+\index{Refrep,Aufruf}
+
+Im \LaTeX\ Local Guide ist jeweils angegeben, ob und wo dieses oder 
+ein "ahnliches Class-File in einer bestimmten 
+\LaTeX-""Installation verf"ugbar ist. Der Aufruf erfolgt durch die 
+Angabe der Class \texttt{refart} im Befehl \cs{documentclass}, 
+also \zB~mit
+\begin{verbatim}
+\documentclass[11pt,a4paper]{refart}
+\usepackage{german}
+\end{verbatim}
+
+\subsection{Optionen}
+\index{Optionen}
+
+Die Class \texttt{refart} ersetzt die Class \texttt{article} und 
+die Class \texttt{refrep} die Class \texttt{report}. Sie kann 
+\emph{nicht} mit der folgenden Option verwendet werden:
+\texttt{twocolumn}.
+
+Da es sich jetzt um eine selbstst"andige Class handelt, sind folgende 
+Optionen m"oglich:
+\texttt{landscape}\index{Landscape},
+\texttt{square}\index{Square}
+sowie die aus den Standard--Classes bekannten 
+Papiergr"o"sen-Optionen
+\texttt{a4paper}\index{a4paper},
+\texttt{a5paper} oder auch die Optionen f"ur amerikanische 
+Formate. Die \texttt{square}-Option erzeugt ein quadratisches 
+Layout, bei dem die H"ohe auf die Papierbreite begrenzt wird.
+
+Sie \emph{kann} auch mit zahlreichen anderen Optionen kombiniert 
+werden, auch \zB\ mit \texttt{twoside} oder \texttt{fleqn}. Die 
+Option \texttt{titelpage} erzeugt bei der \texttt{refart}-Class 
+eine eigene Titelseite. Bei der Class \texttt{refrep} ist dies 
+die Standardeinstellung.
+
+Die Classes \texttt{refart} und \texttt{refrep} unter"-st"utzen nur 
+die einspaltige Ausgabe, die Befehle \cs{twocolumn} und 
+\cs{onecolumn} k"onnen in diesem Fall \emph{nicht} verwendet 
+werden.
+
+Der Index wird automatisch zweispaltig gesetzt. Das Layout entspricht 
+hier dem der Standard--Classes, allerdings mit kleinen "Uberschriften 
+wie im Rest des Dokumentes.
+
+\subsection{Layout-"Anderungen}
+
+\subsubsection{Seitenaufteilung}
+
+\index{Seitenaufteilung, horizontal}\marginlabel{Horizontal:} Die
+komplette gen"utzte Breite (\cs{fullwidth}) berechnet sich so, da"s am
+Papier rechts und links noch jeweils 1~Inch freier Rand bleiben. Die
+Zeilenl"ange des normalen Textes (\cs{textwidth}) und alle davon
+abgeleiteten Gr"o"sen betragen 70\% der \cs{fullwidth}. Die Breite des
+Randes (\cs{leftmarginwidth}), der links vom normalen Textbereich f"ur
+"Uberschriften und Randnoten verwendet wird, ergibt sich aus der
+Differenz von \cs{fullwidth} und \cs{textwidth}.
+
+\index{Seitenaufteilung, vertikal}\marginlabel{Vertikal:} Die Texth"ohe
+berechnet sich so, da"s ein oberer und unterer Rand von 1~Inch bleibt.
+Manche Pagestyles verwenden einen anderen Wert f"ur den oberen Rand.
+(siehe \ref{pagestyle}).
+
+Mit der Option \texttt{smallborder} wird der Rand auf 0,25~Inch verringert.
+
+Der Rand kann durch den Befehl
+\verb|\setlength\papermarginwidth|\verb|{0.25in}| umdefiniert werden,
+danach ist der Befehl \verb|\setpagefraction{0.7}| aufzurufen, um das
+neue Layout zu berechnen. Dies funktioniert nur in der Pr"aambel. Die
+Blattgr"o"se wird dem DVI-Treiber mitgeteilt, wenn die Option
+\texttt{pagesize} angegeben wird. 
+
+Es wird kein vertikaler Randausgleich gemacht (\cs{raggedbottom}).
+
+\subsubsection{Kapitel-"Uberschriften}
+
+Die "Uberschriften von \cs{section}, \cs{subsection} und
+\cs{subsubsection} verwenden die gesamte Seitenbreite, \dH\ sie ragen in
+den linken Rand hinaus. Daf"ur werden kleinere vertikale Abst"ande vor
+und nach den "Uberschriften und eine weniger gro"se Schrift verwendet.
+In den "Uberschriften werden keine Wort"-abteilungen und kein rechter
+Randausgleich gemacht.
+
+Beim Style \texttt{refart} werden die von \cs{maketitle} und \cs{part}
+erzeugten "Uberschriften im folgenden Layout gesetzt: Sie stehen am
+Beginn einer neuen Seite (\cs{clearpage}), verwenden die gesamte Breite
+und sind von zwei waagrechten Linien eingeschlossen. Der Befehl
+\cs{maketitle} setzt die "Uberschrift (\cs{title}) und den Autor
+(\cs{author}). Der Befehl \cs{makeauthor}, wird nicht mehr unterst"utzt.
+Beim Befehl \cs{part} wird nur die r"omische Nummer des Abschnitts vor
+den Text gesetzt (ohne das Wort "`Part"' oder "`Teil"').
+
+Beim Style \texttt{refrep} werden Kapitel-"Uberschriften (\cs{chapter})
+im folgenden Layout gesetzt: Sie stehen am Beginn einer neuen Seite
+(\cs{clearpage}), verwenden die gesamte Breite und sind von zwei
+waagrechten Linien eingeschlossen. Die Befehle \cs{maketitle} und
+\cs{part} bleiben in diesem Style unver"-"andert, es wird aber
+empfohlen, sie in ein Fullpage-""Environment (siehe \ref{fullpage})
+einzu"-schlie"sen.
+
+\subsubsection{Abs"atze}
+
+Abs"atze  werden durch einen vertikalen Abstand (\cs{parskip}) von einer
+halben Zeile getrennt, ohne horizontale Einr"uckung (\cs{parindent} ist
+Null). Der vertikale Abstand ent"-h"alt einen "`stretchable"' Anteil von
+"`\texttt{plus 2pt}"'; dies ver"-gr"o"sert die Wahrscheinlichkeit, da"s
+\LaTeX\ die am besten geeigneten Stellen f"ur alle Seitenwechsel findet.
+
+Die vertikalen Ab"-st"an"-de in den List-""Environments sind so gesetzt,
+da"s sich vor, nach und innerhalb der Environments jeweils derselbe
+Abstand wie zwischen den normalen Ab"-s"atzen ergibt.
+
+\subsection{Fu"snoten}
+
+Das Layout der Fu"snoten wurde an das Absatzlayout angepast, \dH\ auch
+die Fu"snoten werden ohne Einzug in der ersten Zeile gesetzt.
+
+\subsubsection{Description-Environment}
+\index{Description-Environment}
+
+Das \texttt{description}-Environment ist so abge"-"an"-dert, da"s 
+die Item-Labels den gesamten linken Rand verwenden.
+
+\seealso{Kapitel \ref{layout}}
+Beispiele daf"ur finden sich unter anderem in Kapitel~\ref{layout}.
+
+\subsubsection{Positionierung der Randnoten}
+
+Randnoten (\cs{marginpar}) werden stets in den linken Rand gesetzt
+und verwenden dessen gesamte Breite.
+
+Der minimale vertikale Abstand zwischen Randnoten (\cs{marginparpush})
+ist auf Null gesetzt, damit m"oglichst keine Verschiebung von Randnoten
+erfolgt.
+
+
+\subsubsection{Kopf- und Fu"szeilen, Pagestyles} \label{pagestyle}
+\index{Pagestyles}
+
+Beim Pagestyle \texttt{plain} werden die Seitennummern in der
+Fu"s"-zeile jeweils ganz rechts bzw.\ (auf linken Seiten bei der Option
+\texttt{twoside}) ganz links au"sen gesetzt.
+
+\index{Headings} \index{Myheadings} Bei den Pagestyles \texttt{headings}
+und \texttt{myheadings} wird ebenfalls die gesamte Breite verwendet, und
+unter die Kopfzeile wird eine waagrechte Linie gesetzt. Beim Pagestyle
+\texttt{ headings} enth"alt die Kopfzeile beim \texttt{refart} die
+\verb|\section|-"""Uberschrift auf der linke und die
+\verb|\subsection|-"""Uberschrift auf der linken Seite, beim
+\texttt{refrep} die \verb|\chapter|-"""Uberschrift auf der linken und
+die \verb|\section|-"""Uberschrift auf der rechten Seite.  Die Schrift
+wird in schr"ager (slanted) Schrift gesetzt.
+
+Seit Version 2.0~e wird f"ur die erste Seite eines Kapitels der
+Pagestyle \texttt{empty} anstelle von \texttt{plain} verwendet. Bei
+Verwendung des Pagestyles \texttt{headings} kamm es zu seltsamen
+Effekten, wenn die erste Seite mit den Pagestyle \texttt{plain} ges"atzt
+wurde.
+
+\index{Footings}
+\index{Myfootings}
+Zus"atzlich sind auch Pagestyles \texttt{footings} und \texttt{myfootings} 
+definiert, die entsprechende Fu"s"-zeilen (mit einer waagrechten Linie 
+dar"uber) setzen. Beispiel: Die folgenden Befehle setzen den Kurztitel des 
+Schrift"-st"ucks in die Fu"s"-zeile:
+\begin{verse}
+\verb|\pagestyle{myfootings}| \\*
+\verb|\markboth{Kurztitel}{Kurztitel}|
+\end{verse}
+
+Die Pagestyles \texttt{headings} und \texttt{myheadings} setzen den
+oberen Rand auf einen etwas gr"o"seren Wert, um die leere Fu"s"-zeile
+auszugleichen. Die Pagestyles \texttt{footings} und \texttt{myfootings}
+setzen den oberen Rand auf einen etwas kleineren Wert, um die leere
+Kopf"-zeile auszugleichen. Die Pagestyles \texttt{empty} und
+\texttt{plain} lassen den Rand unver"-"andert. Daraus ergibt sich:
+Innerhalb eines Schrift"-st"ucks kann manentweder zwischen den
+Pagestyles \texttt{headings}, \texttt{myheadings} und \texttt{empty}
+\newline oder zwischen den Pagestyles \texttt{footings},
+\texttt{ myfootings} und \texttt{empty} 
+wechseln, aber man sollte nicht zwischen \texttt{footings}- 
+\texttt{headings}- und \texttt{plain} Seiten wechseln.
+
+
+\subsection{Zus"atzliche Befehle}
+
+\subsubsection{Marginlabel}
+\index{Marginlabel}
+
+Der Befehl \verb|\marginlabel{xxx}| setzt das Wort oder den Text
+\texttt{ xxx} rechts"-b"undig in den linken Rand. Dies kann f"ur
+Stichworte, kurze "Uberschriften von Abs"atzen oder "ahnliches verwendet
+werden.
+
+\marginlabel{Beispiel:}Das Wort "`Beispiel:"' links von diesem Absatz
+ist ein Beispiel f"ur einen Marginlabel.
+
+\subsubsection{Attention}
+\index{Attention}\index{Attentionsymbol}\index{manfnt}
+
+Der Befehl \verb|\attention| setzt ein Ausrufungszeichen in den linken 
+Rand. Dies dient zum Markieren wichtiger Abs"atze oder S"atze.
+
+\attention
+Das ist ein Beispiel f"ur \verb|\attention|.
+
+\renewcommand{\attentionsymbol}{\texttt{:-)}}
+\attention
+Seit Version 2.0c ist es m"oglich das Symbol f"ur den 
+\cs{attention} Befehl mit Hilfe von 
+\verb|\renewcommand{\attentionsymbol}{\texttt\{:-)\}}|
+zu ver"andern. Mit 
+\verb|\renewcommand{\attentionsymbol}|\\ \verb|{\large \bfseries ! $\rightarrow$}|
+\renewcommand{\attentionsymbol}{\large \bfseries ! $\rightarrow$} 
+wird wieder auf das Originalverhalten zur"uckgeschaltet.
+
+Zus"atzlich unterst"utzt der \cs{attention} Befehl ein optionales
+Argument um das Symbol im Rand einmalig durch ein anderes zu ers"atzen.
+In diesem Fall ist es nicht notwendig, das \cs{attentionsymbol}
+zur"uckzus"atzen. Diese Erweiterung dient vor allem zur Unterst"utzung
+f"ur das \texttt{manfnt} Paket und sollte nicht zur Erzeugung eines
+bunten Layouts mi"sbraucht werden.\attention[\texttt{:-(}]
+
+Mit dem \texttt{manfnt} Paket existiert eine einfache M"oglichkeit, um
+auf die Symbole des \texttt{manfnt} Zeichensatzes zuzugreifen. Dieser
+Zeichensatz enth"alt u.a. das "`Dangerous Bend"' und "`Double Dangerous
+Bend"' Zeichen.
+
+\subsubsection{Seealso}
+\index{Seealso}
+
+Der Befehl \verb|\seealso{n}| markiert einen Verweis auf ein Kapitel 
+oder eine Abbildung.
+
+Beispiele daf"ur finden sich nicht nur hier (am linken Rand) 
+sondern unter anderem auch in \seealso{Kapitel 1} Kapitel~1.
+
+
+\subsubsection{Maxipage-Environment}
+\index{Maxipage}
+
+Das \texttt{maxipage}-Environment ist eine Art von "`Minipage"', die
+sich "uber die gesamte Seitenbreite erstreckt. Es eignet sich \zB\
+f"ur "uberlange mathematische Gleichungen oder breite Tabellen innerhalb
+des Textes oder in "`Floats"' (\texttt{table} oder \texttt{figure}).
+Innerhalb der "`Maxipage"' sind keine Seitenwechsel und keine Randnoten
+m"oglich. Beginn und Ende des \texttt{maxipage}-Envrionment bewirken
+jeweils einen neuen Absatz und eine waagrechte Linie.
+
+Hier folgt nun ein Beispiel f"ur eine Maxipage.\nopagebreak
+\begin{maxipage}
+Diese "uberlangen Zeilen sind der Inhalt der Maxipage. Sie erstrecken 
+sich "uber die gesamte Seitenbreite, ohne linken 
+Rand.
+\end{maxipage}\nopagebreak
+Dies ist der normale Text nach dem Ende der Maxipage.
+
+\subsubsection{Fullpage-Environment} \label{fullpage}
+\index{Fullpage}
+
+Das \texttt{fullpage}-Environment besteht aus einer oder mehreren
+Seiten, bei denen sich der Text "uber die gesamte Seitenbreite erstreckt
+und kein linker Rand bleibt. Randnoten sind darin nicht m"oglich. Beginn
+und Ende des \texttt{fullpage}-Envrionment bewirken jeweils einen
+Seitenwechsel (\verb|\clearpage|).
+
+Dies eignet sich f"ur Spezialseiten wie mehrseitige gro"se 
+Tabellen, Programmlistings, Titelseiten, Inhaltsverzeichnisse und 
+"ahnliches.
+
+\seealso{Seite \pageref{bild}}
+Seite~\pageref{bild} ist ein Beispiel f"ur eine Fullpage.
+
+\subsubsection{Noparskip}
+
+Der Befehl \verb|\noparskip| entfernt den vertikalen Abstand vor einem 
+Absatz -- analog zum Befehl \verb|\noindent|, der die horizontale 
+Einr"uckung am Beginn eines Absatzes entfernt.
+
+\subsubsection{Setleftmarginwidth}
+\index{Setleftmarginwidth}
+
+Der Befehl \verb|\setleftmarginwidth| wird nicht mehr unterst"utzt.
+Stattdessen kann mit dem Befehl \verb|\settextfraction| der 
+Anteil des Textes (normalerweise 70~\%) ge"andert werden. Das 
+Argument mu"s zwischen 0 und 1 liegen.
+
+\subsubsection{Descriptioncolon}
+\index{Descriptioncolon}
+
+Der Doppelpunkt in einer \texttt{description} kann durch den Befehl 
+\verb|\descriptioncolonfalse| ab und durch \verb|\descriptioncolontrue| 
+wieder eingeschaltet werden. Im Normalfall ist der Doppelpunkt 
+eingeschaltet.
+
+\subsubsection{Descriptionleft}
+\index{Descriptionleft}
+
+Mit \verb|\descriptionlefttrue| wird der Label f"ur eine
+\texttt{description} linksb"undig in den Rand gesetzt. Der Normalfall ist
+rechtsb"undig, dies wird durch \verb|\descriptionleftfalse| erreicht.
+
+\subsubsection{Maxipagerule}
+\index{Maxipagerule}
+
+Mit \verb|\maxipagerulefalse| lassen sich die Striche vor und nach 
+einer \texttt{maxipage} abschalten. Sie sind normalerweise aktiv.
+
+\subsubsection{Condbreak}
+\index{Condbreak}
+
+Mit \verb|\condbreak{2cm}| wird sichergestellt, da"s die n"achsten 2~cm 
+nicht getrennt werden. Sie erscheinen entweder auf der aktuellen Seite 
+oder werden komplett auf die neue Seite umgebrochen.
+
+\subsubsection{Example}
+\index{Example}
+
+Die \texttt{example}-Umgebung erzeugt eine \texttt{verse}-Umgebung, schaltet 
+allerdings auf \texttt{tt} und versucht einen Seitenumbruch vor der 
+Umgebung zu vermeiden.
+
+\subsubsection{Pageperchapter}
+\index{Pageperchapter}
+
+Der Befehl \verb|\pageperchapter| erzeugt eine kapitelweise 
+Seitennumerierung. Dies ist besonders f"ur umfangreiches 
+Reference Manuals sinnvoll. Da nur \texttt{refrep} "uber die 
+Gliederungsebene \texttt{chapter} verf"ugt, ist dieser Befehl 
+auch nur hier m"oglich.
+
+\subsubsection{Smallborder}
+\index{Smallborder}
+
+Der normale Seitenrand betr"agt 1~inch (25,4~mm). Das ist f"ur ein gedrucktes
+Dokument in Ordnung, f"ur die Betrachtung auf dem Monitor aber verschwendete
+Bildschirmfl"ache. Die Option \verb|smallborder| reduziert den Rand auf 0,25~inch
+(6,35~mm). Damit klebt der Text noch nicht am Rand, es wird aber auch nicht
+zu viel Bildschirmfl"ache verschenkt.
+
+Der Rand kann durch den Befehl \verb|\setlength\papermarginwidth|\verb|{0.25in}|
+umdefiniert werden, danach ist der Befehl \verb|\setpagefraction{0.7}|
+aufzurufen, um das neue Layout zu berechnen.
+
+\subsubsection{Dvips}
+\index{Dvips}
+
+Die Option \verb|dvips| teilt DVIPS die aktuelle Blattgr"o"se mit.
+
+\subsubsection{Pdftex}
+\index{Pdftex}
+
+Die Option \verb|pdftex| teilt PDFTEX die aktuelle Blattgr"o"se mit.
+
+\subsubsection{Pagesize}
+\index{Pagesize}
+
+Pagesize w"ahlt automatisch den passenden Befehl f"ur den jeweiligen
+DVI-Treiber. Dies funktioniert bei DVIPS und DVIPDFMX f"ur DVI-Ausgabe und
+PDF\TeX f"ur PDF-Ausgabe.
+
+\subsubsection{Ifpdfoutput}
+\index{Ifpdfoutput}
+
+Mit dem Befehl \verb|\ifpdfoutput{pdftext}{dvitext}| k"onnen Texte abh"angig
+vom Ausgabeformat ges"atzt werden. Die Option \verb|pagesize| nutzt diesen
+Befehl.
+
+Die letzten vier Befehle wurden aus KOMA-Script "ubernommen, vielen Dank
+Markus!
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\endinput
+

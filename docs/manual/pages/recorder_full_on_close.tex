@@ -1,0 +1,18 @@
+\paragraph{\textit{function} \textcolor{blue}{\texttt{on\_close}}\texttt{(self, was\_clean, code, reason)}}\hfill\break
+\noindent \textbf{description:} The function called when the \texttt{close()} task is executed. Begins the post processing of accumulated time-series using the functions:
+\begin{itemize}
+	\item \texttt{hf.}\textcolor{blue}{\texttt{convert\_array\_to\_list\_dict}}
+	\item \texttt{hf.}\textcolor{blue}{\texttt{convert\_array\_to\_list\_dict\_sob}}
+	\item \texttt{hf.}\textcolor{blue}{\texttt{pd\_excel\_save}}
+\end{itemize}
+
+and \texttt{gc.}\textcolor{blue}{\texttt{collect()}} to clear memory after storing \texttt{.xlsx} files of the processed data.
+
+\noindent \textit{restated from} \texttt{CoPrA}:\hfill\break
+\fbox{\begin{minipage}{\textwidth}
+		\texttt{on\_close} is called whenever the connection between the client and server is closed. \texttt{was\_clean} is a boolean indicating whether or not the connection was cleanly closed. code, an integer, and reason, a string, are sent by the end that initiated closing the connection.
+		
+		If the client did not initiate this closure and \texttt{client.auto\_reconnect} is set to True, the client will attempt to reconnect to the server and resubscribe to the channels it was subscribed to when the connection was closed. This method also logs the closure.
+		
+		If your subclass overrides this method, it is important that the subclass method calls the parent method if you want to preserve the auto reconnect functionality. This can be done by including \texttt{super().on\_close(was\_clean, code, reason)} in your subclass method.	
+\end{minipage}}

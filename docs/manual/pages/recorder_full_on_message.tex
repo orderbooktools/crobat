@@ -1,0 +1,37 @@
+\paragraph{\textit{function} \textcolor{blue}{\texttt{on\_message}}\texttt{(self, msg)},}
+\hfill\break
+\textbf{Description:} 
+After matching \texttt{msg['type']} to \texttt{'snapshot','ticker', 'l2update'} do one of three actions,
+\begin{center}
+	\begin{tabular}{ |c|c| }
+		\hline
+		\texttt{msg['type'] ==} & action\\
+		\hline
+		\texttt{'snapshot'}&initialize the limit order book using the \texttt{initialize\_snap\_events}\\
+		\hline
+		\texttt{'ticker'}&  parse a market order,\\
+		\hline
+		\texttt{'l2update'}& parse a limit order insertion or cancellation to the limit order book.\\
+		\hline
+	\end{tabular}
+\end{center}
+
+\noindent \textit{restated from} \texttt{CoPrA}:\hfill\break
+\fbox{\begin{minipage}{\textwidth}
+		\texttt{on\_message}on is called every time a message is received. message is a dict representing the message. Its content will depend on the type of message, the channels subscribed to, etc. Please read Coinbase Pro’s WebSocket API documentation to learn about these message formats.
+		
+		Note that with the exception of errors, every other message triggers this method including things like subscription confirmations. Your code should be prepared to handle unexpected messages.
+		
+		This default method just prints the message received. If you override this method, there is no need to call the parent method from your subclass’ method.
+\end{minipage}}
+
+\begin{lstlisting}[language=Python, caption=Python example]
+	class zepelli(object):
+	def hellobaby(self, yo, mama)
+\end{lstlisting}
+%\begin{lstlisting}[language=Python, caption=Python example]
+\textbf{Receiving a snapshot}:
+\begin{enumerate}
+	\item set the time to now UTC
+	\item initialize the order book snapshots using self.
+\end{enumerate}

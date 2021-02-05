@@ -1,0 +1,23 @@
+00Contents	This file
+
+layout_d.tex German description of the refman classes 
+
+layout_d.pdf The PDF version of Layout_d formatted for A4
+
+layout_e.tex English description of the refman classes 
+
+layout_e.pdf The PDF version of Layout_e formatted for A4
+
+lay_d2.tex Part 2 of the german description 
+
+lay_e2.tex Part 2 of the english description 
+
+pagepc.sty Package to get pagenumbers in the chapter-page format 
+
+refman.dtx The refman classes
+
+refman.pdf The PDF version of refman.dtx
+
+refman.ins The install script 
+
+refman.upl A short note about refman recent changes 
