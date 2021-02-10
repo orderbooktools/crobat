@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 21.1) (preloaded format=pdflatex 2021.1.20)  5 FEB 2021 12:38
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 21.1) (preloaded format=pdflatex 2021.1.20)  10 FEB 2021 00:28
 entering extended mode
 **./manual.tex
 (manual.tex
@@ -802,63 +802,46 @@ Overfull \hbox (6.79999pt too wide) in paragraph at lines 19--27
 
 (/home/ivan/.miktex/texmfs/install/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2020/03/24 1.8d listings language file
-))
-(pages/recorder_full_on_close.tex)
-Overfull \hbox (6.79999pt too wide) in paragraph at lines 11--135
-[]
+) [9])
+(pages/recorder_full_on_close.tex
+Overfull \hbox (6.79999pt too wide) in paragraph at lines 11--19
+[] 
  []
 
-
-Underfull \hbox (badness 10000) in paragraph at lines 11--135
-
- []
-
-[9] (pages/history__init__.tex
-Overfull \hbox (11.1611pt too wide) in paragraph at lines 5--6
-[]\OT1/cmr/m/n/10 bid[]history - list containing timeseries entries for the bid
- side in the form \OT1/cmtt/m/n/10 [timestamp, snapshot[]bid] 
- []
-
-
-Overfull \hbox (11.82776pt too wide) in paragraph at lines 6--7
-[]\OT1/cmr/m/n/10 ask[]history - list containing timeseries entries for the ask
- side in the form \OT1/cmtt/m/n/10 [timestamp, snapshot[]ask] 
- []
-
-) (pages/LOBf_initialize_snap_events.tex)
+) [10] (pages/history__init__.tex) (pages/LOBf_initialize_snap_events.tex)
 (pages/history_add_market_order_message.tex)
-(pages/history_remove_price_level.tex [10])
-(pages/history_update_price_level.tex) [11] [12] [13] (pages/License.tex)
-[14]
+(pages/history_remove_price_level.tex) (pages/history_update_price_level.tex)
+[11] [12] [13] [14] (pages/License.tex) [15]
 \openout2 = `pages/History.aux'.
 
- (pages/History.tex [15
+ (pages/History.tex [16
 
-]) [16] [17
+]) [17]
+[18
 
 
 ]
 \openout2 = `pages/function_template.aux'.
 
- (pages/function_template.tex) [18
+ (pages/function_template.tex) [19
 
-]
-(manual.bbl) [19
+] (manual.bbl) [20
 
 
-] (manual.aux (pages/Introduction.aux) (pages/Order_Books.aux)
-(pages/History.aux) (pages/function_template.aux))
+] (manual.aux
+(pages/Introduction.aux) (pages/Order_Books.aux) (pages/History.aux)
+(pages/function_template.aux))
 Package rerunfilecheck Info: File `manual.out' has not changed.
 (rerunfilecheck)             Checksum: F79F282C0E130DA33AA438D3703DF994;2346.
  ) 
 Here is how much of TeX's memory you used:
- 20385 strings out of 481551
- 382754 string characters out of 2916665
- 880386 words of memory out of 3000000
- 36772 multiletter control sequences out of 15000+200000
+ 20452 strings out of 481551
+ 383954 string characters out of 2916665
+ 1001381 words of memory out of 3000000
+ 36789 multiletter control sequences out of 15000+200000
  411215 words of font info for 55 fonts, out of 3000000 for 9000
  0 hyphenation exceptions out of 8191
- 113i,14n,116p,801b,1328s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 113i,14n,116p,817b,2036s stack positions out of 5000i,500n,10000p,200000b,50000s
 pdfTeX warning (dest): name{Hfootnote.4} has been referenced but does not exi
 st, replaced by a fixed one
 
@@ -886,9 +869,9 @@ fonts/type1/public/amsfonts/cm/cmsy10.pfb></home/ivan/.miktex/texmfs/install/fo
 nts/type1/public/amsfonts/cm/cmti10.pfb></home/ivan/.miktex/texmfs/install/font
 s/type1/public/amsfonts/cm/cmtt10.pfb></home/ivan/.miktex/texmfs/install/fonts/
 type1/public/amsfonts/cm/cmtt8.pfb>
-Output written on manual.pdf (19 pages, 291555 bytes).
+Output written on manual.pdf (20 pages, 306576 bytes).
 PDF statistics:
- 466 PDF objects out of 1000 (max. 8388607)
- 120 named destinations out of 1000 (max. 500000)
+ 529 PDF objects out of 1000 (max. 8388607)
+ 170 named destinations out of 1000 (max. 500000)
  309 words of extra memory for PDF output out of 10000 (max. 10000000)
 

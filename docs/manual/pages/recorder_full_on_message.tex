@@ -5,13 +5,13 @@ After matching \texttt{msg['type']} to \texttt{'snapshot','ticker', 'l2update'} 
 \begin{center}
 	\begin{tabular}{ |c|c| }
 		\hline
-		\texttt{msg['type'] ==} & action\\
+		\texttt{msg[`type'] ==} & action\\
 		\hline
-		\texttt{'snapshot'}&initialize the limit order book using the \texttt{initialize\_snap\_events}\\
+		\texttt{`snapshot'}&initialize the limit order book using the \texttt{initialize\_snap\_events}\\
 		\hline
-		\texttt{'ticker'}&  parse a market order,\\
+		\texttt{`ticker'}&  parse a market order,\\
 		\hline
-		\texttt{'l2update'}& parse a limit order insertion or cancellation to the limit order book.\\
+		\texttt{`l2update'}& parse a limit order insertion or cancellation to the limit order book.\\
 		\hline
 	\end{tabular}
 \end{center}
@@ -25,13 +25,66 @@ After matching \texttt{msg['type']} to \texttt{'snapshot','ticker', 'l2update'} 
 		This default method just prints the message received. If you override this method, there is no need to call the parent method from your subclass’ method.
 \end{minipage}}
 
-\begin{lstlisting}[language=Python, caption=Python example]
-	class zepelli(object):
-	def hellobaby(self, yo, mama)
+\begin{tabular}{r r l }
+	\textbf{parameters:}	& msg: & dict\\
+\end{tabular}
+
+\begin{tabular}{r r l}
+	\textbf{returns:} & None: & None\\
+\end{tabular}
+
+\textbf{Example:}
+\begin{lstlisting}[language=Python]]
+# Let our module be imported and our channels be assigned as follows:
+import recorder_full as rec
+channel1= Channel('level2', 'BTC-USD')
+channel2= Channel('ticker', 'BTC-USD')
+
+
+#Let the instance of the class L2_Update be ws_1 
+ws_1 = rec.L2_Update(loop, channel1, settings )
+ws_1.subscribe(channel2)
+
+#Let the message received from the websocket be:
+msg = {
+	"type": "l2update",
+	"product_id": "BTC-USD",
+	"time": "2019-08-14T20:42:27.265Z",
+	"changes": [
+	[
+	"buy",
+	"10101.80000000",
+	"0.162567"
+	]
+	]
+}
+
+# let the current state of the orderbook be defined as follows:
+ws_1.orderbook_instance.snapshot_bid = [
+	[10101.00, 5.23], [10101.50, 1.11], [10101.80, 0.5]
+	]
+
+ws_1.orderbook_instance.snapshot_signed = [
+	[10101.00, -5.23], [10101.50, -1.11], [10101.80, -0.5],
+	[10101.90, 0.4], [10102.00, 1.3], [10102.10, 5.00]
+	]
+
+ws_1.orderbook_instance.bid_events = []
+ws_1.orderbook_instance.signed_events = []
+#Suppose on loop you this message was passed to on_message(msg)
+on_message)(msg)
+
+# the new values for the the snapshots, and events would be:
+>>print(ws_1.orderbook_instance.snapshot_bid)
+>>[[10101.00, 5.23], [10101.50, 1.11], [10101.80, 0.162567]]
+
+>>print(ws_1.orderbook_instance.snapshot_signed)
+>>[[10101.00, -5.23], [10101.50, -1.11], [10101.80, -0.162567], [10101.90, 0.4], [10102.00, 1.3], [10102.10, 5.00]]
+
+>>print(ws_1.orderbook_instance.bid_events)
+>>[[2019-08-14T20:42:27.265Z, 10101.80, cancellation, 0.337433, 1, 10101.85, 0.10]]
+
+>>print(ws_1.orderbook_instance.signed_events)
+>>[[2019-08-14T20:42:27.265Z, 10101.80, cancellation, 0.337433, -1, 10101.85, 0.10]]
 \end{lstlisting}
-%\begin{lstlisting}[language=Python, caption=Python example]
-\textbf{Receiving a snapshot}:
-\begin{enumerate}
-	\item set the time to now UTC
-	\item initialize the order book snapshots using self.
-\end{enumerate}
+

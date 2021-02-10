@@ -125,11 +125,11 @@
 	\end{enumerate} 
 
 
-	\input{pages/recorder_full__init__}
+	\input{pages/recorder_full__init__} % DONE %
 
-	\input{pages/recorder_full_on_open}
+	\input{pages/recorder_full_on_open} % DONE % 
 	
-	\input{pages/recorder_full_on_message}
+	\input{pages/recorder_full_on_message} % DONE % 
 	
 	\input{pages/recorder_full_on_close}
 	 
@@ -137,9 +137,9 @@
 
 \subsection{LOBF\_funcs}
 \hfill \break
-\textbf{Description:} module that houses the class \texttt{history} and the methods that outline how to update snapshots.
+\textbf{Description:} module that houses the class \textcolor{olive}{\texttt{history}} and the methods that outline how to update snapshots.
 
-\subsubsection{\textit{class} \texttt{history()}}\hfill \break
+\subsubsection{\textit{class} \textcolor{olive}{\texttt{history()}}}\hfill \break
 \textbf{Description:} Contains attributes for the time series array of the limit order book, the current snapshot of the limit order book and the time-series of the events in the limit order book. We detail the role of each attribute in the Table whateever. The class contains methods that operate of these attributes, in order to update the order book and record changes. The functions \texttt{UpdateSnapshot\_bid\_Seq} and \texttt{UpdateSnapshot\_ask\_Seq}found outside ofthese methods, dictate the sequence in which the methods contained in \texttt{history} are executed.
 
 \input{pages/history__init__}
