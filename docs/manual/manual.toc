@@ -23,36 +23,36 @@
 \contentsline {subsection}{\numberline {5.2}LOBF\_funcs}{10}{subsection.5.2}%
 \contentsline {subsubsection}{\numberline {5.2.1}\textit {class} \leavevmode {\color {olive}\texttt {history()}}}{11}{subsubsection.5.2.1}%
 \contentsline {paragraph}{\numberline {5.2.1.1}\textit {function} \leavevmode {\color {blue}\texttt {\_\_init\_\_}}\texttt {(self)}}{11}{paragraph.5.2.1.1}%
-\contentsline {paragraph}{\numberline {5.2.1.2}initialize\_snap\_events}{11}{paragraph.5.2.1.2}%
-\contentsline {paragraph}{\numberline {5.2.1.3}add\_market\_order\_message}{11}{paragraph.5.2.1.3}%
-\contentsline {paragraph}{\numberline {5.2.1.4}remove\_price\_level()}{11}{paragraph.5.2.1.4}%
-\contentsline {paragraph}{\numberline {5.2.1.5}update\_price\_level()}{11}{paragraph.5.2.1.5}%
-\contentsline {paragraph}{\numberline {5.2.1.6}update\_price\_index\_buy}{11}{paragraph.5.2.1.6}%
-\contentsline {subsection}{\numberline {5.3}history\_funcs.py}{11}{subsection.5.3}%
-\contentsline {paragraph}{\numberline {5.3.0.1}\textbf {function} check\_order(snapshot, side)}{11}{paragraph.5.3.0.1}%
-\contentsline {paragraph}{\numberline {5.3.0.2}\textbf {function} convert\_array\_to\_list\_dict()}{12}{paragraph.5.3.0.2}%
-\contentsline {paragraph}{\numberline {5.3.0.3}\textbf {function} convert\_array\_to\_list\_dict\_sob()}{12}{paragraph.5.3.0.3}%
-\contentsline {paragraph}{\numberline {5.3.0.4}\textbf {function} pd\_excel\_save()}{12}{paragraph.5.3.0.4}%
-\contentsline {paragraph}{\numberline {5.3.0.5}\textbf {function} set\_sign}{12}{paragraph.5.3.0.5}%
-\contentsline {paragraph}{\numberline {5.3.0.6}\textbf {function} set\_signed\_position}{12}{paragraph.5.3.0.6}%
-\contentsline {paragraph}{\numberline {5.3.0.7}\textbf {function} get\_min\_dec()}{12}{paragraph.5.3.0.7}%
-\contentsline {paragraph}{\numberline {5.3.0.8}\textbf {function} convert\_array\_to\_list\_dict\_sob()}{12}{paragraph.5.3.0.8}%
-\contentsline {section}{\numberline {6}Contributing}{13}{section.6}%
-\contentsline {subsection}{\numberline {6.1}Types of Contributions}{13}{subsection.6.1}%
-\contentsline {subsubsection}{\numberline {6.1.1}Report Bugs}{13}{subsubsection.6.1.1}%
-\contentsline {subsubsection}{\numberline {6.1.2}Fix Bugs}{13}{subsubsection.6.1.2}%
-\contentsline {subsubsection}{\numberline {6.1.3}Implement Features}{13}{subsubsection.6.1.3}%
-\contentsline {subsubsection}{\numberline {6.1.4}Write Documentation}{13}{subsubsection.6.1.4}%
-\contentsline {subsubsection}{\numberline {6.1.5}Submit Feedback}{13}{subsubsection.6.1.5}%
-\contentsline {subsection}{\numberline {6.2}Getting Started!}{13}{subsection.6.2}%
-\contentsline {section}{\numberline {7}Credits}{14}{section.7}%
-\contentsline {subsection}{\numberline {7.1}Development Lead}{14}{subsection.7.1}%
-\contentsline {subsection}{\numberline {7.2}Contributors}{14}{subsection.7.2}%
-\contentsline {section}{\numberline {8}License}{15}{section.8}%
-\contentsline {section}{\numberline {9}History}{16}{section.9}%
-\contentsline {subsection}{\numberline {9.1}0.0.2}{16}{subsection.9.1}%
-\contentsline {subsection}{\numberline {9.2}1.0.1}{16}{subsection.9.2}%
-\contentsline {section}{\numberline {10}Python Function Index}{17}{section.10}%
-\contentsline {section}{\numberline {11}Index}{18}{section.11}%
-\contentsline {section}{\numberline {12}To do list}{18}{section.12}%
-\contentsline {paragraph}{\numberline {12.0.0.1}\textit {function} \leavevmode {\color {blue}\texttt {\_\_my\_function\_\_}}\texttt {(self, param\_1, param\_2=False, param\_3)}}{19}{paragraph.12.0.0.1}%
+\contentsline {paragraph}{\numberline {5.2.1.2}\textit {function} \leavevmode {\color {blue}\texttt {initialize\_snap\_events}}\texttt {(self, msg, time)}}{11}{paragraph.5.2.1.2}%
+\contentsline {paragraph}{\numberline {5.2.1.3}add\_market\_order\_message}{12}{paragraph.5.2.1.3}%
+\contentsline {paragraph}{\numberline {5.2.1.4}remove\_price\_level()}{13}{paragraph.5.2.1.4}%
+\contentsline {paragraph}{\numberline {5.2.1.5}update\_price\_level()}{13}{paragraph.5.2.1.5}%
+\contentsline {paragraph}{\numberline {5.2.1.6}update\_price\_index\_buy}{13}{paragraph.5.2.1.6}%
+\contentsline {subsection}{\numberline {5.3}history\_funcs.py}{13}{subsection.5.3}%
+\contentsline {paragraph}{\numberline {5.3.0.1}\textbf {function} check\_order(snapshot, side)}{13}{paragraph.5.3.0.1}%
+\contentsline {paragraph}{\numberline {5.3.0.2}\textbf {function} convert\_array\_to\_list\_dict()}{13}{paragraph.5.3.0.2}%
+\contentsline {paragraph}{\numberline {5.3.0.3}\textbf {function} convert\_array\_to\_list\_dict\_sob()}{13}{paragraph.5.3.0.3}%
+\contentsline {paragraph}{\numberline {5.3.0.4}\textbf {function} pd\_excel\_save()}{13}{paragraph.5.3.0.4}%
+\contentsline {paragraph}{\numberline {5.3.0.5}\textbf {function} set\_sign}{14}{paragraph.5.3.0.5}%
+\contentsline {paragraph}{\numberline {5.3.0.6}\textbf {function} set\_signed\_position}{14}{paragraph.5.3.0.6}%
+\contentsline {paragraph}{\numberline {5.3.0.7}\textbf {function} get\_min\_dec()}{14}{paragraph.5.3.0.7}%
+\contentsline {paragraph}{\numberline {5.3.0.8}\textbf {function} convert\_array\_to\_list\_dict\_sob()}{14}{paragraph.5.3.0.8}%
+\contentsline {section}{\numberline {6}Contributing}{15}{section.6}%
+\contentsline {subsection}{\numberline {6.1}Types of Contributions}{15}{subsection.6.1}%
+\contentsline {subsubsection}{\numberline {6.1.1}Report Bugs}{15}{subsubsection.6.1.1}%
+\contentsline {subsubsection}{\numberline {6.1.2}Fix Bugs}{15}{subsubsection.6.1.2}%
+\contentsline {subsubsection}{\numberline {6.1.3}Implement Features}{15}{subsubsection.6.1.3}%
+\contentsline {subsubsection}{\numberline {6.1.4}Write Documentation}{15}{subsubsection.6.1.4}%
+\contentsline {subsubsection}{\numberline {6.1.5}Submit Feedback}{15}{subsubsection.6.1.5}%
+\contentsline {subsection}{\numberline {6.2}Getting Started!}{15}{subsection.6.2}%
+\contentsline {section}{\numberline {7}Credits}{16}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Development Lead}{16}{subsection.7.1}%
+\contentsline {subsection}{\numberline {7.2}Contributors}{16}{subsection.7.2}%
+\contentsline {section}{\numberline {8}License}{17}{section.8}%
+\contentsline {section}{\numberline {9}History}{18}{section.9}%
+\contentsline {subsection}{\numberline {9.1}0.0.2}{18}{subsection.9.1}%
+\contentsline {subsection}{\numberline {9.2}1.0.1}{18}{subsection.9.2}%
+\contentsline {section}{\numberline {10}Python Function Index}{19}{section.10}%
+\contentsline {section}{\numberline {11}Index}{20}{section.11}%
+\contentsline {section}{\numberline {12}To do list}{20}{section.12}%
+\contentsline {paragraph}{\numberline {12.0.0.1}\textit {function} \leavevmode {\color {blue}\texttt {\_\_my\_function\_\_}}\texttt {(self, param\_1, param\_2=False, param\_3)}}{21}{paragraph.12.0.0.1}%

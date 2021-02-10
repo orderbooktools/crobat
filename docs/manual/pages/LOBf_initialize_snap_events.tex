@@ -1,8 +1,53 @@
-\paragraph{initialize\_snap\_events}\hfill\break
-\noindent\textbf{Description:} Method that parses the \texttt{snapshot}. Add the first entry to the collection of \_history variables. 
+\paragraph{\textit{function} \textcolor{blue}{\texttt{initialize\_snap\_events}}\texttt{(self, msg, time)}}\hfill\break
+\noindent\textbf{Description:} Method that parses the \texttt{msg} payload if \texttt{msg[`type'] == snapshot }. Adds the first entry to the collection of \texttt{\_history} variables. Uses np.round and hf.min\_dec to calculate the smallest amount of the quote currency is needed to make the ticks 0.01 units of the base currency.\footnote{For example if BTC-USD = 10101 USD/BTC, then min\_dec would return the number of BTC needed for 0.01 USD in BTC and np.round truncates the volume returns to the decimal places returned by hf.min\_dec. Doing so resolves the issue with artifacts from floating point arithmetic.}
 
 \textbf{function dependency:}
 \begin{itemize}
 	\item np.round
 	\item hf.min\_dec
 \end{itemize}
+
+\begin{tabular}{r r l }
+	\textbf{parameters:}	& msg: & dict\\
+	&time& datetime object\\ 
+\end{tabular}
+
+\begin{tabular}{r r l}
+	\textbf{returns:} & None: & None\\
+\end{tabular}
+
+\textbf{Example:}
+\begin{lstlisting}[language=Python]]
+# let the instance of our L2_Update class be defined as follows:
+channel1= Channel('level2', 'BTC-USD')
+ws_1 = L2_Update(loop, channel1, settings_1)
+
+# from our __init__ method, we initialized the arrays in history:
+>>print(vars(ws_1.hist))
+>>{bid_history:[],ask_history:[], signed_history:[], snpashot_bid:[],snapshot_ask:[],snapshot_signed:[], bid_events:[], ask_events:[], signed_events:[], order_type:None, token:False, position:0, event_size:0}
+
+#after receiving the snapshot from our event loop we will run initialize_snap_events
+#to populate the variables created in __init__.
+
+#Let our message be
+ws_1.time_now = "2019-08-14T20:42:27.265Z"
+msg = {
+	"type": "snapshot",
+	"product_id": "BTC-USD",
+	"bids": [["10101.10", "0.450541"],["10101.20", "0.44100"], ["10101.55", "0.013400"]],
+	"asks": [["10102.55", "0.577535"],["10102.58", "0.63219"], ["10102.60", "0.803200"]]
+}
+
+#note there is not a timestamp for the snapshot that we receive from coinbase so it is passed from the datetime.utcnow() from the init method of the L2_Update class. 
+
+ws_1.hist.initialize_snapevents(msg, ws_1.time_now)
+
+>>print(vars(ws_1.hist))
+>>{bid_history:[[2019-08-14T20:42:27.265Z,  [[10101.10, 0.450541], [10101.20, 0.44100], [10101.55, 0.013400]]]],
+	ask_history:[[2019-08-14T20:42:27.265Z, [[10102.55, 0.577535], [10102.58, 0.63219], [10102.60, 0.803200]]]],
+	signed_history:[2019-08-14T20:42:27.265Z, [[[10101.10, -0.450541], [10101.20, -0.44100], [10101.55, -0.013400], [10102.55, 0.577535], [10102.58, 0.63219], [10102.60, 0.803200]]]],
+	snapshot_bid:[[10101.10, 0.450541],[10101.20, 0.44100], [10101.55, 0.013400]], 
+	snapshot_ask:[[10102.55, 0.577535],[10102.58, 0.63219], [10102.60, 0.803200]], 
+	snapshot_signed:[[10101.10, -0.450541],[10101.20, -0.44100], [10101.55, -0.013400], [10102.55, 0.577535],[10102.58, 0.63219], [10102.60, 0.803200]],
+	bid_events:[], ask_events:[], signed_events:[], order_type:None, token:False, position:0, event_size:0}
+\end{lstlisting}

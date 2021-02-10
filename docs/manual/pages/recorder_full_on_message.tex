@@ -42,7 +42,7 @@ channel2= Channel('ticker', 'BTC-USD')
 
 
 #Let the instance of the class L2_Update be ws_1 
-ws_1 = rec.L2_Update(loop, channel1, settings )
+ws_1 = rec.L2_Update(loop, channel1, settings_1)
 ws_1.subscribe(channel2)
 
 #Let the message received from the websocket be:
