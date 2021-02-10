@@ -1,15 +1,25 @@
-\paragraph{\textit{function} \_\_init\_\_(self)}\hfill\break
-\textbf{Description:} Initializes the self variables as outline in Table 1 that will be operated on by other class methods. 
+\paragraph{\textit{function} \textcolor{blue}{\texttt{\_\_init\_\_}}\texttt{(self)}}\hfill\break
+\textbf{Description:} Initializes the lists and variables that will be operated on by other class methods. Each side, bid, ask and the combined signed has a list demarked by \texttt{\_history}, that will be populated by timestamped states of the limit order book. The lists prefixed by \texttt{snapshot} are populated by the state of limit order book demarked by the suffix \texttt{bid}, \texttt{ ask}, and \texttt{signed}. The variables \texttt{order\_type},  \texttt{position} and \texttt{event\_size} denote the type, position and size of the event based on the change in the order book as a result of an \texttt{l2\_update} message. The \texttt{token} variable determines whether the change in the order book is recorded in the events list. 
+%
+%\begin{itemize}
+%	\item  bid\_history - list containing timeseries entries for the bid side in the form \texttt{[timestamp, snapshot\_bid]}
+%	\item  ask\_history - list containing timeseries entries for the ask side in the form \texttt{[timestamp, snapshot\_ask]}
+%	\item  signed\_history - list containing timeseries entries for the signed order book in the form \texttt{[timestamp, snapshot\_signed]}
+%	\item snapshot\_bid - list containing current state of the order book on the bid side in the form \texttt{[[price, volm], \ldots ]}
+%	\item snapshot\_bid - list containing current state of the order book on the bid side in the form \texttt{[[price, volm], \ldots ]}
+%	\item snapshot\_bid - list containing current state of the order book on the bid side in the form \texttt{[[price, volm], \ldots ]}
+%	\item order\_type 
+%	\item token
+%	\item position
+%	\item event\_size 
+%\end{itemize}
 
-\begin{itemize}
-	\item  bid\_history - list containing timeseries entries for the bid side in the form \texttt{[timestamp, snapshot\_bid]}
-	\item  ask\_history - list containing timeseries entries for the ask side in the form \texttt{[timestamp, snapshot\_ask]}
-	\item  signed\_history - list containing timeseries entries for the signed order book in the form \texttt{[timestamp, snapshot\_signed]}
-	\item snapshot\_bid - list containing current state of the order book on the bid side in the form \texttt{[[price, volm], \ldots ]}
-	\item snapshot\_bid - list containing current state of the order book on the bid side in the form \texttt{[[price, volm], \ldots ]}
-	\item snapshot\_bid - list containing current state of the order book on the bid side in the form \texttt{[[price, volm], \ldots ]}
-	\item order\_type 
-	\item token
-	\item position
-	\item event\_size 
-\end{itemize}
+\begin{tabular}{r r l }
+	\textbf{parameters:}	& None: & None\\
+\end{tabular}
+
+\begin{tabular}{r r l}
+	\textbf{returns:} & None: & None\\
+\end{tabular}
+
+\textbf{Example: None}

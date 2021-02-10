@@ -16,3 +16,17 @@ and \texttt{gc.}\textcolor{blue}{\texttt{collect()}} to clear memory after stori
 		
 		If your subclass overrides this method, it is important that the subclass method calls the parent method if you want to preserve the auto reconnect functionality. This can be done by including \texttt{super().on\_close(was\_clean, code, reason)} in your subclass method.	
 \end{minipage}}
+
+\begin{tabular}{r r l }
+	\textbf{parameters:}	& was\_clean:& bool \\
+	& code: & int or None \\
+	& reason: & str or None
+\end{tabular}
+
+\begin{tabular}{r r l}
+	\textbf{returns:} & None: & None\\
+\end{tabular}
+
+\begin{lstlisting}[language=Python, caption=Python example]]
+	# Needs an Example
+\end{lstlisting}
