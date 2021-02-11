@@ -1,0 +1,110 @@
+\section{Context: Where does crobat operate?}
+
+Following CoPrA's example as to how to set up a web socket connectin we provide context as to where crobat operates. Lets begin with copras heartbeat.py example:
+
+\begin{lstlisting}[language=Python]
+import asyncio
+
+from copra.websocket import Channel, Client
+
+loop = asyncio.get_event_loop()
+
+ws = Client(loop, Channel('heartbeat', 'BTC-USD'))
+
+try:
+loop.run_forever()
+except KeyboardInterrupt:
+loop.run_until_complete(ws.close())
+loop.close()
+\end{lstlisting}
+
+If we were to run it we would execute methods in the instance of the class Client based on the arrival of messages on the heartbeat channel for the pair BTC-USD. crobat primarily overwrites this Client class and inserts its new methods. Below we introduce our own version of this loop.
+
+\begin{lstlisting}[language=Python]
+	import recorder_full as rec
+	import asyncio, time
+	from datetime import datetime
+	import copra.rest
+	from copra.websocket import Channel, Client
+	
+	class input_args(object):
+		def __init__(self, currency_pair='ETH-USD', position_range=5, recording_duration=5):
+			self.currency_pair = currency_pair
+			self.position_range = position_range
+			self.recording_duration = recording_duration
+	
+	def main():
+		settings_1 = input_args()
+	
+		loop = asyncio.get_event_loop()
+	
+		channel1 = Channel('level2', settings_1.currency_pair) 
+		channel2 = Channel('ticker', settings_1.currency_pair)
+	
+		ws_1 = rec.L2_Update(loop, channel1, settings_1)
+		ws_1.subscribe(channel2)
+	
+		timestart=datetime.utcnow()
+	
+	try:     
+		loop.run_forever()
+	except KeyboardInterrupt:
+		loop.run_until_complete(ws_1.close())
+		loop.close()
+	
+	if __name__ == '__main__':
+		main()
+\end{lstlisting}
+
+In this modified event loop we have the context where the bulk of crobat sits, the class l2\_update. we can the \texttt{loop} object that is passed to \texttt{ws\_1}, the instance of the class \texttt{L2\_Update}, receives \texttt{msg} objects through the async methods inherited from Client. Here we give an example of what \texttt{l2\_Update} looks like:
+
+\begin{lstlisting}[language=Python]
+import asyncio, time
+from datetime import datetime
+import copra.rest
+from copra.websocket import Channel, Client
+
+class L2_Update(Client):
+	def __init__(self, loop, channel, input_args):
+	self.time_now = datetime.utcnow() #initial start time
+	self.position_range = input_args.position_range
+	self.recording_duration = input_args.recording_duration
+	self.snap_received = False
+	super().__init__(loop, channel)
+
+	def on_open(self):
+		print("Let's count the L2 messages!", self.time_now)
+		super().on_open() # inheriting things from the parent class who really knows    
+
+	def on_message(self, msg):
+		if msg['type'] in ['snapshot']:
+			print("received the snapshot")
+			time = self.time_now
+			self.snap_received = True
+		if msg['type'] in ['ticker']:
+			print("received ticker message")
+			if self.snap_received:
+				# Do Something Here
+			else:
+				print("market order arrived but no snapshot received yet")
+
+		if msg['type'] in ['l2update']:
+			print("received an l2update message")
+		else:
+			print("unknown message")
+
+		if (datetime.utcnow() - self.time_now).total_seconds() > 		self.recording_duration:
+			self.loop.create_task(self.close()) 
+
+	def on_close(self, was_clean, code, reason):
+		print("Connection to server is closed")
+		print(was_clean)
+		print(code)
+		print(reason)
+		
+def main():
+	pass
+
+if __name__ == '__main__':
+	main()
+\end{lstlisting}

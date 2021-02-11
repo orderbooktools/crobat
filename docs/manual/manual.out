@@ -10,28 +10,29 @@
 \BOOKMARK [3][-]{subsubsection.4.2.1}{Order Book Snapshots}{subsection.4.2}% 10
 \BOOKMARK [3][-]{subsubsection.4.2.2}{Signed Order Book}{subsection.4.2}% 11
 \BOOKMARK [2][-]{subsection.4.3}{Final notes on Orderbook interpretation}{section.4}% 12
-\BOOKMARK [1][-]{section.5}{Modules}{}% 13
-\BOOKMARK [2][-]{subsection.5.1}{recorder\137full}{section.5}% 14
-\BOOKMARK [3][-]{subsubsection.5.1.1}{Description}{subsection.5.1}% 15
-\BOOKMARK [3][-]{subsubsection.5.1.2}{Class L2\137Update }{subsection.5.1}% 16
-\BOOKMARK [2][-]{subsection.5.2}{LOBF\137funcs}{section.5}% 17
-\BOOKMARK [3][-]{subsubsection.5.2.1}{class history\(\)}{subsection.5.2}% 18
-\BOOKMARK [2][-]{subsection.5.3}{history\137funcs.py}{section.5}% 19
-\BOOKMARK [1][-]{section.6}{Contributing}{}% 20
-\BOOKMARK [2][-]{subsection.6.1}{Types of Contributions}{section.6}% 21
-\BOOKMARK [3][-]{subsubsection.6.1.1}{Report Bugs}{subsection.6.1}% 22
-\BOOKMARK [3][-]{subsubsection.6.1.2}{Fix Bugs}{subsection.6.1}% 23
-\BOOKMARK [3][-]{subsubsection.6.1.3}{Implement Features}{subsection.6.1}% 24
-\BOOKMARK [3][-]{subsubsection.6.1.4}{Write Documentation}{subsection.6.1}% 25
-\BOOKMARK [3][-]{subsubsection.6.1.5}{Submit Feedback}{subsection.6.1}% 26
-\BOOKMARK [2][-]{subsection.6.2}{Getting Started!}{section.6}% 27
-\BOOKMARK [1][-]{section.7}{Credits}{}% 28
-\BOOKMARK [2][-]{subsection.7.1}{Development Lead}{section.7}% 29
-\BOOKMARK [2][-]{subsection.7.2}{Contributors}{section.7}% 30
-\BOOKMARK [1][-]{section.8}{License}{}% 31
-\BOOKMARK [1][-]{section.9}{History}{}% 32
-\BOOKMARK [2][-]{subsection.9.1}{0.0.2}{section.9}% 33
-\BOOKMARK [2][-]{subsection.9.2}{1.0.1}{section.9}% 34
-\BOOKMARK [1][-]{section.10}{Python Function Index}{}% 35
-\BOOKMARK [1][-]{section.11}{Index}{}% 36
-\BOOKMARK [1][-]{section.12}{To do list}{}% 37
+\BOOKMARK [1][-]{section.5}{Context: Where does crobat operate?}{}% 13
+\BOOKMARK [1][-]{section.6}{Modules}{}% 14
+\BOOKMARK [2][-]{subsection.6.1}{recorder\137full}{section.6}% 15
+\BOOKMARK [3][-]{subsubsection.6.1.1}{Description}{subsection.6.1}% 16
+\BOOKMARK [3][-]{subsubsection.6.1.2}{Class L2\137Update }{subsection.6.1}% 17
+\BOOKMARK [2][-]{subsection.6.2}{LOBF\137funcs}{section.6}% 18
+\BOOKMARK [3][-]{subsubsection.6.2.1}{class history\(\)}{subsection.6.2}% 19
+\BOOKMARK [2][-]{subsection.6.3}{history\137funcs.py}{section.6}% 20
+\BOOKMARK [1][-]{section.7}{Contributing}{}% 21
+\BOOKMARK [2][-]{subsection.7.1}{Types of Contributions}{section.7}% 22
+\BOOKMARK [3][-]{subsubsection.7.1.1}{Report Bugs}{subsection.7.1}% 23
+\BOOKMARK [3][-]{subsubsection.7.1.2}{Fix Bugs}{subsection.7.1}% 24
+\BOOKMARK [3][-]{subsubsection.7.1.3}{Implement Features}{subsection.7.1}% 25
+\BOOKMARK [3][-]{subsubsection.7.1.4}{Write Documentation}{subsection.7.1}% 26
+\BOOKMARK [3][-]{subsubsection.7.1.5}{Submit Feedback}{subsection.7.1}% 27
+\BOOKMARK [2][-]{subsection.7.2}{Getting Started!}{section.7}% 28
+\BOOKMARK [1][-]{section.8}{Credits}{}% 29
+\BOOKMARK [2][-]{subsection.8.1}{Development Lead}{section.8}% 30
+\BOOKMARK [2][-]{subsection.8.2}{Contributors}{section.8}% 31
+\BOOKMARK [1][-]{section.9}{License}{}% 32
+\BOOKMARK [1][-]{section.10}{History}{}% 33
+\BOOKMARK [2][-]{subsection.10.1}{0.0.2}{section.10}% 34
+\BOOKMARK [2][-]{subsection.10.2}{1.0.1}{section.10}% 35
+\BOOKMARK [1][-]{section.11}{Python Function Index}{}% 36
+\BOOKMARK [1][-]{section.12}{Index}{}% 37
+\BOOKMARK [1][-]{section.13}{To do list}{}% 38

@@ -1,58 +1,58 @@
-\contentsline {section}{\numberline {1}Introduction}{2}{section.1}%
-\contentsline {section}{\numberline {2}crobat Features}{3}{section.2}%
-\contentsline {subsection}{\numberline {2.1}Orderbook updating}{3}{subsection.2.1}%
-\contentsline {section}{\numberline {3}Getting Started and Installation}{4}{section.3}%
-\contentsline {subsection}{\numberline {3.1}CoPrA}{4}{subsection.3.1}%
-\contentsline {subsection}{\numberline {3.2}Installation}{4}{subsection.3.2}%
-\contentsline {section}{\numberline {4}Time-series Data Structure Layout}{5}{section.4}%
-\contentsline {subsection}{\numberline {4.1}Introduction}{5}{subsection.4.1}%
-\contentsline {subsection}{\numberline {4.2}Understanding The Raw Order Book Data}{5}{subsection.4.2}%
-\contentsline {subsubsection}{\numberline {4.2.1}Order Book Snapshots}{5}{subsubsection.4.2.1}%
-\contentsline {subsubsection}{\numberline {4.2.2}Signed Order Book}{6}{subsubsection.4.2.2}%
-\contentsline {paragraph}{\numberline {4.2.2.1}Signed Order Book Snapshot Prices}{6}{paragraph.4.2.2.1}%
-\contentsline {paragraph}{\numberline {4.2.2.2}Signed Events}{6}{paragraph.4.2.2.2}%
-\contentsline {subsection}{\numberline {4.3}Final notes on Orderbook interpretation}{7}{subsection.4.3}%
-\contentsline {section}{\numberline {5}Modules}{8}{section.5}%
-\contentsline {subsection}{\numberline {5.1}recorder\_full}{8}{subsection.5.1}%
-\contentsline {subsubsection}{\numberline {5.1.1}Description}{8}{subsubsection.5.1.1}%
-\contentsline {subsubsection}{\numberline {5.1.2}\textit {Class} \leavevmode {\color {olive}\texttt {L2\_Update}} }{8}{subsubsection.5.1.2}%
-\contentsline {paragraph}{\numberline {5.1.2.1}\textit {function} \leavevmode {\color {blue}\texttt {\_\_init\_\_}}\texttt {(self, loop, channel, input\_args)}}{8}{paragraph.5.1.2.1}%
-\contentsline {paragraph}{\numberline {5.1.2.2}\textit {function} \leavevmode {\color {blue}\texttt {on\_open}}\texttt {(self)}}{9}{paragraph.5.1.2.2}%
-\contentsline {paragraph}{\numberline {5.1.2.3}\textit {function} \leavevmode {\color {blue}\texttt {on\_message}}\texttt {(self, msg)},}{9}{paragraph.5.1.2.3}%
-\contentsline {paragraph}{\numberline {5.1.2.4}\textit {function} \leavevmode {\color {blue}\texttt {on\_close}}\texttt {(self, was\_clean, code, reason)}}{10}{paragraph.5.1.2.4}%
-\contentsline {subsection}{\numberline {5.2}LOBF\_funcs}{10}{subsection.5.2}%
-\contentsline {subsubsection}{\numberline {5.2.1}\textit {class} \leavevmode {\color {olive}\texttt {history()}}}{11}{subsubsection.5.2.1}%
-\contentsline {paragraph}{\numberline {5.2.1.1}\textit {function} \leavevmode {\color {blue}\texttt {\_\_init\_\_}}\texttt {(self)}}{11}{paragraph.5.2.1.1}%
-\contentsline {paragraph}{\numberline {5.2.1.2}\textit {function} \leavevmode {\color {blue}\texttt {initialize\_snap\_events}}\texttt {(self, msg, time)}}{11}{paragraph.5.2.1.2}%
-\contentsline {paragraph}{\numberline {5.2.1.3}add\_market\_order\_message}{12}{paragraph.5.2.1.3}%
-\contentsline {paragraph}{\numberline {5.2.1.4}remove\_price\_level()}{13}{paragraph.5.2.1.4}%
-\contentsline {paragraph}{\numberline {5.2.1.5}update\_price\_level()}{13}{paragraph.5.2.1.5}%
-\contentsline {paragraph}{\numberline {5.2.1.6}update\_price\_index\_buy}{13}{paragraph.5.2.1.6}%
-\contentsline {subsection}{\numberline {5.3}history\_funcs.py}{13}{subsection.5.3}%
-\contentsline {paragraph}{\numberline {5.3.0.1}\textbf {function} check\_order(snapshot, side)}{13}{paragraph.5.3.0.1}%
-\contentsline {paragraph}{\numberline {5.3.0.2}\textbf {function} convert\_array\_to\_list\_dict()}{13}{paragraph.5.3.0.2}%
-\contentsline {paragraph}{\numberline {5.3.0.3}\textbf {function} convert\_array\_to\_list\_dict\_sob()}{13}{paragraph.5.3.0.3}%
-\contentsline {paragraph}{\numberline {5.3.0.4}\textbf {function} pd\_excel\_save()}{13}{paragraph.5.3.0.4}%
-\contentsline {paragraph}{\numberline {5.3.0.5}\textbf {function} set\_sign}{14}{paragraph.5.3.0.5}%
-\contentsline {paragraph}{\numberline {5.3.0.6}\textbf {function} set\_signed\_position}{14}{paragraph.5.3.0.6}%
-\contentsline {paragraph}{\numberline {5.3.0.7}\textbf {function} get\_min\_dec()}{14}{paragraph.5.3.0.7}%
-\contentsline {paragraph}{\numberline {5.3.0.8}\textbf {function} convert\_array\_to\_list\_dict\_sob()}{14}{paragraph.5.3.0.8}%
-\contentsline {section}{\numberline {6}Contributing}{15}{section.6}%
-\contentsline {subsection}{\numberline {6.1}Types of Contributions}{15}{subsection.6.1}%
-\contentsline {subsubsection}{\numberline {6.1.1}Report Bugs}{15}{subsubsection.6.1.1}%
-\contentsline {subsubsection}{\numberline {6.1.2}Fix Bugs}{15}{subsubsection.6.1.2}%
-\contentsline {subsubsection}{\numberline {6.1.3}Implement Features}{15}{subsubsection.6.1.3}%
-\contentsline {subsubsection}{\numberline {6.1.4}Write Documentation}{15}{subsubsection.6.1.4}%
-\contentsline {subsubsection}{\numberline {6.1.5}Submit Feedback}{15}{subsubsection.6.1.5}%
-\contentsline {subsection}{\numberline {6.2}Getting Started!}{15}{subsection.6.2}%
-\contentsline {section}{\numberline {7}Credits}{16}{section.7}%
-\contentsline {subsection}{\numberline {7.1}Development Lead}{16}{subsection.7.1}%
-\contentsline {subsection}{\numberline {7.2}Contributors}{16}{subsection.7.2}%
-\contentsline {section}{\numberline {8}License}{17}{section.8}%
-\contentsline {section}{\numberline {9}History}{18}{section.9}%
-\contentsline {subsection}{\numberline {9.1}0.0.2}{18}{subsection.9.1}%
-\contentsline {subsection}{\numberline {9.2}1.0.1}{18}{subsection.9.2}%
-\contentsline {section}{\numberline {10}Python Function Index}{19}{section.10}%
-\contentsline {section}{\numberline {11}Index}{20}{section.11}%
-\contentsline {section}{\numberline {12}To do list}{20}{section.12}%
-\contentsline {paragraph}{\numberline {12.0.0.1}\textit {function} \leavevmode {\color {blue}\texttt {\_\_my\_function\_\_}}\texttt {(self, param\_1, param\_2=False, param\_3)}}{21}{paragraph.12.0.0.1}%
+\contentsline {section}{\numberline {1}Introduction}{3}{section.1}%
+\contentsline {section}{\numberline {2}crobat Features}{4}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Orderbook updating}{4}{subsection.2.1}%
+\contentsline {section}{\numberline {3}Getting Started and Installation}{5}{section.3}%
+\contentsline {subsection}{\numberline {3.1}CoPrA}{5}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Installation}{5}{subsection.3.2}%
+\contentsline {section}{\numberline {4}Time-series Data Structure Layout}{6}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Introduction}{6}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Understanding The Raw Order Book Data}{6}{subsection.4.2}%
+\contentsline {subsubsection}{\numberline {4.2.1}Order Book Snapshots}{6}{subsubsection.4.2.1}%
+\contentsline {subsubsection}{\numberline {4.2.2}Signed Order Book}{7}{subsubsection.4.2.2}%
+\contentsline {paragraph}{\numberline {4.2.2.1}Signed Order Book Snapshot Prices}{7}{paragraph.4.2.2.1}%
+\contentsline {paragraph}{\numberline {4.2.2.2}Signed Events}{7}{paragraph.4.2.2.2}%
+\contentsline {subsection}{\numberline {4.3}Final notes on Orderbook interpretation}{8}{subsection.4.3}%
+\contentsline {section}{\numberline {5}Context: Where does crobat operate?}{9}{section.5}%
+\contentsline {section}{\numberline {6}Modules}{11}{section.6}%
+\contentsline {subsection}{\numberline {6.1}recorder\_full}{11}{subsection.6.1}%
+\contentsline {subsubsection}{\numberline {6.1.1}Description}{11}{subsubsection.6.1.1}%
+\contentsline {subsubsection}{\numberline {6.1.2}\textit {Class} \leavevmode {\color {olive}\texttt {L2\_Update}} }{11}{subsubsection.6.1.2}%
+\contentsline {paragraph}{\numberline {6.1.2.1}\textit {function} \leavevmode {\color {blue}\texttt {\_\_init\_\_}}\texttt {(self, loop, channel, input\_args)}}{11}{paragraph.6.1.2.1}%
+\contentsline {paragraph}{\numberline {6.1.2.2}\textit {function} \leavevmode {\color {blue}\texttt {on\_open}}\texttt {(self)}}{12}{paragraph.6.1.2.2}%
+\contentsline {paragraph}{\numberline {6.1.2.3}\textit {function} \leavevmode {\color {blue}\texttt {on\_message}}\texttt {(self, msg)},}{12}{paragraph.6.1.2.3}%
+\contentsline {paragraph}{\numberline {6.1.2.4}\textit {function} \leavevmode {\color {blue}\texttt {on\_close}}\texttt {(self, was\_clean, code, reason)}}{13}{paragraph.6.1.2.4}%
+\contentsline {subsection}{\numberline {6.2}LOBF\_funcs}{13}{subsection.6.2}%
+\contentsline {subsubsection}{\numberline {6.2.1}\textit {class} \leavevmode {\color {olive}\texttt {history()}}}{14}{subsubsection.6.2.1}%
+\contentsline {paragraph}{\numberline {6.2.1.1}\textit {function} \leavevmode {\color {blue}\texttt {\_\_init\_\_}}\texttt {(self)}}{14}{paragraph.6.2.1.1}%
+\contentsline {paragraph}{\numberline {6.2.1.2}\textit {function} \leavevmode {\color {blue}\texttt {initialize\_snap\_events}}\texttt {(self, msg, time)}}{14}{paragraph.6.2.1.2}%
+\contentsline {paragraph}{\numberline {6.2.1.3}add\_market\_order\_message}{15}{paragraph.6.2.1.3}%
+\contentsline {paragraph}{\numberline {6.2.1.4}\textit {function} \leavevmode {\color {blue}\texttt {remove\_price\_level}}\texttt {(snap\_array, level\_depth, match\_index)}}{16}{paragraph.6.2.1.4}%
+\contentsline {paragraph}{\numberline {6.2.1.5}\textit {function} \leavevmode {\color {blue}\texttt {update\_level\_depth}}\texttt {(snap\_array, level\_depth, match\_index, pre\_level\_depth)}}{16}{paragraph.6.2.1.5}%
+\contentsline {subsection}{\numberline {6.3}history\_funcs.py}{17}{subsection.6.3}%
+\contentsline {paragraph}{\numberline {6.3.0.1}\textbf {function} check\_order(snapshot, side)}{17}{paragraph.6.3.0.1}%
+\contentsline {paragraph}{\numberline {6.3.0.2}\textbf {function} convert\_array\_to\_list\_dict()}{17}{paragraph.6.3.0.2}%
+\contentsline {paragraph}{\numberline {6.3.0.3}\textbf {function} convert\_array\_to\_list\_dict\_sob()}{17}{paragraph.6.3.0.3}%
+\contentsline {paragraph}{\numberline {6.3.0.4}\textbf {function} pd\_excel\_save()}{18}{paragraph.6.3.0.4}%
+\contentsline {paragraph}{\numberline {6.3.0.5}\textbf {function} set\_sign}{18}{paragraph.6.3.0.5}%
+\contentsline {paragraph}{\numberline {6.3.0.6}\textbf {function} set\_signed\_position}{18}{paragraph.6.3.0.6}%
+\contentsline {paragraph}{\numberline {6.3.0.7}\textbf {function} get\_min\_dec()}{18}{paragraph.6.3.0.7}%
+\contentsline {paragraph}{\numberline {6.3.0.8}\textbf {function} convert\_array\_to\_list\_dict\_sob()}{18}{paragraph.6.3.0.8}%
+\contentsline {section}{\numberline {7}Contributing}{19}{section.7}%
+\contentsline {subsection}{\numberline {7.1}Types of Contributions}{19}{subsection.7.1}%
+\contentsline {subsubsection}{\numberline {7.1.1}Report Bugs}{19}{subsubsection.7.1.1}%
+\contentsline {subsubsection}{\numberline {7.1.2}Fix Bugs}{19}{subsubsection.7.1.2}%
+\contentsline {subsubsection}{\numberline {7.1.3}Implement Features}{19}{subsubsection.7.1.3}%
+\contentsline {subsubsection}{\numberline {7.1.4}Write Documentation}{19}{subsubsection.7.1.4}%
+\contentsline {subsubsection}{\numberline {7.1.5}Submit Feedback}{19}{subsubsection.7.1.5}%
+\contentsline {subsection}{\numberline {7.2}Getting Started!}{19}{subsection.7.2}%
+\contentsline {section}{\numberline {8}Credits}{20}{section.8}%
+\contentsline {subsection}{\numberline {8.1}Development Lead}{20}{subsection.8.1}%
+\contentsline {subsection}{\numberline {8.2}Contributors}{20}{subsection.8.2}%
+\contentsline {section}{\numberline {9}License}{21}{section.9}%
+\contentsline {section}{\numberline {10}History}{22}{section.10}%
+\contentsline {subsection}{\numberline {10.1}0.0.2}{22}{subsection.10.1}%
+\contentsline {subsection}{\numberline {10.2}1.0.1}{22}{subsection.10.2}%
+\contentsline {section}{\numberline {11}Python Function Index}{23}{section.11}%
+\contentsline {section}{\numberline {12}Index}{24}{section.12}%
+\contentsline {section}{\numberline {13}To do list}{24}{section.13}%
+\contentsline {paragraph}{\numberline {13.0.0.1}\textit {function} \leavevmode {\color {blue}\texttt {\_\_my\_function\_\_}}\texttt {(self, param\_1, param\_2=False, param\_3)}}{25}{paragraph.13.0.0.1}%

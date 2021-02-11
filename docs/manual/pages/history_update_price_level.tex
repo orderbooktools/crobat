@@ -1,5 +1,58 @@
-\paragraph{update\_price\_level()}
+\paragraph{\textit{function} \textcolor{blue}{\texttt{update\_level\_depth}}\texttt{(snap\_array, level\_depth, match\_index, pre\_level\_depth)}}
 \hfill \break
-\textbf{Descirption:} updates the existing price level to a new size. Sets self.order type to insertion if the new size is larger than the old size, or cancellation if the new size is smaller than the old size. sets the position to the self.position variable to the index where this event happened.
+\textbf{Descirption:} updates the existing price level to a new size. Sets \texttt{self.order\_type} to insertion if the new size is larger than the old size, or cancellation if the new size is smaller than the old size. sets the position to the \texttt{self.position} variable to the index where the event occurred.
 
-\textbf{returns} an updated snapshot
+\begin{tabular}{r r l }
+	\textbf{parameters:}	& snap\_array: & list\\
+	&  & The snapshot array that will be modified.\\
+	& level\_depth:& float64\\
+	&& The new level depth that will be checked against the old level \\
+	&&  depth in the snapshot array.\\
+	& math\_index:& list\\
+	&& single item list that contains the index where the price in the\\
+	&& snapshot array matches that of the \texttt{l2update} message. 
+\end{tabular}
+
+\begin{tabular}{l c l}
+	\textbf{returns:} & snap\_array : & list\\
+	&& The modified snapshot array.\\
+	& pre\_level\_depth:& float64\\
+	&& An updated pre\_level\_depth\footnote{not sure why I do this...}  
+\end{tabular}
+
+\textbf{Example:}
+\begin{lstlisting}[language=Python]
+	# let our snapshot_bid be:
+	snapshot_bid =  [[10101.80, 0.013400],[10101.20, 0.44100], [10101.10, 0.450541]]
+	
+	# we receive a 'l2update' message from our event loop
+	
+	msg = {
+		"type": "l2update",
+		"product_id": "BTC-USD",
+		"time": "2019-08-14T20:42:27.265Z",
+		"changes": [
+		[
+		"buy",
+		"10101.80000000",
+		"0.500000"
+		]
+		]
+	}
+	
+	# on_message() conventiently parses the message to create relevant local variables
+	# time, changes, side, price_level, level_depth, pre_level_depth, hist.token
+	>>print(time, side,price_level, level_depth, prelevel_depth, hist.token)
+	>>2019-08-14T20:42:27.265Z "buy" 10101.80000000 0.500000 0 False
+	
+	# in on_message(), the variable price_match_index is assigned by finding the index
+	# with the matching price, in the snapshot. In this case:
+	price_match_index = [0] 
+	
+	snapshot_bid, pre_level_depth = updatedate_price_level(snapshot_bid, level_depth, price_match_index, pre_level_depth)
+	
+	>>print(price)
+	
+	>>print(snapshot_bid, hist.token)
+	>>[[10101.20, 0.44100], [10101.10, 0.450541]] True
+\end{lstlisting}
