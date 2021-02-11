@@ -8,7 +8,11 @@ A level-1 auxiliary file: pages/Introduction.aux
 Reallocating 'name_of_file' (item size: 1) to 22 items.
 A level-1 auxiliary file: pages/Order_Books.aux
 Reallocating 'name_of_file' (item size: 1) to 18 items.
+A level-1 auxiliary file: pages/context.aux
+Reallocating 'name_of_file' (item size: 1) to 18 items.
 A level-1 auxiliary file: pages/History.aux
+Reallocating 'name_of_file' (item size: 1) to 28 items.
+A level-1 auxiliary file: pages/function_template.aux
 Reallocating 'name_of_file' (item size: 1) to 7 items.
 Database file #1: manual.bib
 "}" immediately follows an entry type---line 533 of file manual.bib
@@ -17,7 +21,7 @@ Database file #1: manual.bib
 I'm skipping whatever remains of this entry
 You've used 1 entry,
             2118 wiz_defined-function locations,
-            508 strings with 4267 characters,
+            510 strings with 4311 characters,
 and the built_in function-call counts, 374 in all, are:
 = -- 34
 > -- 18

@@ -1,6 +1,49 @@
-\paragraph{remove\_price\_level()}
+\paragraph{\textit{function} \textcolor{blue}{\texttt{remove\_price\_level}}\texttt{(snap\_array, level\_depth, match\_index)}}
 \hfill \break
-\textbf{Description:} Checks the level depth of an l2\_update message, removes the existing price level from the snapshot array if the level depth is 0. 
-counts as a change to the limit order book therefore self.token is set to True.
+\textbf{Description:} Checks the level depth of an \texttt{l2\_update} message, removes the existing price level from the snapshot array if the level depth is 0. Counts as a change to the limit order book therefore self.token is set to True. 
 
-\textbf{returns} an updated snapshot 
+\begin{tabular}{r r l }
+	\textbf{parameters:}	& snap\_array & array\\
+	& level\_depth & float64\\
+	& match\_index& int\\ 
+\end{tabular}
+
+\begin{tabular}{r r l}
+	\textbf{returns:} & snap\_array: & array\\
+\end{tabular}
+
+\textbf{Example:}
+\begin{lstlisting}[language=Python]
+	# let our snapshot_bid be:
+	snapshot_bid =  [[10101.80, 0.013400],[10101.20, 0.44100], [10101.10, 0.450541]]
+	
+	# we receive a 'l2update' message from our event loop
+	
+	msg = {
+	"type": "l2update",
+	"product_id": "BTC-USD",
+	"time": "2019-08-14T20:42:27.265Z",
+	"changes": [
+	[
+	"buy",
+	"10101.80000000",
+	"0.0"
+	]
+	]
+	}
+	
+	# on_message() conventiently parses the message to create relevant local variables
+	# time, changes, side, price_level, level_depth, pre_level_depth, hist.token
+	>>print(time, side,price_level, level_depth, prelevel_depth, hist.token)
+	>>2019-08-14T20:42:27.265Z "buy" 10101.80000000 0.0 0 False
+		
+	# in on_message(), the variable price_match_index is assigned by finding the index
+	# with the matching price, in the snapshot. In this case:
+	price_match_index = [0] 
+	
+	snapshot_bid = remove_price_level(snapshot_bid, level_depth, price_match_index)
+	
+	>>print(snapshot_bid, hist.token)
+	>>[[10101.20, 0.44100], [10101.10, 0.450541]] True
+\end{lstlisting}
+
