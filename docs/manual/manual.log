@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 21.1) (preloaded format=pdflatex 2021.1.20)  11 FEB 2021 13:11
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 21.1) (preloaded format=pdflatex 2021.1.20)  12 FEB 2021 01:50
 entering extended mode
 **./manual.tex
 (manual.tex
@@ -829,21 +829,32 @@ Underfull \hbox (badness 10000) in paragraph at lines 2--4
 
  []
 
-[16]) [17] [18] [19] [20] (pages/License.tex) [21]
+[16]) (pages/history_update_price_index_buy.tex
+Underfull \hbox (badness 10000) in paragraph at lines 1--3
+
+ []
+
+
+Overfull \hbox (10.6446pt too wide) in paragraph at lines 1--3
+\OT1/cmr/bx/n/10 Description: \OT1/cmr/m/n/10 If there is a new price level int
+roduced, this function determines its location and appropriately
+ []
+
+[17]) [18] [19] [20] [21] (pages/License.tex) [22]
 \openout2 = `pages/History.aux'.
 
- (pages/History.tex [22
+ (pages/History.tex [23
 
 ])
-[23] [24
+[24] [25
 
 
 ]
 \openout2 = `pages/function_template.aux'.
 
- (pages/function_template.tex) [25
+ (pages/function_template.tex) [26
 
-] (manual.bbl) [26
+] (manual.bbl) [27
 
 
 ] (manual.aux
@@ -853,10 +864,10 @@ Package rerunfilecheck Info: File `manual.out' has not changed.
 (rerunfilecheck)             Checksum: 79FAA2B22973624B8CFF772D0BC289D6;2422.
  ) 
 Here is how much of TeX's memory you used:
- 20803 strings out of 481551
- 389226 string characters out of 2916665
- 1257203 words of memory out of 3000000
- 36852 multiletter control sequences out of 15000+200000
+ 20831 strings out of 481551
+ 389664 string characters out of 2916665
+ 1257201 words of memory out of 3000000
+ 36853 multiletter control sequences out of 15000+200000
  411215 words of font info for 55 fonts, out of 3000000 for 9000
  0 hyphenation exceptions out of 8191
  113i,14n,116p,817b,1914s stack positions out of 5000i,500n,10000p,200000b,50000s
@@ -890,9 +901,9 @@ fonts/type1/public/amsfonts/cm/cmsy10.pfb></home/ivan/.miktex/texmfs/install/fo
 nts/type1/public/amsfonts/cm/cmti10.pfb></home/ivan/.miktex/texmfs/install/font
 s/type1/public/amsfonts/cm/cmtt10.pfb></home/ivan/.miktex/texmfs/install/fonts/
 type1/public/amsfonts/cm/cmtt8.pfb>
-Output written on manual.pdf (26 pages, 373655 bytes).
+Output written on manual.pdf (27 pages, 379787 bytes).
 PDF statistics:
- 893 PDF objects out of 1000 (max. 8388607)
- 451 named destinations out of 1000 (max. 500000)
+ 925 PDF objects out of 1000 (max. 8388607)
+ 475 named destinations out of 1000 (max. 500000)
  317 words of extra memory for PDF output out of 10000 (max. 10000000)
 
