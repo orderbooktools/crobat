@@ -56,7 +56,7 @@ If we were to run it we would execute methods in the instance of the class Clien
 		main()
 \end{lstlisting}
 
-In this modified event loop we have the context where the bulk of crobat sits, the class l2\_update. we can the \texttt{loop} object that is passed to \texttt{ws\_1}, the instance of the class \texttt{L2\_Update}, receives \texttt{msg} objects through the async methods inherited from Client. Here we give an example of what \texttt{l2\_Update} looks like:
+In this modified event loop we have the context where the bulk of crobat sits, the class l2\_update. we can the \texttt{loop} object that is passed to \texttt{ws\_1}, the instance of the class \texttt{L2\_Update}, receives \texttt{msg} objects through the async methods inherited from Client. Here we give an example of what \texttt{l2\_Update} looks like:\newpage
 
 \begin{lstlisting}[language=Python]
 import asyncio, time
@@ -108,3 +108,5 @@ def main():
 if __name__ == '__main__':
 	main()
 \end{lstlisting}
+
+Here we can see that we can create an instance of this class, and on its initialization we can create light weight arrays that can hold our changes and order book states. the logic tree for when each type of message arrives can dictate what kinds of records, and changes to the snapshot are made the arrival of a message. In this current version, the history module contains methods to both update the order book and record changes, but in furture versions the processes should be separated as other may have better ideas as to what to do with order book changes. 

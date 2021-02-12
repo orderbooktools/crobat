@@ -1,0 +1,31 @@
+\paragraph{\textit{function} \textcolor{blue}{\texttt{update\_price\_index\_buy}}\texttt{(self, level\_depth, price\_level, pre\_level\_depth)}}\hfill\break
+\noindent \textbf{Description:} If there is a new price level introduced, this function determines its location and appropriately inserts it into the snapshot bid array. It will also set the position, and token depending on where the change occurs. 
+
+\begin{tabular}{r r l }
+	\textbf{parameters:}	& level\_depth: & float64\\
+	&  & level depth received from the \texttt{l2update} message\\
+	& price\_level:& float64\\
+	&& The price level being introduced\\
+	& pre\_level\_depth:& float64\\
+	&& some pre\_level\_depth that is reset to 0, idk this feature
+\end{tabular}
+
+\begin{tabular}{l c l}
+	\textbf{returns:} & snapshot\_bid & list\\
+	& & The modified snapshot\_bid.\\
+	& bid\_range: & list \\
+	&& The modified range of bids available in the snapshot.\\
+	&pre\_level\_depth &float64\\
+	&& again the pre level depth that idk why i still have this.\\
+\end{tabular}
+
+\textbf{Example: None}
+\begin{lstlisting}[language=Python]
+	x = __my_function__(1.234, True, 3)
+	>>print(x)
+	>>-1.23
+	
+	x = __my_function__(1.234, False, 3)
+	>>print(x)
+	>>1.23
+\end{lstlisting}
