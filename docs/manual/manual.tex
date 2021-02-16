@@ -11,6 +11,7 @@
 \usepackage{natbib}
 \bibliographystyle{plain}
 \usepackage{enumitem}
+\usepackage{import}
 
 \usepackage{tikz}
 \usetikzlibrary{shapes.geometric, arrows}
@@ -57,265 +58,28 @@
 \pagenumbering{roman} 
 \tableofcontents 
 
- 
 \pagenumbering{arabic} 
 \pagestyle{headings} 
 
 
-\include{pages/Introduction}
+\include{sections/Introduction/Introduction}
 
-\include{pages/Order_Books}
+\include{sections/Structure/Order_Books}
 
-\include{pages/context}
+\include{sections/Context/context}
 
-\section{Modules}
-	The module dependency of the program are organized as follows:
-	\dirtree{%
-		.1 CSV\_out\_test.py.
-		.2 recorder\_full.py.
-		.3 asyncio, time.
-		.3 dateime.
-		.3 copra.websocket.
-		.3 pandas(note can move this later).
-		.3 LOB\_funcs.py.
-		.4 pandas.
-		.4 copy.
-		.4 bisect.
-		.4 numpy.
-		.4 history\_funcs.py.
-		.3 history\_funcs.py.
-		.4 pandas.
-		.4 bisect.
-		.3 gc.
-		.3 numpy.
-		.2 datetime.
-		.2 copra.rest.
-		.2 copra.websocket.
-	}
+\include{sections/Modules/Modules}
 
+\include{sections/Contributing/contributing}
 
-	\subsection{recorder\_full}
-	
-	\subsubsection{Description}
-	
-	The \texttt{recorder\_full} module contains the class \textcolor{olive}{\texttt{L2\_Update}}. \textcolor{olive}{\texttt{L2\_Update}} is responsible for:
-	\begin{itemize}
-		\item initializing instances of the order book history class, \textcolor{olive}{\texttt{history}}.
-		\item interpreting the snapshot, ticker and l2update messages that come from the websocket.
-		\item calling the appropriate functions and classes to carry out the orderly update to the limit order book, and order book history arrays.
-	\end{itemize}
+\include{sections/Credits/credits}
 
-	\subsubsection{\textit{Class} \textcolor{olive}{\texttt{L2\_Update}} }
-	
-	\textbf{Function list}:
-	\begin{itemize}
-		\item \textcolor{blue}{\texttt{\_\_init\_\_}}\texttt{(self, loop, channel, input\_args)}
-		\item
-		\textcolor{blue}{\texttt{on\_open}}\texttt{(self)}
-		\item \textcolor{blue}{\texttt{on\_message}}\texttt{(self, msg)}
-		\item \textcolor{blue}{\texttt{on\_close}}\texttt{(self, was\_clean, code, reason)}
-	\end{itemize}
+\include{sections/License/License}
 
-	\textcolor{blue}{\texttt{\_\_init\_\_}}\texttt{(self, loop, channel, input\_args)}
-	\medskip
-	
-	\noindent \textbf{Description:} Inheriting attributes \texttt{loop}, and \texttt{channel}, from \textcolor{olive}{\texttt{Client}}, it
-	\begin{enumerate} 
-		\item initializes the class \texttt{history} imported from \texttt{LOB\_funcs} and
-		\item passes on the settings from the class \texttt{input\_args} and \item uses functions \textcolor{blue}{\texttt{on\_message}}\texttt{(self, msg)},
-		\item \textcolor{blue}{\texttt{on\_close}}\texttt{(self, was\_clean, code, reason)} to manage incoming messages.
-	\end{enumerate} 
+\include {sections/Appendix/Appendix}
 
+\include{sections/Appendix/function_template}
 
-	\input{pages/recorder_full__init__} % DONE %
+\bibliography{sections/Bibliography/manual}
 
-	\input{pages/recorder_full_on_open} % DONE % 
-	
-	\input{pages/recorder_full_on_message} % DONE % 
-	
-	\input{pages/recorder_full_on_close}
-	 
- 
-
-\subsection{LOBF\_funcs}
-\hfill \break
-\textbf{Description:} module that houses the class \textcolor{olive}{\texttt{history}} and the methods that outline how to update snapshots.
-
-\subsubsection{\textit{class} \textcolor{olive}{\texttt{history()}}}\hfill \break
-\textbf{Description:} Contains attributes for the time series array of the limit order book, the current snapshot of the limit order book and the time-series of the events in the limit order book. We detail the role of each attribute in the Table whateever. The class contains methods that operate of these attributes, in order to update the order book and record changes. The functions \texttt{UpdateSnapshot\_bid\_Seq} and \texttt{UpdateSnapshot\_ask\_Seq}found outside ofthese methods, dictate the sequence in which the methods contained in \texttt{history} are executed.
-
-\input{pages/history__init__}
-
-\input{pages/LOBf_initialize_snap_events}
-	
-\input{pages/history_add_market_order_message}
-
-\input{pages/history_remove_price_level}
-
-\input{pages/history_update_price_level}
-
-\input{pages/history_update_price_index_buy}
-
-\input{pages/history_update_price_index_sell}
-
-\input{pages/history_update_snapshot_bid}
-
-\textbf{list to create}
-\begin{enumerate}
-	\item update snapshot bid / ask
-	\item trim coordinator
-	\item append snapshot bid ask signed
-	\item append signed book
-	\item chk mkt can overlap
-	\item accessors\begin{enumerate}
-		\item last LO, CO, MO
-		\item last image
-		\item last event
-		\item last market depth
-	\end{enumerate}
-	\item price\_match 
-	\item update bid seq
-	\item update ask seq
-\end{enumerate}
-
-
-
-\subsection{history\_funcs.py}\hfill \break
-\noindent \textbf{Description}
-
-
-
-\paragraph{\textbf{function} check\_order(snapshot, side)}\hfill\break
-\noindent \textbf{Description}
-
-\noindent \textbf{inputs}
-
-\noindent \textbf{returns}
-
-\paragraph{\textbf{function} convert\_array\_to\_list\_dict()}\hfill\break
-\noindent \textbf{Description}
-
-\textbf{inputs}
-\textbf{returns}
-
-\paragraph{\textbf{function} convert\_array\_to\_list\_dict\_sob()}\hfill\
-\noindent \textbf{Description}
-
-\textbf{inputs}
-\textbf{returns}
-
-\paragraph{\textbf{function} pd\_excel\_save()}\hfill\break
-\noindent \textbf{Description}
-
-\textbf{inputs}
-\textbf{returns}
-
-\paragraph{\textbf{function} set\_sign}\hfill\break
-\noindent \textbf{Description}
-
-\textbf{inputs}
-\textbf{returns}
-
-\paragraph{\textbf{function} set\_signed\_position}\hfill\break
-\noindent \textbf{Description}
-
-\textbf{inputs}
-\textbf{returns}
-
-\paragraph{\textbf{function} get\_min\_dec()}\hfill\break
-\noindent \textbf{Description}
-
-\textbf{inputs}
-\textbf{returns}
-
-\paragraph{\textbf{function} convert\_array\_to\_list\_dict\_sob()}\hfill\break
-\noindent \textbf{Description}
-
-\textbf{inputs}
-\textbf{returns}
-
-\newpage
-\section{Contributing}
-\subsection{Types of Contributions}
-\subsubsection{Report Bugs}
-Report bugs at \href{https://github.com/orderbooktools/crobat/issues}{https://github.com/orderbooktools/crobat/issues}
- 
- If you are reporting a bug, please include:
- \begin{itemize}
- 	\item Your operating system and version, or virtual environment setup
- 	\item Details about the setup or container you might be using.
- 	\item Detailed steps to reproduce the bug
- \end{itemize}
- 
- \subsubsection{Fix Bugs}
- 
- If you see something you can tackle in \href{https://github.com/orderbooktools/crobat/issues}{Issues}, if it is just a response or work around have at it. If you would like to fork the repository and fix it on your own, please do. When you attempt to merge it would be nice to get an email about it so I can also learn about the mistake. 
- 
- \subsubsection{Implement Features}
- 
- I will usually actively work on features for crobat. If somebody wants a particular feature it can be brought up in \href{https://github.com/orderbooktools/crobat/issues}{Issues.}
- \smallskip
- 
- \noindent I will say the side project is implementing some features that report real-time statistics for changes in the order book.
- 
- \subsubsection{Write Documentation}
- 
- crobat could always use more documentation. For the manual I write in \LaTeX, (mostly because  I could not figure out PanDoc or Sphinx). If you write in either PanDoc or Sphinx and are interested in contributing significantly do not hesitate to contact me and I will try to learn how to convert this \texttt{.tex} file into a proper documentation repository.
- 
- \subsubsection{Submit Feedback}
- 
- Please submit feedback by filing an issue at:
- 
- \noindent  \href{https://github.com/orderbooktools/crobat/issues}{https://github.com/orderbooktools/crobat/issues}.
- \smallskip
- 
- \noindent If you are proposing a feature:\begin{itemize}
- 	\item Explain in detail how it would work.
- 	\item Keep the scope as narrow as possible, to make implementation feasible.
- 	\item Remember that as an order book analysis tool for messages that arrive microseconds apart, we are very constrained in complexity of operations.
- 	\item Since this a volunteer project, contributions are welcome.
- \end{itemize}
-  
- \subsection{Getting Started!}
- I am not well versed in GitHub for starters. The way I make changes is:
- \begin{enumerate}
- 	\item Make a clone of the directory and all the files of the package. 
- 	\item Make changes on the file that I was working on.
- 	\item Go through the PyPi package distribution wizard.
- 	\item Compress the new package into a tarball.
- 	\item Upload, and change files on the GitHub project page directory manually.
- 	\item Flag the change in the GitHub change-log as a new release.
- \end{enumerate}
-
-\noindent For you to contribute, I would fork the repository, then you can make changes on your forked repository on your own, and ask to merge to the main repository. I will then review and either accept or reject changes. I might ask you questions over email. 
- \newpage
- \section{Credits}
- \subsection{Development Lead}
- \begin{itemize}
- 	\item Ivan E. Perez -  \href{mailto:perez.ivan.e@gmail.com}{perez.ivan.e@gmail.com}
- \end{itemize}
- \subsection{Contributors}
- \begin{itemize}
- 	\item BTC-DAVE - \href{mailto:jewmansown69@gmail.com}{jewmansown69@gmail.com}
- \end{itemize}
- \newpage
- 
- \input{pages/License}
-
-\include{pages/History}
-
- \section{Index}
- \section{To do list}
- \begin{enumerate}
- 	\item daily goals
- 	\begin{enumerate}
- 		\item write 2 whole function definitions with description, examples, i/o, 
- 		\item help format or rewrite one unique section. 
- 	\end{enumerate}
- \end{enumerate}
- \include{pages/function_template}
-
- \include{pages/variable_definitions}
-
- \bibliography{manual}
 \end{document} 

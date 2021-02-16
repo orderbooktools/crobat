@@ -1,0 +1,31 @@
+\paragraph{\textit{function} \textcolor{blue}{\texttt{set\_sign}}\texttt{(event\_size, side, order\_type)}}\hfill\break
+\noindent \textbf{Description:} Sets the multiplicative sign,either 1 or -1 depending on the order type and event side. 
+
+\begin{tabular}{r r l }
+	\textbf{parameters:}	& event\_size: & float64\\
+	&  & Size of  the event, artifact from when I returned the signed event\\
+	& side:& string\\
+	&& Event side either "bid" or "ask"\\
+	& order\_type:& str\\
+	&& the type of order either \texttt{``insertion''}, \texttt{``cancellation''} or \texttt{``market''}.
+\end{tabular}
+
+\begin{tabular}{l c l}
+	\textbf{returns:} & sign & int\\
+	& & The correct sign given the event's order type and side.
+\end{tabular}
+
+\begin{tabular}{l c l}
+	\textbf{latent changes:} & None: & None\\
+\end{tabular}
+
+\textbf{Example: None}
+\begin{lstlisting}[language=Python]
+	x = __my_function__(1.234, True, 3)
+	>>print(x)
+	>>-1.23
+	
+	x = __my_function__(1.234, False, 3)
+	>>print(x)
+	>>1.23
+\end{lstlisting}

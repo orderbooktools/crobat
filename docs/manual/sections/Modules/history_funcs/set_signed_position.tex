@@ -1,0 +1,32 @@
+\paragraph{\textit{function} \textcolor{blue}{\texttt{set\_signed\_positiion}}\texttt{(position, side)}}\hfill\break
+\noindent \textbf{Description:} Simple conditional that sets the position for the bid side.... I'm tired...
+
+\begin{tabular}{r r l }
+	\textbf{parameters:}	& param\_1: & float64\\
+	&  & some input that will be passed to the function\\
+	& param\_2:& boolean\\
+	&& a conditional that will be checked by the function\\
+	& param\_3:& int\\
+	&& some int that is needed for the function	
+\end{tabular}
+
+\begin{tabular}{l c l}
+	\textbf{returns:} & trans\_number & float64\\
+	& & The number with the correct significant digits and sign. 
+\end{tabular}
+
+\begin{tabular}{l c l}
+	\textbf{latent changes:} & trans\_number & float64\\
+	& & The number with the correct significant digits and sign. 
+\end{tabular}
+
+\textbf{Example: None}
+\begin{lstlisting}[language=Python]
+	x = __my_function__(1.234, True, 3)
+	>>print(x)
+	>>-1.23
+	
+	x = __my_function__(1.234, False, 3)
+	>>print(x)
+	>>1.23
+\end{lstlisting}

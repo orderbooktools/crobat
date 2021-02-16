@@ -1,0 +1,42 @@
+\paragraph{\textit{function} \textcolor{blue}{\texttt{conver\_array\_to\_list\_dict}}\texttt{(history, pos\_limt=5)}}\hfill\break
+\noindent \textbf{Description:} converts the time-series of order book states into a list of dictionaries for a single side.  
+
+\begin{tabular}{r r l }
+	\textbf{parameters:}	& history: & list\\
+	&  & time series of order book states\\
+	& pos\_limit:& int, default := 5\\
+	&& ordinal distance from the best bid/ask that is worth saving.	
+\end{tabular}
+
+\begin{tabular}{l c l}
+	\textbf{returns:} & volm\_list: & list\\
+	& & list of dictionaries for volume sizes and their respective position.\\
+	& price\_list: & list\\
+	&& list of dictionaries for prices and their respective position.
+\end{tabular}
+
+\begin{tabular}{l c l}
+	\textbf{latent changes:} & None: & None\\
+\end{tabular}
+
+\textbf{Example: None}
+\begin{lstlisting}[language=Python]
+	# let our snapshot_bid be:
+	bid_history = [
+	[2019-08-14T20:42:27.265Z,[[10101.80, 0.013400],[10101.20, 0.44100], [10101.10, 0.450541], [10100.55, 5.24501], [10099.00, 10.24511], [10090.11, 24.21395]]],
+	[2019-08-14T20:42:27.500Z,[[10101.20, 0.44100], [10101.10, 0.450541], [10100.55, 5.24501], [10099.00, 10.24511], [10090.11, 24.21395],[10090.05]] ],
+	[2019-08-14T20:42:27.963Z,[[10101.20, 0.55200], [10101.10, 0.450541], [10100.55, 5.24501], [10099.00, 10.24511], [10090.11, 24.21395]]]
+	]
+		
+	ordinal_volumes, ordinal_prices = convert_array_list_to_dict(snapshot)
+	
+	>>print(ordinal_volumes)
+	>>[{"time":2019-08-14T20:42:27.265Z, "1":0.013400, "2":0.44100, "3":0.450541, "4":5.24501, "5":10.24511},
+	{"time":2019-08-14T20:42:27.500Z, "1":0.44100, "2":0.450541, "3":5.24501, "4":10.24511, "5":24.21395},
+	{"time":2019-08-14T20:42:27.963Z, "1":0.52200, "2":0.450541, "3":5.24501, "4":10.24511, "5":2421395}]
+	
+	>>print(ordinal_prices)
+	>>[{"time":2019-08-14T20:42:27.265Z, "1":10101.80, "2":10101.20, "3":10101.10, "4":10100.55, "5":10099.00},
+	{"time":2019-08-14T20:42:27.500Z, "1":10101.20, "2":10101.10, "3":10100.55, "4":10099.00, "5":10090.11},
+	{"time":2019-08-14T20:42:27.963Z, "1":10101.20, "2":10101.10, "3":10100.55, "4":10099.00, "5":10090.11}]
+\end{lstlisting}

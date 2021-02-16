@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 21.1) (preloaded format=pdflatex 2021.1.20)  12 FEB 2021 13:53
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 21.1) (preloaded format=pdflatex 2021.1.20)  16 FEB 2021 04:50
 entering extended mode
 **./manual.tex
 (manual.tex
@@ -316,6 +316,9 @@ Package: enumitem 2019/06/20 v3.9 Customized lists
 \enit@inbox=\box51
 \enit@count@id=\count289
 \enitdp@description=\count290
+)
+(/home/ivan/.miktex/texmfs/install/tex/latex/import/import.sty
+Package: import 2020/04/01  v 6.2
 )
 (/home/ivan/.miktex/texmfs/install/tex/latex/pgf/frontendlayer/tikz.sty
 (/home/ivan/.miktex/texmfs/install/tex/latex/pgf/basiclayer/pgf.sty
@@ -641,27 +644,29 @@ File: l3backend-pdftex.def 2021-01-09 L3 backend support: PDF output (pdfTeX)
 LaTeX Warning: Unused global option(s):
     [refman].
 
-(manual.aux (pages/Introduction.aux) (pages/Order_Books.aux) (pages/context.aux
-) (pages/History.aux) (pages/function_template.aux)
-(pages/variable_definitions.aux))
+(manual.aux (sections/Introduction/Introduction.aux)
+(sections/Structure/Order_Books.aux) (sections/Context/context.aux)
+(sections/Modules/Modules.aux) (sections/Contributing/contributing.aux)
+(sections/Credits/credits.aux) (sections/License/License.aux)
+(sections/Appendix/Appendix.aux) (sections/Appendix/function_template.aux))
 \openout1 = `manual.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 55.
-LaTeX Font Info:    ... okay on input line 55.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 56.
+LaTeX Font Info:    ... okay on input line 56.
 
 (/home/ivan/.miktex/texmfs/install/tex/context/base/mkii/supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
@@ -682,7 +687,7 @@ Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 4
 85.
 )
 \c@lstlisting=\count319
-Package hyperref Info: Link coloring OFF on input line 55.
+Package hyperref Info: Link coloring OFF on input line 56.
 
 (/home/ivan/.miktex/texmfs/install/tex/latex/hyperref/nameref.sty
 Package: nameref 2019/09/16 v2.46 Cross-referencing by name of section
@@ -696,9 +701,9 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 )
 \c@section@level=\count320
 )
-LaTeX Info: Redefining \ref on input line 55.
-LaTeX Info: Redefining \pageref on input line 55.
-LaTeX Info: Redefining \nameref on input line 55.
+LaTeX Info: Redefining \ref on input line 56.
+LaTeX Info: Redefining \pageref on input line 56.
+LaTeX Info: Redefining \nameref on input line 56.
  (manual.out) (manual.out)
 \@outlinefile=\write4
 \openout4 = `manual.out'.
@@ -745,15 +750,16 @@ LaTeX Info: Redefining \nameref on input line 55.
  [1
 
 {/home/ivan/.miktex/texmfs/data/pdftex/config/pdftex.map}]
-[2]
-\openout2 = `pages/Introduction.aux'.
+\openout2 = `sections/Introduction/Introduction.aux'.
 
- (pages/Introduction.tex [3
 
-] [4] [5])
-\openout2 = `pages/Order_Books.aux'.
+(sections/Introduction/Introduction.tex [2
 
- (pages/Order_Books.tex
+] [3] [4])
+\openout2 = `sections/Structure/Order_Books.aux'.
+
+
+(sections/Structure/Order_Books.tex
 Overfull \hbox (19.20663pt too wide) in paragraph at lines 8--9
 []\OT1/cmr/m/n/10 1. For now we only have the full orderbook, with no regard fo
 r ticksize, and we call that ```recorder[]full.py```. 
@@ -776,7 +782,7 @@ Overfull \hbox (27.8083pt too wide) in paragraph at lines 93--106
  [] 
  []
 
-[6
+[5
 
 
 
@@ -785,41 +791,50 @@ Overfull \hbox (27.8083pt too wide) in paragraph at lines 161--175
  [] 
  []
 
-[7] [8])
-\openout2 = `pages/context.aux'.
+[6] [7])
+\openout2 = `sections/Context/context.aux'.
 
- (pages/context.tex
+ (sections/Context/context.tex
 (/home/ivan/.miktex/texmfs/install/tex/latex/listings/lstlang1.sty
 File: lstlang1.sty 2020/03/24 1.8d listings language file
-) [9
+) [8
 
 
 
 ])
-[10]
+[9]
+\openout2 = `sections/Modules/Modules.aux'.
+
+ (sections/Modules/Modules.tex
 LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10> not available
-(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 108.
- (pages/recorder_full__init__.tex [11
+(Font)              Font shape `OT1/cmtt/m/n' tried instead on input line 38.
+
+(sections/Modules/recorder/recorder_full__init__.tex [10
 
 
-]) (pages/recorder_full_on_open.tex
+
+])
+(sections/Modules/recorder/recorder_full_on_open.tex
 Overfull \hbox (6.79999pt too wide) in paragraph at lines 5--13
 [] 
  []
 
-) (pages/recorder_full_on_message.tex
+) (sections/Modules/recorder/recorder_full_on_message.tex
 Overfull \hbox (6.79999pt too wide) in paragraph at lines 19--27
 [] 
  []
 
-[12]) (pages/recorder_full_on_close.tex
+[11]) (sections/Modules/recorder/recorder_full_on_close.tex
 Overfull \hbox (6.79999pt too wide) in paragraph at lines 11--19
 [] 
  []
 
-) [13] (pages/history__init__.tex) (pages/LOBf_initialize_snap_events.tex
-[14]) (pages/history_add_market_order_message.tex [15])
-(pages/history_remove_price_level.tex) (pages/history_update_price_level.tex
+) (sections/Modules/history.tex [12]
+(sections/Modules/history/history__init__.tex)
+(sections/Modules/history/history_initialize_snap_events.tex [13])
+(sections/Modules/history/history_add_market_order_message.tex [14])
+(sections/Modules/history/history_remove_price_level.tex)
+(sections/Modules/history/history_update_price_level.tex
 Overfull \hbox (9.41371pt too wide) in paragraph at lines 2--4
  \OT1/cmr/bx/n/10 6.2.1.5 \OT1/cmr/bx/it/10 function []\OT1/cmtt/m/n/10 update[
 ]level[]depth[](snap[]array, level[]depth, match[]index, pre[]level[]depth)[]
@@ -830,7 +845,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 2--4
 
  []
 
-[16]) (pages/history_update_price_index_buy.tex
+[15]) (sections/Modules/history/history_update_price_index_buy.tex
 Underfull \hbox (badness 10000) in paragraph at lines 1--3
 
  []
@@ -841,12 +856,12 @@ Overfull \hbox (10.6446pt too wide) in paragraph at lines 1--3
 roduced, this function determines its location and appropriately
  []
 
-[17]
+[16]
 Overfull \hbox (63.50154pt too wide) in paragraph at lines 22--27
 [][] 
  []
 
-) (pages/history_update_price_index_sell.tex
+) (sections/Modules/history/history_update_price_index_sell.tex
 Overfull \hbox (4.16376pt too wide) in paragraph at lines 2--4
  \OT1/cmr/bx/n/10 6.2.1.7 \OT1/cmr/bx/it/10 function []\OT1/cmtt/m/n/10 update[
 ]price[]index[]sell[](self, level[]depth, price[]level, pre[]level[]depth)[]
@@ -868,46 +883,96 @@ Overfull \hbox (66.27933pt too wide) in paragraph at lines 23--30
 [][] 
  []
 
-[18]) (pages/history_update_snapshot_bid.tex) [19] [20] [21] [22]
-(pages/License.tex) [23]
-\openout2 = `pages/History.aux'.
+[17]) (sections/Modules/history/history_update_snapshot_bid.tex)
+(sections/Modules/history/history_update_snapshot_ask.tex)
+(sections/Modules/history/history_trim_coordinator.tex [18]
+Overfull \hbox (55.00594pt too wide) in paragraph at lines 11--15
+[][] 
+ []
 
- (pages/History.tex [24
+) (sections/Modules/history/history_append_snapshot_bid.tex)
+(sections/Modules/history/history_append_snapshot_ask.tex)
+(sections/Modules/history/history_append_signed_book.tex [19])
+(sections/Modules/history/history_check_mkt_can_overlap.tex)
+(sections/Modules/history/history_last_inserted_order.tex)) [20]
+(sections/Modules/history_funcs.tex
+(sections/Modules/history_funcs/check_order.tex)
+(sections/Modules/history_funcs/convert_array_to_list_dict.tex [21])
+(sections/Modules/history_funcs/convert_array_to_list_dict_sob.tex)
+(sections/Modules/history_funcs/pd_excel_save.tex
+Overfull \hbox (19.35156pt too wide) in paragraph at lines 4--10
+[][] 
+ []
 
-]) [25] [26
+[22]) (sections/Modules/history_funcs/set_sign.tex
+Overfull \hbox (40.63829pt too wide) in paragraph at lines 4--12
+[][] 
+ []
+
+) (sections/Modules/history_funcs/set_signed_position.tex)
+(sections/Modules/history_funcs/get_min_dec.tex [23]
+Overfull \hbox (238.26192pt too wide) in paragraph at lines 14--18
+[][] 
+ []
+
+) [24]))
+\openout2 = `sections/Contributing/contributing.aux'.
+
+
+No file sections/Contributing/contributing.tex.
+\openout2 = `sections/Credits/credits.aux'.
+
+(sections/Credits/credits.tex [25
+
+
+
+
+
+
+])
+\openout2 = `sections/License/License.aux'.
+
+ (sections/License/License.tex) [26
+
 
 
 ]
-\openout2 = `pages/function_template.aux'.
+\openout2 = `sections/Appendix/Appendix.aux'.
 
 
-(pages/function_template.tex) [27
-
-]
-\openout2 = `pages/variable_definitions.aux'.
-
- (pages/variable_definitions.tex) [28
+(sections/Appendix/Appendix.tex (sections/Appendix/function_template.tex)
+(sections/Appendix/variable_definitions.tex)) [27
 
 
 
 ]
-(manual.bbl) [29
+\openout2 = `sections/Appendix/function_template.aux'.
 
 
-] (manual.aux (pages/Introduction.aux) (pages/Order_Books.aux)
-(pages/context.aux) (pages/History.aux) (pages/function_template.aux)
-(pages/variable_definitions.aux))
+(sections/Appendix/function_template.tex) [28
+
+
+
+] (manual.bbl) [29
+
+
+] (manual.aux
+(sections/Introduction/Introduction.aux) (sections/Structure/Order_Books.aux)
+(sections/Context/context.aux) (sections/Modules/Modules.aux)
+(sections/Contributing/contributing.aux) (sections/Credits/credits.aux)
+(sections/License/License.aux) (sections/Appendix/Appendix.aux)
+(sections/Appendix/function_template.aux))
 Package rerunfilecheck Info: File `manual.out' has not changed.
-(rerunfilecheck)             Checksum: 79FAA2B22973624B8CFF772D0BC289D6;2422.
+(rerunfilecheck)             Checksum: D4CDE7DACE4E5885491E43B4D7303509;1651.
  ) 
 Here is how much of TeX's memory you used:
- 20918 strings out of 481551
- 391578 string characters out of 2916665
- 1257582 words of memory out of 3000000
- 36860 multiletter control sequences out of 15000+200000
+ 21163 strings out of 481551
+ 400838 string characters out of 2916665
+ 1259254 words of memory out of 3000000
+ 36904 multiletter control sequences out of 15000+200000
  411215 words of font info for 55 fonts, out of 3000000 for 9000
  0 hyphenation exceptions out of 8191
- 113i,14n,116p,817b,1914s stack positions out of 5000i,500n,10000p,200000b,50000s
+ 113i,14n,116p,904b,1914s stack positions out of 5000i,500n,10000p,200000b,50000s
 pdfTeX warning (dest): name{Hfootnote.6} has been referenced but does not exi
 st, replaced by a fixed one
 
@@ -935,12 +1000,13 @@ s/install/fonts/type1/public/amsfonts/cm/cmr7.pfb></home/ivan/.miktex/texmfs/in
 stall/fonts/type1/public/amsfonts/cm/cmr8.pfb></home/ivan/.miktex/texmfs/instal
 l/fonts/type1/public/amsfonts/cm/cmsl10.pfb></home/ivan/.miktex/texmfs/install/
 fonts/type1/public/amsfonts/cm/cmsy10.pfb></home/ivan/.miktex/texmfs/install/fo
-nts/type1/public/amsfonts/cm/cmti10.pfb></home/ivan/.miktex/texmfs/install/font
-s/type1/public/amsfonts/cm/cmtt10.pfb></home/ivan/.miktex/texmfs/install/fonts/
-type1/public/amsfonts/cm/cmtt8.pfb>
-Output written on manual.pdf (29 pages, 396520 bytes).
+nts/type1/public/amsfonts/cm/cmsy7.pfb></home/ivan/.miktex/texmfs/install/fonts
+/type1/public/amsfonts/cm/cmti10.pfb></home/ivan/.miktex/texmfs/install/fonts/t
+ype1/public/amsfonts/cm/cmtt10.pfb></home/ivan/.miktex/texmfs/install/fonts/typ
+e1/public/amsfonts/cm/cmtt8.pfb>
+Output written on manual.pdf (29 pages, 428531 bytes).
 PDF statistics:
- 1011 PDF objects out of 1200 (max. 8388607)
- 542 named destinations out of 1000 (max. 500000)
- 317 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1093 PDF objects out of 1200 (max. 8388607)
+ 650 named destinations out of 1000 (max. 500000)
+ 221 words of extra memory for PDF output out of 10000 (max. 10000000)
 

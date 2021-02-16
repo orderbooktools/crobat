@@ -3,33 +3,27 @@ Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: manual.aux
 Reallocating 'name_of_file' (item size: 1) to 6 items.
 The style file: plain.bst
-Reallocating 'name_of_file' (item size: 1) to 39 items.
-A level-1 auxiliary file: sections/Introduction/Introduction.aux
-Reallocating 'name_of_file' (item size: 1) to 35 items.
-A level-1 auxiliary file: sections/Structure/Order_Books.aux
-Reallocating 'name_of_file' (item size: 1) to 29 items.
-A level-1 auxiliary file: sections/Context/context.aux
-Reallocating 'name_of_file' (item size: 1) to 29 items.
-A level-1 auxiliary file: sections/Modules/Modules.aux
-Reallocating 'name_of_file' (item size: 1) to 39 items.
-A level-1 auxiliary file: sections/Contributing/contributing.aux
-Reallocating 'name_of_file' (item size: 1) to 29 items.
-A level-1 auxiliary file: sections/Credits/credits.aux
-Reallocating 'name_of_file' (item size: 1) to 29 items.
-A level-1 auxiliary file: sections/License/License.aux
+Reallocating 'name_of_file' (item size: 1) to 23 items.
+A level-1 auxiliary file: pages/Introduction.aux
+Reallocating 'name_of_file' (item size: 1) to 22 items.
+A level-1 auxiliary file: pages/Order_Books.aux
+Reallocating 'name_of_file' (item size: 1) to 18 items.
+A level-1 auxiliary file: pages/context.aux
+Reallocating 'name_of_file' (item size: 1) to 18 items.
+A level-1 auxiliary file: pages/History.aux
+Reallocating 'name_of_file' (item size: 1) to 28 items.
+A level-1 auxiliary file: pages/function_template.aux
 Reallocating 'name_of_file' (item size: 1) to 31 items.
-A level-1 auxiliary file: sections/Appendix/Appendix.aux
-Reallocating 'name_of_file' (item size: 1) to 40 items.
-A level-1 auxiliary file: sections/Appendix/function_template.aux
-Reallocating 'name_of_file' (item size: 1) to 29 items.
-Database file #1: sections/Bibliography/manual.bib
-"}" immediately follows an entry type---line 533 of file sections/Bibliography/manual.bib
+A level-1 auxiliary file: pages/variable_definitions.aux
+Reallocating 'name_of_file' (item size: 1) to 7 items.
+Database file #1: manual.bib
+"}" immediately follows an entry type---line 533 of file manual.bib
  : \item \href{https://link.springer.com/article/10.1007/s42521-019-00007-w#article-info}{Silyantev, E. - Order flow analysis of cryptocurrency markets}\footnote{This paper shows a working model implementing Order Flow Imbalance (OFI) and Trade Flow Imbalance(TFI) to BTC-USD trades was done by \href{https://medium.com/@eliquinox/order-flow-analysis-of-cryptocurrency-markets-b479a0216ad8
  :                                                                                                                                                                                                                                                                                                                                                                                                   }{Ed Silyantev}. He developed a tool to assess OFI and TFI of XBT-USD pair. }
 I'm skipping whatever remains of this entry
 You've used 1 entry,
             2118 wiz_defined-function locations,
-            515 strings with 4526 characters,
+            511 strings with 4341 characters,
 and the built_in function-call counts, 374 in all, are:
 = -- 34
 > -- 18
