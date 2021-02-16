@@ -3,33 +3,49 @@
 \textbf{Description:} Contains attributes for the time series array of the limit order book, the current snapshot of the limit order book and the time-series of the events in the limit order book. We detail the role of each attribute in the Table whateever. The class contains methods that operate of these attributes, in order to update the order book and record changes. The functions \texttt{UpdateSnapshot\_bid\_Seq} and \texttt{UpdateSnapshot\_ask\_Seq}found outside ofthese methods, dictate the sequence in which the methods contained in \texttt{history} are executed.
 
 \input{sections/Modules/history/history__init__}
+\cleardoublepage
 
 \input{sections/Modules/history/history_initialize_snap_events}
+\cleardoublepage
 
 \input{sections/Modules/history/history_add_market_order_message}
+\cleardoublepage
 
 \input{sections/Modules/history/history_remove_price_level}
+\cleardoublepage
 
 \input{sections/Modules/history/history_update_price_level}
+\cleardoublepage
 
 \input{sections/Modules/history/history_update_price_index_buy}
+\cleardoublepage
 
 \input{sections/Modules/history/history_update_price_index_sell}
+\cleardoublepage
 
 \input{sections/Modules/history/history_update_snapshot_bid}
+\cleardoublepage
 
 \input{sections/Modules/history/history_update_snapshot_ask}
+\cleardoublepage
 
 \input{sections/Modules/history/history_trim_coordinator}
+\cleardoublepage
 
 \input{sections/Modules/history/history_append_snapshot_bid}
+\cleardoublepage
 
 \input{sections/Modules/history/history_append_snapshot_ask}
+\cleardoublepage
 
 \input{sections/Modules/history/history_append_signed_book}
+\cleardoublepage
 
 \input{sections/Modules/history/history_check_mkt_can_overlap}
+\cleardoublepage
 
-\noindent\textbf{Accessors:} The folowing functions, prefaced with \texttt{last\_} are the currently named accessors. They cover the last order of a named type, the last state of the order book, and the market depth for a the last given state of the order book. If I come up with other relevant accessors or refine how each function works their changes will likely be noted in the versions, or at least a git entry. 
+
+\noindent\textbf{Accessors:} The following functions, prefaced with \texttt{last\_} are the currently named accessors. They cover the last order of a named type, the last state of the order book, and the market depth for a the last given state of the order book. If I come up with other relevant accessors or refine how each function works their changes will likely be noted in the versions, or at least a git entry. 
 
 \input{sections/Modules/history/history_last_inserted_order}
+\cleardoublepage
