@@ -1,0 +1,28 @@
+\paragraph{\textit{function} \textcolor{blue}{\texttt{check\_order}}\texttt{(snapshot, side)}}\hfill\break
+\noindent \textbf{Description:} Checks that the snapshot is sorted correctly. Used in debugging when snapshots do not look well ordered. Only checks bid and ask side, because signed snapshot is a concatenated form of a bid and ask snapshot. \texttt{pass} placeholder can be changed to a print statement. 
+
+\begin{tabular}{r r l }
+	\textbf{parameters:}	& snapshot: & list\\
+	&  & snpshot to check\\
+	& side:& string \\
+	&& side \texttt{bid, ask}	
+\end{tabular}
+
+\begin{tabular}{l c l}
+	\textbf{returns:} & snapshot & list\\
+	& & 
+\end{tabular}
+
+\begin{tabular}{l c l}
+	\textbf{latent changes:} & None: & None\\
+\end{tabular}
+
+\textbf{Example: None}
+\begin{lstlisting}[language=Python]
+	# let our snapshot_bid be:
+	snapshot_bid =  [[10101.80, 0.013400],[10101.20, 0.44100], [10101.10, 0.450541]]
+	
+	#I will say that if the snapshot is not ordered I can ask the function to return a boolean, True if ordered, else False
+	>>x = check order(snapshot_bid, "bid")
+	>>print(x)
+\end{lstlisting}

@@ -1,0 +1,27 @@
+\paragraph{\textit{function} \textcolor{blue}{\texttt{last\_inserted\_order}}\texttt{(self, side=``signed'')}}\hfill\break
+\noindent \textbf{Description:} Returns the latest limit order insertion from the bid, ask, or signed events. Defaults to signed. 
+
+\begin{tabular}{r r l }
+	\textbf{parameters:}	& side: & string\\
+	&  & market side to query \\
+\end{tabular}
+
+\begin{tabular}{l c l}
+	\textbf{returns:} & out(please rename) & list\\
+	& & The last inserted event. 
+\end{tabular}
+
+\begin{tabular}{l c l}
+	\textbf{latent changes:} & None: & None\\
+\end{tabular}
+
+\textbf{Example: None}
+\begin{lstlisting}[language=Python]
+	x = __my_function__(1.234, True, 3)
+	>>print(x)
+	>>-1.23
+	
+	x = __my_function__(1.234, False, 3)
+	>>print(x)
+	>>1.23
+\end{lstlisting}

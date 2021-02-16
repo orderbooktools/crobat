@@ -1,0 +1,92 @@
+\section{Modules}
+The module dependency of the program are organized as follows:
+\dirtree{%
+	.1 CSV\_out\_test.py.
+	.2 recorder\_full.py.
+	.3 asyncio, time.
+	.3 dateime.
+	.3 copra.websocket.
+	.3 pandas(note can move this later).
+	.3 LOB\_funcs.py.
+	.4 pandas.
+	.4 copy.
+	.4 bisect.
+	.4 numpy.
+	.4 history\_funcs.py.
+	.3 history\_funcs.py.
+	.4 pandas.
+	.4 bisect.
+	.3 gc.
+	.3 numpy.
+	.2 datetime.
+	.2 copra.rest.
+	.2 copra.websocket.
+}
+
+
+\subsection{recorder\_full}
+
+\subsubsection{Description}
+
+The \texttt{recorder\_full} module contains the class \textcolor{olive}{\texttt{L2\_Update}}. \textcolor{olive}{\texttt{L2\_Update}} is responsible for:
+\begin{itemize}
+	\item initializing instances of the order book history class, \textcolor{olive}{\texttt{history}}.
+	\item interpreting the snapshot, ticker and l2update messages that come from the websocket.
+	\item calling the appropriate functions and classes to carry out the orderly update to the limit order book, and order book history arrays.
+\end{itemize}
+
+\subsubsection{\textit{Class} \textcolor{olive}{\texttt{L2\_Update}} }
+
+\textbf{Function list}:
+\begin{itemize}
+	\item \textcolor{blue}{\texttt{\_\_init\_\_}}\texttt{(self, loop, channel, input\_args)}
+	\item
+	\textcolor{blue}{\texttt{on\_open}}\texttt{(self)}
+	\item \textcolor{blue}{\texttt{on\_message}}\texttt{(self, msg)}
+	\item \textcolor{blue}{\texttt{on\_close}}\texttt{(self, was\_clean, code, reason)}
+\end{itemize}
+
+\textcolor{blue}{\texttt{\_\_init\_\_}}\texttt{(self, loop, channel, input\_args)}
+\medskip
+
+\noindent \textbf{Description:} Inheriting attributes \texttt{loop}, and \texttt{channel}, from \textcolor{olive}{\texttt{Client}}, it
+\begin{enumerate} 
+	\item initializes the class \texttt{history} imported from \texttt{LOB\_funcs} and
+	\item passes on the settings from the class \texttt{input\_args} and \item uses functions \textcolor{blue}{\texttt{on\_message}}\texttt{(self, msg)},
+	\item \textcolor{blue}{\texttt{on\_close}}\texttt{(self, was\_clean, code, reason)} to manage incoming messages.
+\end{enumerate} 
+
+
+\input{sections/Modules/recorder/recorder_full__init__} % DONE %
+
+\input{sections/Modules/recorder/recorder_full_on_open} % DONE % 
+
+\input{sections/Modules/recorder/recorder_full_on_message} % DONE % 
+
+\input{sections/Modules/recorder/recorder_full_on_close}
+
+
+
+\subsection{LOBF\_funcs}
+\hfill \break
+\textbf{Description:} module that houses the class \textcolor{olive}{\texttt{history}} and the methods that outline how to update snapshots.
+
+\input{sections/Modules/history}
+
+
+\textbf{list to create}
+
+
+\begin{enumerate}
+	\item accessors\begin{enumerate}
+		\item last CO, MO
+		\item last image
+		\item last event
+		\item last market depth
+	\end{enumerate}
+	\item price\_match 
+	\item update bid seq
+	\item update ask seq
+\end{enumerate}
+
+\input{sections/Modules/history_funcs}
