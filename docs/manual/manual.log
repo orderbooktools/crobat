@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 21.1) (preloaded format=pdflatex 2021.1.20)  16 FEB 2021 04:50
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 21.1) (preloaded format=pdflatex 2021.1.20)  16 FEB 2021 05:00
 entering extended mode
 **./manual.tex
 (manual.tex
@@ -813,27 +813,41 @@ LaTeX Font Info:    Font shape `OT1/cmtt/bx/n' in size <10> not available
 
 
 
-])
+]) [11]
 (sections/Modules/recorder/recorder_full_on_open.tex
 Overfull \hbox (6.79999pt too wide) in paragraph at lines 5--13
 [] 
  []
 
-) (sections/Modules/recorder/recorder_full_on_message.tex
+) [12
+
+] (sections/Modules/recorder/recorder_full_on_message.tex
 Overfull \hbox (6.79999pt too wide) in paragraph at lines 19--27
 [] 
  []
 
-[11]) (sections/Modules/recorder/recorder_full_on_close.tex
+) [13
+
+] (sections/Modules/recorder/recorder_full_on_close.tex
 Overfull \hbox (6.79999pt too wide) in paragraph at lines 11--19
 [] 
  []
 
-) (sections/Modules/history.tex [12]
-(sections/Modules/history/history__init__.tex)
-(sections/Modules/history/history_initialize_snap_events.tex [13])
-(sections/Modules/history/history_add_market_order_message.tex [14])
-(sections/Modules/history/history_remove_price_level.tex)
+) [14
+
+] (sections/Modules/history.tex
+(sections/Modules/history/history__init__.tex) [15
+
+]
+(sections/Modules/history/history_initialize_snap_events.tex) [16
+
+]
+(sections/Modules/history/history_add_market_order_message.tex [17
+
+]) [18]
+(sections/Modules/history/history_remove_price_level.tex) [19
+
+]
 (sections/Modules/history/history_update_price_level.tex
 Overfull \hbox (9.41371pt too wide) in paragraph at lines 2--4
  \OT1/cmr/bx/n/10 6.2.1.5 \OT1/cmr/bx/it/10 function []\OT1/cmtt/m/n/10 update[
@@ -845,7 +859,9 @@ Underfull \hbox (badness 10000) in paragraph at lines 2--4
 
  []
 
-[15]) (sections/Modules/history/history_update_price_index_buy.tex
+) [20
+
+] (sections/Modules/history/history_update_price_index_buy.tex
 Underfull \hbox (badness 10000) in paragraph at lines 1--3
 
  []
@@ -856,12 +872,14 @@ Overfull \hbox (10.6446pt too wide) in paragraph at lines 1--3
 roduced, this function determines its location and appropriately
  []
 
-[16]
+
 Overfull \hbox (63.50154pt too wide) in paragraph at lines 22--27
 [][] 
  []
 
-) (sections/Modules/history/history_update_price_index_sell.tex
+) [21
+
+] (sections/Modules/history/history_update_price_index_sell.tex
 Overfull \hbox (4.16376pt too wide) in paragraph at lines 2--4
  \OT1/cmr/bx/n/10 6.2.1.7 \OT1/cmr/bx/it/10 function []\OT1/cmtt/m/n/10 update[
 ]price[]index[]sell[](self, level[]depth, price[]level, pre[]level[]depth)[]
@@ -883,46 +901,79 @@ Overfull \hbox (66.27933pt too wide) in paragraph at lines 23--30
 [][] 
  []
 
-[17]) (sections/Modules/history/history_update_snapshot_bid.tex)
-(sections/Modules/history/history_update_snapshot_ask.tex)
-(sections/Modules/history/history_trim_coordinator.tex [18]
+) [22
+
+] (sections/Modules/history/history_update_snapshot_bid.tex) [23
+
+]
+(sections/Modules/history/history_update_snapshot_ask.tex) [24
+
+]
+(sections/Modules/history/history_trim_coordinator.tex
 Overfull \hbox (55.00594pt too wide) in paragraph at lines 11--15
 [][] 
  []
 
-) (sections/Modules/history/history_append_snapshot_bid.tex)
-(sections/Modules/history/history_append_snapshot_ask.tex)
-(sections/Modules/history/history_append_signed_book.tex [19])
-(sections/Modules/history/history_check_mkt_can_overlap.tex)
-(sections/Modules/history/history_last_inserted_order.tex)) [20]
+) [25
+
+] (sections/Modules/history/history_append_snapshot_bid.tex) [26
+
+]
+(sections/Modules/history/history_append_snapshot_ask.tex) [27
+
+]
+(sections/Modules/history/history_append_signed_book.tex) [28
+
+]
+(sections/Modules/history/history_check_mkt_can_overlap.tex) [29
+
+]
+(sections/Modules/history/history_last_inserted_order.tex) [30
+
+])
 (sections/Modules/history_funcs.tex
-(sections/Modules/history_funcs/check_order.tex)
-(sections/Modules/history_funcs/convert_array_to_list_dict.tex [21])
-(sections/Modules/history_funcs/convert_array_to_list_dict_sob.tex)
+(sections/Modules/history_funcs/check_order.tex) [31
+
+]
+(sections/Modules/history_funcs/convert_array_to_list_dict.tex) [32
+
+]
+(sections/Modules/history_funcs/convert_array_to_list_dict_sob.tex) [33
+
+]
 (sections/Modules/history_funcs/pd_excel_save.tex
 Overfull \hbox (19.35156pt too wide) in paragraph at lines 4--10
 [][] 
  []
 
-[22]) (sections/Modules/history_funcs/set_sign.tex
+) [34
+
+] (sections/Modules/history_funcs/set_sign.tex
 Overfull \hbox (40.63829pt too wide) in paragraph at lines 4--12
 [][] 
  []
 
-) (sections/Modules/history_funcs/set_signed_position.tex)
-(sections/Modules/history_funcs/get_min_dec.tex [23]
+) [35
+
+] (sections/Modules/history_funcs/set_signed_position.tex) [36
+
+]
+(sections/Modules/history_funcs/get_min_dec.tex
 Overfull \hbox (238.26192pt too wide) in paragraph at lines 14--18
 [][] 
  []
 
-) [24]))
+) [37
+
+]))
 \openout2 = `sections/Contributing/contributing.aux'.
 
 
 No file sections/Contributing/contributing.tex.
 \openout2 = `sections/Credits/credits.aux'.
 
-(sections/Credits/credits.tex [25
+(sections/Credits/credits.tex [38
+
 
 
 
@@ -932,7 +983,7 @@ No file sections/Contributing/contributing.tex.
 ])
 \openout2 = `sections/License/License.aux'.
 
- (sections/License/License.tex) [26
+ (sections/License/License.tex) [39
 
 
 
@@ -941,7 +992,7 @@ No file sections/Contributing/contributing.tex.
 
 
 (sections/Appendix/Appendix.tex (sections/Appendix/function_template.tex)
-(sections/Appendix/variable_definitions.tex)) [27
+(sections/Appendix/variable_definitions.tex)) [40
 
 
 
@@ -949,11 +1000,11 @@ No file sections/Contributing/contributing.tex.
 \openout2 = `sections/Appendix/function_template.aux'.
 
 
-(sections/Appendix/function_template.tex) [28
+(sections/Appendix/function_template.tex) [41
 
 
 
-] (manual.bbl) [29
+] (manual.bbl) [42
 
 
 ] (manual.aux
@@ -966,9 +1017,9 @@ Package rerunfilecheck Info: File `manual.out' has not changed.
 (rerunfilecheck)             Checksum: D4CDE7DACE4E5885491E43B4D7303509;1651.
  ) 
 Here is how much of TeX's memory you used:
- 21163 strings out of 481551
- 400838 string characters out of 2916665
- 1259254 words of memory out of 3000000
+ 21176 strings out of 481551
+ 400929 string characters out of 2916665
+ 1258254 words of memory out of 3000000
  36904 multiletter control sequences out of 15000+200000
  411215 words of font info for 55 fonts, out of 3000000 for 9000
  0 hyphenation exceptions out of 8191
@@ -1004,9 +1055,9 @@ nts/type1/public/amsfonts/cm/cmsy7.pfb></home/ivan/.miktex/texmfs/install/fonts
 /type1/public/amsfonts/cm/cmti10.pfb></home/ivan/.miktex/texmfs/install/fonts/t
 ype1/public/amsfonts/cm/cmtt10.pfb></home/ivan/.miktex/texmfs/install/fonts/typ
 e1/public/amsfonts/cm/cmtt8.pfb>
-Output written on manual.pdf (29 pages, 428531 bytes).
+Output written on manual.pdf (42 pages, 443135 bytes).
 PDF statistics:
- 1093 PDF objects out of 1200 (max. 8388607)
- 650 named destinations out of 1000 (max. 500000)
+ 1151 PDF objects out of 1200 (max. 8388607)
+ 663 named destinations out of 1000 (max. 500000)
  221 words of extra memory for PDF output out of 10000 (max. 10000000)
 
