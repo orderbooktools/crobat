@@ -23,49 +23,57 @@ Reallocating 'name_of_file' (item size: 1) to 40 items.
 A level-1 auxiliary file: sections/Appendix/function_template.aux
 Reallocating 'name_of_file' (item size: 1) to 29 items.
 Database file #1: sections/Bibliography/manual.bib
-"}" immediately follows an entry type---line 533 of file sections/Bibliography/manual.bib
+"}" immediately follows an entry type---line 578 of file sections/Bibliography/manual.bib
  : \item \href{https://link.springer.com/article/10.1007/s42521-019-00007-w#article-info}{Silyantev, E. - Order flow analysis of cryptocurrency markets}\footnote{This paper shows a working model implementing Order Flow Imbalance (OFI) and Trade Flow Imbalance(TFI) to BTC-USD trades was done by \href{https://medium.com/@eliquinox/order-flow-analysis-of-cryptocurrency-markets-b479a0216ad8
  :                                                                                                                                                                                                                                                                                                                                                                                                   }{Ed Silyantev}. He developed a tool to assess OFI and TFI of XBT-USD pair. }
 I'm skipping whatever remains of this entry
-You've used 1 entry,
+Name 1 in "Rama Cont, Sasha Stoikov, and Rishi Talreja" has a comma at the end for entry ContStoikovTalreja2009:StochModelOBD
+while executing---line 1049 of file plain.bst
+Name 1 in "Rama Cont, Arseniy Kukanov, and Sasha Stoikov" has a comma at the end for entry ContKukanovStoikov2012:PriceImpactOBE
+while executing---line 1049 of file plain.bst
+Name 1 in "Rama Cont, Arseniy Kukanov, and Sasha Stoikov" has a comma at the end for entry ContKukanovStoikov2012:PriceImpactOBE
+while executing---line 1090 of file plain.bst
+Name 1 in "Rama Cont, Sasha Stoikov, and Rishi Talreja" has a comma at the end for entry ContStoikovTalreja2009:StochModelOBD
+while executing---line 1090 of file plain.bst
+You've used 6 entries,
             2118 wiz_defined-function locations,
-            515 strings with 4526 characters,
-and the built_in function-call counts, 374 in all, are:
-= -- 34
-> -- 18
-< -- 0
-+ -- 7
-- -- 6
-* -- 32
-:= -- 69
-add.period$ -- 3
-call.type$ -- 1
-change.case$ -- 6
+            551 strings with 5365 characters,
+and the built_in function-call counts, 2031 in all, are:
+= -- 205
+> -- 76
+< -- 3
++ -- 32
+- -- 24
+* -- 127
+:= -- 332
+add.period$ -- 18
+call.type$ -- 6
+change.case$ -- 29
 chr.to.int$ -- 0
-cite$ -- 1
-duplicate$ -- 11
-empty$ -- 28
-format.name$ -- 6
-if$ -- 74
+cite$ -- 6
+duplicate$ -- 86
+empty$ -- 161
+format.name$ -- 24
+if$ -- 437
 int.to.chr$ -- 0
-int.to.str$ -- 1
-missing$ -- 1
-newline$ -- 8
-num.names$ -- 2
-pop$ -- 4
+int.to.str$ -- 6
+missing$ -- 7
+newline$ -- 33
+num.names$ -- 12
+pop$ -- 30
 preamble$ -- 1
-purify$ -- 5
+purify$ -- 24
 quote$ -- 0
-skip$ -- 7
+skip$ -- 67
 stack$ -- 0
-substring$ -- 26
-swap$ -- 1
-text.length$ -- 0
+substring$ -- 138
+swap$ -- 25
+text.length$ -- 3
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 4
+type$ -- 22
 warning$ -- 0
-while$ -- 3
-width$ -- 2
-write$ -- 13
-(There was 1 error message)
+while$ -- 23
+width$ -- 7
+write$ -- 67
+(There were 5 error messages)

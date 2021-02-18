@@ -1,5 +1,17 @@
 \section{Modules}
-The module dependency of the program are organized as follows:
+
+\noindent\textbf{Introduction:} corbat has one main module, \texttt{recorder\_full} typically imported as \texttt{rec}. Its dependencies are:
+\begin{enumerate}[noitemsep]
+	\item asyncio, time for asynchronous methods,
+	\item datetime, to work with datetime objects,
+	\item copra.websocket, to connect to coinbase,
+	\item pandas, to store out time series arrays, 
+	\item LOB\_funcs.py, to manage messages and create time series arrays, 
+	\item history\_funcs.py, for some helper functions, and 
+	\item gc and numpy. 
+\end{enumerate}
+The modules, and their dependencies are listed in the tree diagram below.\\
+
 \dirtree{%
 	.1 CSV\_out\_test.py.
 	.2 recorder\_full.py.
@@ -25,20 +37,17 @@ The module dependency of the program are organized as follows:
 
 
 \subsection{recorder\_full}
-
 \subsubsection{Description}
-
 The \texttt{recorder\_full} module contains the class \textcolor{olive}{\texttt{L2\_Update}}. \textcolor{olive}{\texttt{L2\_Update}} is responsible for:
-\begin{itemize}
+\begin{itemize}[noitemsep]
 	\item initializing instances of the order book history class, \textcolor{olive}{\texttt{history}}.
 	\item interpreting the snapshot, ticker and l2update messages that come from the websocket.
 	\item calling the appropriate functions and classes to carry out the orderly update to the limit order book, and order book history arrays.
 \end{itemize}
 
-\subsubsection{\textit{Class} \textcolor{olive}{\texttt{L2\_Update}} }
-
-\textbf{Function list}:
-\begin{itemize}
+\subsubsection{\textit{class} \textcolor{olive}{\texttt{L2\_Update}} }
+\noindent\textbf{Description:} The class that handles messages incoming from the websocket connection. Its methods are:
+\begin{itemize}[noitemsep]
 	\item \textcolor{blue}{\texttt{\_\_init\_\_}}\texttt{(self, loop, channel, input\_args)}
 	\item
 	\textcolor{blue}{\texttt{on\_open}}\texttt{(self)}
@@ -46,16 +55,13 @@ The \texttt{recorder\_full} module contains the class \textcolor{olive}{\texttt{
 	\item \textcolor{blue}{\texttt{on\_close}}\texttt{(self, was\_clean, code, reason)}
 \end{itemize}
 
-\textcolor{blue}{\texttt{\_\_init\_\_}}\texttt{(self, loop, channel, input\_args)}
-\medskip
-
-\noindent \textbf{Description:} Inheriting attributes \texttt{loop}, and \texttt{channel}, from \textcolor{olive}{\texttt{Client}}, it
-\begin{enumerate} 
+\textcolor{blue}{\texttt{\_\_init\_\_}}\texttt{(self, loop, channel, input\_args)} begins by inheriting attributes \texttt{loop}, and \texttt{channel}, from \textcolor{olive}{\texttt{Client}}, and it
+\begin{enumerate}[noitemsep]
 	\item initializes the class \texttt{history} imported from \texttt{LOB\_funcs} and
 	\item passes on the settings from the class \texttt{input\_args} and \item uses functions \textcolor{blue}{\texttt{on\_message}}\texttt{(self, msg)},
 	\item \textcolor{blue}{\texttt{on\_close}}\texttt{(self, was\_clean, code, reason)} to manage incoming messages.
 \end{enumerate} 
-
+\cleardoublepage
 
 \input{sections/Modules/recorder/recorder_full__init__} % DONE %
 \cleardoublepage
@@ -70,26 +76,10 @@ The \texttt{recorder\_full} module contains the class \textcolor{olive}{\texttt{
 \cleardoublepage
 
 
-\subsection{LOBF\_funcs}
-\hfill \break
-\textbf{Description:} module that houses the class \textcolor{olive}{\texttt{history}} and the methods that outline how to update snapshots.
+\subsection{LOB\_funcs}
+\subsubsection{\textbf{Description:}}Contains the class \textcolor{olive}{\texttt{history}} and the methods, \textcolor{blue}{\texttt{UpdateSnapshot\_Bid\_Seq}} and 
+\textcolor{blue}{\texttt{UpdateSnapshot\_Ask\_Seq}} that outline how to update snapshots.
 
 \input{sections/Modules/history}
-
-
-\textbf{list to create}
-
-
-\begin{enumerate}
-	\item accessors\begin{enumerate}
-		\item last CO, MO
-		\item last image
-		\item last event
-		\item last market depth
-	\end{enumerate}
-	\item price\_match 
-	\item update bid seq
-	\item update ask seq
-\end{enumerate}
 
 \input{sections/Modules/history_funcs}
