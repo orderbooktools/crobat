@@ -1,6 +1,8 @@
-\section{Context: Where does crobat operate?}
+\section{Usage}
 
-Following CoPrA's example as to how to set up a web socket connectin we provide context as to where crobat operates. Lets begin with copras heartbeat.py example:
+\textbf{Preface:} crobat is used with an open websocket connection to the Coinbase exchange. It uses CoPrA to parse JSON objects, and it records time series arrays of order book snapshots and events. \hfill\break
+
+We demonstrate where crobat is used by beginning with CoPrA's \texttt{heartbeat.py} example:
 
 \begin{lstlisting}[language=Python]
 import asyncio
@@ -18,7 +20,7 @@ loop.run_until_complete(ws.close())
 loop.close()
 \end{lstlisting}
 
-If we were to run it we would execute methods in the instance of the class Client based on the arrival of messages on the heartbeat channel for the pair BTC-USD. crobat primarily overwrites this Client class and inserts its new methods. Below we introduce our own version of this loop.
+If we were to execute the code, we would run methods in the instance of the class \textcolor{olive}{\texttt{Client}} based on the arrival of messages on the heartbeat channel for the pair BTC-USD. crobat primarily inherits methods from this class and adds logic for managing incoming messages. Below we introduce our own version of this loop found in \texttt{CSV\_out.py}.
 
 \begin{lstlisting}[language=Python]
 	import recorder_full as rec
@@ -109,4 +111,4 @@ if __name__ == '__main__':
 	main()
 \end{lstlisting}
 
-Here we can see that we can create an instance of this class, and on its initialization we can create light weight arrays that can hold our changes and order book states. the logic tree for when each type of message arrives can dictate what kinds of records, and changes to the snapshot are made the arrival of a message. In this current version, the history module contains methods to both update the order book and record changes, but in furture versions the processes should be separated as other may have better ideas as to what to do with order book changes. 
+Here we can see that we can create an instance of this class, and on its initialization we create arrays that can hold our changes and order book states. The logic tree for when each type of message arrives can dictate what kinds of records, and changes to the snapshot are made the arrival of a message. In this current version, the history module contains methods to both update the order book and record changes, but in future versions the processes should be separated as other may have better ideas as to what to do with order book changes. In the following section we will introduce the modules and their associated functions and classes.

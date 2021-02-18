@@ -3,11 +3,11 @@
 \subsection{Introduction}
 
 
-Since this is an orderbook <u>recorder</u> my use until now has been to record the orderbook. However there are accessors in the ```LOB\_funcs.py``` file, under in the *history* class. In the /test folder there is a small usecase if you would like to see it but documentation is pending.
+Since this is an order book \textit{recorder} my use until now has been to record the order book. However there are accessors in the \texttt{LOB\_funcs.py} file, under in the \texttt{history} class. In the /test folder there is a small use case called \texttt{csv\_out\_test.py} wiith the associated jupyter notebook pending.
 
-1. For now we only have the full orderbook, with no regard for ticksize, and we call that ```recorder\_full.py```. 
+1. For now we only have the full order book and we call that\texttt{recorder\_full.py}. 
 
-2. We change the ```settings``` variable in the ```CSV\_out\_test.py``` file that has arguments for:
+2. We change the \texttt{settings} variable in the \texttt{CSV\_out\_test.py} file that has arguments for:
 
 \begin{center}
 	\begin{tabular}{|l|l|l|l|}
@@ -16,11 +16,12 @@ Since this is an orderbook <u>recorder</u> my use until now has been to record t
 		\hline
 		Recording Duration & \texttt{duration}& \texttt{int} & recording time in seconds\\
 		Position Range & \texttt{position\_range} & \texttt{int} & ordinal distance from the best bid(ask)\\
-		Currency Pair\footnote{\href{https://help.coinbase.com/en/pro/trading-and-funding/cryptocurrency-trading-pairs/locations-and-trading-pairs}{List of currency pairs supported by Coinbase}} & \texttt{currency\_pair} & \texttt{str} &\\
+		Currency Pair & \texttt{currency\_pair} & \texttt{str} & The currency pair from list of supported pairs\\
 		\hline
 	\end{tabular}
-	
 \end{center}
+
+\footnote{\href{https://help.coinbase.com/en/pro/trading-and-funding/cryptocurrency-trading-pairs/locations-and-trading-pairs}{List of currency pairs supported by Coinbase}}
 
 %| Parameter                | Function Arg  | Type |  Description | 
 %|-------------------------|-------------------|------| -------|
@@ -28,65 +29,38 @@ Since this is an orderbook <u>recorder</u> my use until now has been to record t
 %| Position Range     | position_range| int  | ordinal distance from the best bid(ask) |
 %| Currency Pair      | currency_pair | str  | [List of currency pairs supported by Coinbase](https://help.coinbase.com/en/pro/trading-and-funding/cryptocurrency-trading-pairs/locations-and-trading-pairs) |
 
-3. When you are ready, you can start the build. When it finishes you should get a message ```Connection Closed``` from ```CoPrA```. And the files for the limit orderbook for each side should be created with a timestamp:
-
-%|Filename|side|description|
-%|----|----|----|
-%|L2_orderbook_events_askYYYY-MM-DDTHH:MM:SS.ffffff| ask|Time series of order book events on the ask side|
-%|L2_orderbook_events_bidYYYY-MM-DDTHH:MM:SS.ffffff| bid| Time series of order book events on the bid side |
-%|L2_orderbook_events_signedYYYY-MM-DDTHH:MM:SS.ffffff| both | Time series of order book events on both sides, - sign for bid, +sign for ask|
-%|L2_orderbook_ask_volmYYYY-MM-DDTHH:MM:SS.ffffff| ask |Time series of the volume snapshots of order book on the ask side |
-%|L2_orderbook_bid_volmYYYY-MM-DDTHH:MM:SS.ffffff| bid |Time series of the volume snapshots of order book on the bid side |
-%|L2_orderbook_signed_volmYYYY-MM-DDTHH:MM:SS.ffffff | both |Time series of the volume  snapshots of the signed order book, - for bid, + for ask|
-%|L2_orderbook_ask_volmYYYY-MM-DDTHH:MM:SS.ffffff| ask |Time series of the price snapshots of order book on the ask side |
-%|L2_orderbook_bid_volmYYYY-MM-DDTHH:MM:SS.ffffff| bid |Time series of the price snapshots of order book on the bid side |
-%|L2_orderbook_signed_volmYYYY-MM-DDTHH:MM:SS.ffffff | both |Time series of the price snapshots of the signed order book, - for bid, + for ask|
+3. When you are ready, you can start the build. When it finishes you should get a message \texttt{Connection Closed} from CoPrA. And the files for the limit order book for each side should be created with a timestamp in the form YYYY-MM-DDTHH:MM:SS.ffffff. Currently it will output everything given in the table below, but I will update the function to only output select things for people.
+\begin{center}
+\begin{tabular}{|l|c|l|}
+	\hline
+	Filename & side & Time Series Description \\
+	\hline 
+	L2\_orderbook\_events\_ask+timestamp& ask& Order book events on the ask side\\
+	L2\_orderbook\_events\_bid+timestamp&bid& Order book events on the bid side \\
+	L2\_orderbook\_events\_signed+timestamp& both & Order book events on both sides,\\
+	&& - sign for bid, +sign for ask\\
+	L2\_orderbook\_ask\_volm+timestamp& ask &Volume snapshots of order book on the ask side \\
+	L2\_orderbook\_bid\_volm+timestamp& bid &Volume snapshots of order book on the bid side \\
+	L2\_orderbook\_signed\_volm+timestamp & both &Volume  snapshots of the signed order book,\\
+	&&- sign for bid, + sign for ask\\
+	L2\_orderbook\_ask\_volm+timestamp& ask &Price snapshots of order book on the ask side \\
+	L2\_orderbook\_bid\_volm+timestamp& bid &Price snapshots of order book on the bid side \\
+	L2\_orderbook\_signed\_volm+timestamp& both &Price snapshots of the signed order book,\\
+	&& - sign for bid, +sign for ask\\
+	\hline
+\end{tabular}
+\end{center}
 
 \subsection{Understanding The Raw Order Book Data}
 
-The coinbase exchange operates using the double auction model, the \href{https://docs.pro.coinbase.com/}{Coinbase Pro API}, and by extension the \href{https://copra.readthedocs.io/en/latest/}{CoPrA API} makes it relatively easy to get still images of an instance of the orderbook as \href{(https://docs.pro.coinbase.com/#the-level2-channel)}{\texttt{snapshots}} and it sends updates in real time of the volume at a particular price level as \href{https://docs.pro.coinbase.com/#the-level2-channel}{\texttt{l2\_update}} messages. If you would like to know more, the cited papers do a great job introducing the double auction model for the purposes of defining the types of orders, and how they record events and make sense of them. 
+The Coinbase exchange operates using the double auction model, the \href{https://docs.pro.coinbase.com/}{Coinbase Pro API}, and by extension the \href{https://copra.readthedocs.io/en/latest/}{CoPrA API} makes it relatively easy to get still images of an instance of the orderbook as \href{(https://docs.pro.coinbase.com/#the-level2-channel)}{\texttt{snapshots}} and it sends updates in real time of the volume at a particular price level as \href{https://docs.pro.coinbase.com/#the-level2-channel}{\texttt{l2\_update}} messages. If you would like to know more O'Hara's book\cite{Ohara:MMTheory} does a great job introducing the double auction model for the purposes of defining the types of orders, and how they record events and make sense of them. 
 
 \subsubsection{Order Book Snapshots}
 
-Below there is a graph of the snapshot where bids (green) show open limit orders to buy the 1 unit of the cryptocurrency below \$7085.930, and asks (red) show open limit orders to buy 1 unit above \$7085.930. The x-axis shows the price points, and the y-axis is the aggregate size at the price level. Note that  the signed order book calls volume on the bid side negative. 
+Private data providers (e.g., \href{https://data.nasdaq.com/BookViewer.aspx}{NASDAQ - BookViewer},\href{https://lobsterdata.com/}{LOBSTER} provide reconstructions of order books. Coinbase updates the levels on the instance of a update message from the exchange of the order book. The format of the order book snapshot at time $t$ is a $2\times n$ array for $n$ price levels, where the first element is the price-level, and the second element is the volume at that price-level. The time series of order book snapshots is also an array with dimensions $2\times m$, for $m$ recorded timestamps, where the first element is the timestamp,$t\_m$, and the second element contains the entire $2\times n$ snapshot at $t_m$.
 
-%<img src="https://raw.githubusercontent.com/orderbooktools/crobat/master/images/figure_1.png" >
-
-Early and current works relied on exchanges and private data providers (e.g., \href{https://data.nasdaq.com/BookViewer.aspx}{NASDAQ - BookViewer},\href{https://lobsterdata.com/}{LOBSTER} to provide reconstructions of order books. Earlier works were limited to taking snapshots and inferring the possible sequence of order book events between states. Coinbase and by extension crobat update the levels on the instance of a update message from the exchange so there is no guess as to what happened between states of the order book. The current format of the order book snapshot is not aggregated. The format of the order book snapshot for a single side is shown below
-
-\begin{center}
-	\begin{tabular}{|l|l|}
-		\hline
-		Item & Description/Format \\
-		\hline
-		Timestamp & YYYY-MM-DDTHH:MM:SS.ffffff\\ $1$ & total BTC at position 1 \\
-		$2$ &total BTC at position 1 \\
-		$\ldots$ & \ldots \\
-		$n$ & total BTC at position n \\
-		\hline
-	\end{tabular}
-\end{center}
-
-\textbf{Incl. sample output of an entry}
-
-The associated price quote (price quote (USD per XTC))snapshot is also generated, to make generation of market depth feasible. 
-
-\begin{center}
-	\begin{tabular}{|l|l|}
-		\hline
-		Item & Description/Format \\
-		\hline
-		Timestamp & YYYY-MM-DDTHH:MM:SS.ffffff\\ 
-		$1$ & price quote at position 1 \\
-		$2$ &price quote at position 1 \\
-		$\ldots$ & \ldots \\
-		$n$ & price quote at position n \\
-		\hline
-	\end{tabular}
-\end{center}
-
-
-Event recording are a timeseries of MO, LO, CO's as afforded from the \texttt{l2\_update} messages which are used to update the price, volume pair size at each price level. The format of the Event recorder is as follows:
+\cleardoublepage
+Event recording are a time series of MO, LO, CO's as afforded from the \texttt{l2\_update} messages which are used to update the price, volume pair size at each price level. The format of the Event recorder is as follows:
 
 \begin{center}
 	
@@ -97,13 +71,16 @@ Event recording are a timeseries of MO, LO, CO's as afforded from the \texttt{l2
 		Timestamp & Timestamp of when the event occurred &  YYYY-MM-DDTHH:MM:SS.ffffff\\
 		order type & MO, LO, CO & \texttt{str} $\in \left\{\texttt{`market',`limit', `cancellation'}\right\}$\\
 		price level & price of event occurrence in quote currency & \texttt{float64}\\
-		event size & size of event in base currency\footnote{given constraints on the tick size of quote currency (e.g., USD =: \$0.01) we round the event size to the nearest decimal that would correspond to a move constrained by the minimum tick size.} & \texttt{float64}\\
+		event size & size of event in base currency  & \texttt{float64}\\
 		position & signed position (-- for bids, + for asks) & \texttt{int}\\
 		mid price & (best-ask + best-bid)/2 & \texttt{float64}\\
 		spread & best-ask + best-bid & \texttt{float64}\\
 		\hline
 	\end{tabular}
 \end{center}
+
+
+%\tablefootnote{given constraints on the tick size of quote currency (e.g., USD =: \$0.01) we round the event size to the nearest decimal that would correspond to a move constrained by the minimum tick size.}
 
 \subsubsection{Signed Order Book}
 \paragraph{Signed Order Book Snapshot Prices}
@@ -151,13 +128,9 @@ Similar to the single side implementation, there is an associated price quote  (
 	\end{tabular}
 \end{center}
 
-\paragraph{Signed Events}
-
-\medskip
+\paragraph{Signed Events}\hfill\break
 \noindent Signed event recordings follow the convention from \href{https://arxiv.org/pdf/1011.6402.pdf}{The Price impact of Orderbook events}, where positive order flow is due to MO's on the buy side, CO on the sell side, and LO on the buy side. Conversely,  negative order flow is due to MO's on the sell side, CO on the buy side, and LO on the buy side. The format is similar to the single side order book events time-series, but the order volume is signed based on the aforementioned construction. 
-
 \begin{center}
-	
 	\begin{tabular}{|l|l|l|}
 		\hline
 		Item & Description & format \\
@@ -165,16 +138,18 @@ Similar to the single side implementation, there is an associated price quote  (
 		Timestamp & Timestamp of when the event occurred &  YYYY-MM-DDTHH:MM:SS.ffffff\\
 		order type & MO, LO, CO & \texttt{str} $\in \left\{\texttt{`market',`limit', `cancellation'}\right\}$\\
 		price level & price of event occurrence in quote currency & \texttt{float64}\\
-		event size & size of event in base currency\footnote{given constraints on the tick size of quote currency (e.g., USD =: \$0.01) we round the event size to the nearest decimal that would correspond to a move constrained by the minimum tick size.} & \texttt{float64}\\
+		event size & size of event in base currency & \texttt{float64}\\
 		position & signed position (-- for bids, + for asks) & \texttt{int}\\
 		side & bid/ask side where the event occurs & \texttt{str} $\in \left\{\texttt{`buy',`sell'}\right\}$\\
 		mid price & (best-ask + best-bid)/2 & \texttt{float64}\\
 		spread & best-ask + best-bid & \texttt{float64}\\
 		\hline
 	\end{tabular}
-	
 \end{center}
 
+%y\footnote{given constraints on the tick size of quote currency (e.g., USD =: \$0.01) we round the event size to the nearest decimal that would correspond to a move constrained by the minimum tick size.}
+
+\newpage
 \subsection{Final notes on Orderbook interpretation}
 
 write about how the program object sees the orderbook with an example of code. 
