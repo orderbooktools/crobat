@@ -1,0 +1,9 @@
+
+day = 0
+principal = 36000
+interest rate = 7.15
+pmt = 425
+ttm_est = 15*24
+
+for i in range(1,ttm_est):
+	if
