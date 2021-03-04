@@ -1,11 +1,11 @@
-import recorder_full as rec
+import recorder_full_w_prices as rec
 import asyncio, time
 from datetime import datetime
 import copra.rest
 from copra.websocket import Channel, Client
 
 def main():
-    settings = rec.input_args(recording_duration=21600)
+    settings = rec.input_args(recording_duration=2)
     loop = asyncio.get_event_loop()
     channel = Channel('level2', settings.currency_pair) 
     channel2 =Channel('ticker', settings.currency_pair)
