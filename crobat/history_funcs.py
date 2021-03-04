@@ -80,7 +80,20 @@ def convert_array_to_list_dict_sob(history, events, pos_limit=5):
     return volm_list, price_list
 
 #converts pd dfs into an excel file 
+def pd_pkl_save(title, hist_obj_dict):
+    hist_obj_df = pd.DataFrame(hist_obj_dict)
+    hist_obj_df = hist_obj_df[1:]
+    path = "./"+title+".pkl"
+    hist_obj_df.to_pickle(path)
+
+def pd_csv_save(title, hist_obj_dict):
+    hist_obj_df = pd.DataFrame(hist_obj_dict)
+    hist_obj_df = hist_obj_df[1:]
+    path = "./"+title+".pkl"
+    hist_obj_df.to_csv(index=False)
+
 def pd_excel_save(title, hist_obj_dict):
+    title +=".xlsx"
     hist_obj_df = pd.DataFrame(hist_obj_dict)
     hist_obj_df = hist_obj_df[1:]
     writer = pd.ExcelWriter(title, engine='xlsxwriter')
