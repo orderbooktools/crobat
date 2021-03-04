@@ -39,7 +39,7 @@
   <h3 align="center">crobat</h3>
 
   <p align="center">
-    Crypocurrency Order Book Analysis Tool  
+    Cryptocurrency Order Book Analysis Tool  
     <br />
     <a href="https://github.com/orderbooktools/crobat"><strong>Explore the docs »</strong></a>
     <br />
