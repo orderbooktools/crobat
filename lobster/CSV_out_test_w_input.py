@@ -18,6 +18,10 @@ class input_args(object):
         self.sides = sides
         self.filetype = filetype
 
+def check_input(input_str, reference_var):
+    
+
+
 def main():
     currency_pair = input("Please state your currency pair:")
     recording_duration = input("Please state your recording_duration:")

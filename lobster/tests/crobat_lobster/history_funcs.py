@@ -1,8 +1,18 @@
-#import orderbook_helpers as hf
+
+## Functions that help the history class 
 import pandas as pd
-from datetime import datetime 
 import bisect
 
+# test function that checks that the snapshot is sorted correctly.
+def check_order(snapshot,side):
+    if side == "bid":
+        ans = sorted(snapshot, key=lambda x: x[0])[::-1]  
+    else:
+        ans = sorted(snapshot, key=lambda x: x[0])
+    if snapshot == ans:
+        pass
+    else:
+        pass  
 # function that converts the time series list of orderbook states into a list of dictionaries for a single side.
 def convert_array_to_list_dict(history, pos_limit=5):
     temp_dict = {}
@@ -26,7 +36,6 @@ def convert_array_to_list_dict_sob(history, events, pos_limit=5):
     temp_dict = {}
     volm_list = []
     price_list = []
-    print(type(history))
     temp_dict.update({"time":history[0][0]})
     last_volm = history[0][1][0][1]
     for x in range(len(history[0][1])):
@@ -91,61 +100,41 @@ def pd_excel_save(title, hist_obj_dict):
     hist_obj_df.to_excel(writer, sheet_name='Sheet1')
     writer.save()
 
-
-
-def filesaver(hist_obj, position_range, events=True, **kwargs):
-    #hf = converstion_functions()
-    list_to_convert = []
-    out_time = datetime.utcnow()
-    print("recorded the time")
-    if 'sides' in kwargs.keys():
-        if 'bid' in kwargs['sides']:
-            print("found bid okay")
-            final_bid_list, final_bid_prices = convert_array_to_list_dict(hist_obj.bid_history, position_range)
-            titles_bid = ["L2_orderbook_volm_bid"+str(out_time),
-                "L2_orderbook_prices_bid"+str(out_time),
-                "L2_orderbook_events_bid"+str(out_time)]
-            list_to_convert.append([[final_bid_list, titles_bid[0]], [final_bid_prices, titles_bid[1]]])
-            if events:
-                list_to_convert[-1].append([hist_obj.bid_events, titles_bid[2]])
-                print("added events okay")
-        if 'ask' in kwargs['sides']:
-            final_ask_list, final_ask_prices = convert_array_to_list_dict(hist_obj.ask_history, position_range)
-            titles_ask = ["L2_orderbook_volm_ask"+str(out_time),
-                "L2_orderbook_prices_ask"+str(out_time),
-                "L2_orderbook_events_ask"+str(out_time)]
-            list_to_convert.append([[final_ask_list, titles_ask[0]], [final_ask_prices, titles_ask[1]]])
-            if events:
-                list_to_convert[-1].append([hist_obj.ask_events, titles_ask[2]])
-        if 'signed' in kwargs['sides']:
-            final_signed_list, final_signed_prices = convert_array_to_list_dict_sob(hist_obj.signed_history, hist_obj.signed_events)
-            titles_signed = ["L2_orderbook_volm_signed"+str(out_time),
-                "L2_orderbook_prices_signed"+str(out_time),
-                "L2_orderbook_events_signed"+str(out_time)]
-            list_to_convert.append([[final_signed_list, titles_signed[0]], [final_signed_prices, titles_signed[1]]])
-            if events:
-                list_to_convert[-1].append([hist_obj.signed_events, titles_signed[2]])
-
+# used to set the sign in OFI for signed order book events
+def set_sign(event_size, side, order_type):
+    sign=1
+    if order_type in ["insertion", "market"]:
+        sign = 1
+    elif order_type == "cancelation":
+        sign = -1 
     else:
-        print("no sides specified")
-
-    if 'filetype' in kwargs.keys():
-        if 'csv' in kwargs['filetype']:
-            for i in range(len(list_to_convert)): # 0 for bid, 1 for ask 2 for signed
-                for m in range(len(list_to_convert[i])): # 0 for volm, 1 for price, 2 for events
-                    pd_csv_save(list_to_convert[i][m][1], list_to_convert[i][m][0]) # o for data, 1 for title
-        if 'pkl' in kwargs['filetype']:
-            for i in range(len(list_to_convert)): # 0 for bid, 1 for ask 2 for signed
-                for m in range(len(list_to_convert[i])): # 0 for volm, 1 for price, 2 for events
-                    pd_pkl_save(list_to_convert[i][m][1], list_to_convert[i][m][0]) # o for data, 1 for title
-        if 'xlsx' in kwargs['filetype']:
-            for i in range(len(list_to_convert)): # 0 for bid, 1 for ask 2 for signed
-                for m in range(len(list_to_convert[i])): # 0 for volm, 1 for price, 2 for events
-                    pd_excel_save(list_to_convert[i][m][1], list_to_convert[i][m][0]) # o for data, 1 for title
+        pass
+    if side == "bid":
+        sign *= -1 
     else:
-        print("no filetype specified")
-def main():
-    pass
+        pass
+    return sign
 
-if __name__ == '__main__':
-    main()
+# used to flip position for bid side
+def set_signed_position(position, side):
+    position += 1
+    if side =="bid":
+        position *= -1
+    return position
+
+# function used to get the smallest tradable amount of XTC base currency for a given tick size in the float currency (i.e., 0.01 USD)
+def get_min_dec(min_currency_denom, min_asset_value):
+    min_tradable_amount = min_currency_denom/min_asset_value
+    min_dec_out = 0
+    while min_tradable_amount < 1:
+        min_tradable_amount*=10
+        min_dec_out += 1
+        if min_dec_out > 10:
+            print("min_dec >10")
+            break 
+    return min_dec_out
+
+# stuff I'm working on now 
+def get_tick_distance(ref_price, input_price, ticksize=0.01):
+    tick_distance = abs(ref_price - input_price)/ticksize
+    return tick_distance 

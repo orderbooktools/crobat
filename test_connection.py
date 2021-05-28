@@ -1,4 +1,4 @@
-import recorder as rec
+import crobat 
 import asyncio, time
 #from datetime import datetime
 import copra.rest
@@ -17,12 +17,25 @@ from copra.websocket import Channel, Client
 # 3b. if not you have the option of calling the class indiviudually within your own asyncio loop
 # 4. error handling ? 
 
+class input_args(object):
+    def __init__(self, currency_pair='ETH-USD',
+                       position_range=5,
+                       recording_duration=5,
+                       sides=['bid, ask', 'signed'],
+                       filetype=['xlsx']):
+    
+        self.currency_pair = currency_pair
+        self.position_range = position_range
+        self.recording_duration = recording_duration
+        self.sides = sides
+        self.filetype = filetype
+
 def main():
-    settings = rec.input_args()
+    settings = input_args()
     loop = asyncio.get_event_loop()
     channel = Channel('level2', settings.currency_pair) 
     channel2 =Channel('ticker', settings.currency_pair)
-    ws = rec.L2_Update(loop, channel, settings)
+    ws = crobat.L2_Update(loop, channel, settings)
     ws.subscribe(channel2)
     try:
         loop.run_forever()
