@@ -2,7 +2,7 @@ import pandas as pd
 import copy
 import bisect
 import numpy as np
-import history_funcs as hf
+from .history_funcs import * 
 
 class history(object):
     """
