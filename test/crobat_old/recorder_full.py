@@ -3,7 +3,8 @@ from datetime import datetime
 import copra.rest
 from copra.websocket import Channel, Client
 import pandas as pd
-import LOB_funcs as LOBf
+from . import LOB_funcs as LOBf
+
 class L2_Update(Client):
     def __init__(self, loop, channel, input_args):
         self.time_now = datetime.utcnow() #initial start time
@@ -93,16 +94,9 @@ class L2_Update(Client):
         title4 = "L2_orderbook_events_ask.xlsx"        
         LOBf.pd_excel_save(title4, self.hist.ask_events)
 
-class input_args(object):
-    def __init__(self, currency_pair='ETH-USD', position_range=4, recording_duration=10, style='all'):
-        self.currency_pair = currency_pair
-        self.position_range = position_range
-        self.recording_duration = recording_duration
-        self.style = 'all'
 
 def main():
     pass
 
 if __name__ == '__main__':
     main()
-

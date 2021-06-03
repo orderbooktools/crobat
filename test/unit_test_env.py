@@ -5,4 +5,9 @@ path =  '/home/ivan/Documents/github/crobat/'
 os.chdir(path)
 print(os.getcwd())
 
-import crobat
+from lobster import LOB_funcs
+
+class test_output_format(unittest.TestCase):
+    def setUp(self):
+        """ Call before every testcase"""
+        self.foo = 
