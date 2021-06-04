@@ -96,6 +96,26 @@ misc_class_objects = [
         
 
 class ModuleTest(unittest.TestCase):
+    """
+    Moduletest class run tests on modules
+    to check if they have appropriate documentation, are can be called safely?
+    
+    Attributes
+    ----------
+    None
+
+    Methods
+    -------
+    setUp
+        empty method
+    
+    test_docstrings_LOBfuncs
+        tests the docstrings of the module LOB_funcs.py
+    
+    
+    
+    """
+
     def setUp(self):
         pass
 
@@ -121,12 +141,10 @@ class ModuleTest(unittest.TestCase):
         for attribute in directory:
             if not (attribute.startswith('__') or attribute.endswith('__')):
                 if attribute not in standard_library_and_reqs:
-                    found_list.append(attribute)
-
-        print(crobat_old.recorder_full.__doc__))
+                    attr_type = str(type(getattr(crobat_old.recorder_full, attribute)))
+                    if not (attr_type.endswith("module'>") or attr_type.endswith("'type'>")):
+                        found_list.append(attribute)
         for item in found_list:
-            item_type = type(getattr(crobat_old.recorder_full, item))
-            print(item_type)
             for item in found_list:
                 try:
                     docstring = getattr(crobat_old.recorder_full, item).__doc__
@@ -141,6 +159,12 @@ class ModuleTest(unittest.TestCase):
             if not (attribute.startswith('__') or attribute.endswith('__')):
                 if attribute not in standard_library_and_reqs:
                     found_list.append(attribute)
+        for item in found_list:
+            item_type = str(type(getattr(crobat_old.main_script, item)))
+            if item_type.endswith("module'>") or item_type.endswith("'type'>"):
+                found_list.remove(item)
+            else:
+                print(item, item_type)
         for item in found_list:
             try:
                 docstring = getattr(crobat_old.main_script, item).__doc__
