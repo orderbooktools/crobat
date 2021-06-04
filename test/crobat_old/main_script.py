@@ -2,7 +2,7 @@ import asyncio, time
 #from datetime import datetime
 import copra.rest
 from copra.websocket import Channel, Client
-from . import recorder_full as rec
+from . import recorder_full
 #import pandas as pd
 
 # how do i want this shit to work
@@ -56,7 +56,44 @@ class input_args(object):
                        recording_duration=5,
                        sides=['bid, ask', 'signed'],
                        filetype=['xlsx']):
+        """
+        init function of class input args. Assigns values to self variables:
+        currency_pair, position_range, recording_duration, sides, filetype
+        
+        Parameters
+        ----------
+        currency_pair : str 
+            default 'ETH-USD'
+            currency pair from coinbase exchange see
+            ????? for the current list of approved currency pairs
     
+        position_range : int default 5
+            default 'ETH-USD'
+            ordinal position range that the order book will log to.
+        
+        recording_duration : int 
+            default 5
+            number of seconds (can be float64) that the main script will record before
+            closing the connection. 
+        
+        sides : list of str
+            default ['bid', 'ask', 'signed']
+            sides of interest in saving can be:
+            ['bid', 'ask', 'signed'] or an omission for those members only. 
+        
+        filetype : list of str
+            default ['xlsx']
+            the file type the script will save as; can be:
+            ['xlsx', 'csv', 'pkl'] or an omission of those members only.
+        
+        Returns
+        -------
+        None
+        
+        Raises
+        ------
+        None
+        """
         self.currency_pair = currency_pair
         self.position_range = position_range
         self.recording_duration = recording_duration
@@ -85,7 +122,7 @@ def main():
     loop = asyncio.get_event_loop()
     channel = Channel('level2', settings.currency_pair) 
     channel2 = Channel('ticker', settings.currency_pair)
-    ws = rec.L2_Update(loop, channel, settings)
+    ws = recorder_full.L2_Update(loop, channel, settings)
     ws.subscribe(channel2)
     try:
         loop.run_forever()
