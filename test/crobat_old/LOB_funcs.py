@@ -69,7 +69,7 @@ def convert_array_to_list_dict(history, pos_limit=5):
             temp_dict = {}
     return return_list
 
-def pd_excel_save(title,hist_obj_dict):
+def pd_excel_save(title, hist_obj_dict):
     """
     Generates the .xlsx file for a given list of dictionaries by first
     turning the list of dictionaries into a pandas dataframe and then

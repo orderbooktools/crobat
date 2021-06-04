@@ -1,8 +1,11 @@
 ## this file tests old crobat scripts
 
 # imports okay
-import crobat_old.main_script
+#import crobat_old.main_script
 import unittest
+import crobat_old 
+
+
 # lets try running the script
 
 # print(dir(crobat_old))
@@ -11,21 +14,24 @@ import unittest
 
 # testing the main script 
 
-crobat_old.main_script.main()
+#crobat_old.main_script.main()
 
 
-class MainScriptTest(unittest.TestCase):
-    # def setUp(self):
-    #     pass
+class ModuleTest(unittest.TestCase):
+    def setUp(self):
+        pass
 
+    # def test_add(self):
+    #     actual = 2 + 1 
+    #     expected = 4
+    #     self.assertEqual(actual, expected)
 
-    def test_add(self):
-        actual = 2 + 1 
-        expected = 4
-        self.assertEqual(actual, expected)
-    # def test_script(self):
-    #     crobat_old.main_script.main()
-    #     self.assertIsNotNone(crobat_old.main_script.ws.hist)
+    def test_import(self):
+        pass
 
-    # def tearDown(self):
-    #     pass
+    def test_docstrings(self):
+        
+        self.assertIsNotNone(crobat_old.main_script.ws.hist)
+
+    def tearDown(self):
+        pass

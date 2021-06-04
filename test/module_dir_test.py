@@ -1,5 +1,5 @@
 ## this is an object checking script
-import crobat 
+#import crobat_old
 
 ### build out the list of objects and their functions
 #print(dir(crobat))
