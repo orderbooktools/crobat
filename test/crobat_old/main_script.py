@@ -65,12 +65,26 @@ class input_args(object):
 
 def main():
     """
-    main script; passes settings to 
+    main script; passes settings from an instance of the class input_args() 
+    to the instances of the classes Channel, and L2_Update.
+    
+    Parameters
+    ----------
+        None
+    
+    Returns
+    -------
+        None
+        Outputs a files if settings are correct
+    
+    Raises
+    ------
+        Needs testing
     """
     settings = input_args()
     loop = asyncio.get_event_loop()
     channel = Channel('level2', settings.currency_pair) 
-    channel2 =Channel('ticker', settings.currency_pair)
+    channel2 = Channel('ticker', settings.currency_pair)
     ws = rec.L2_Update(loop, channel, settings)
     ws.subscribe(channel2)
     try:

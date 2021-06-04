@@ -19,5 +19,5 @@ class data_stubs():
         self.snapshot_ask = []
         self.msg_list = []
 
-    def correctsnapshot 
+    #def correctsnapshot 
 
