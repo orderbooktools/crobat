@@ -5,6 +5,20 @@ from copra.websocket import Channel, Client
 import pandas as pd
 from . import LOB_funcs as LOBf
 
+"""
+recorder module holds class L2_Update.
+1. summary
+2. extended summary
+3. routine listings
+    class L2 update
+4. see also
+5. notes
+6. references
+7. examples
+
+We have to do this later
+
+"""
 class L2_Update(Client):
     """
     class that inherits from copra.websocket Client. Contains methods for
@@ -48,6 +62,28 @@ class L2_Update(Client):
         the collected data.    
     """
     def __init__(self, loop, channel, input_args):
+        """
+        init method
+        
+        Paramaters
+        ----------
+        loop : Asyncio loop object
+            Loop object that is passed by copra (tbh i dont understand it)                
+        channel : copra.websocket Channel object
+            channel settings passed L2_Update class
+
+        input_args : class input_args object
+            input arguments and recording settings. 
+
+        Returns
+        -------
+        None
+        
+        Raises
+        ------
+        None 
+            
+        """
         self.time_now = datetime.utcnow() 
         self.hist = LOBf.history()
         self.currency_pair = input_args.currency_pair
@@ -211,6 +247,21 @@ class L2_Update(Client):
 
 
 def main():
+    """
+    Empty main function
+
+    Parameters
+    ----------
+    None
+    
+    Returns
+    -------
+    None
+
+    Raises
+    ------
+    None
+    """
     pass
 
 if __name__ == '__main__':
