@@ -1,9 +1,20 @@
-import recorder_full as rec
+import os 
+
+cwd = os.getcwd()
+print(cwd)
+
+os.chdir('crobat_old')
+
+cwd = os.getcwd()
+print(cwd)
+
+from crobat_old import recorder_full as rec
 import asyncio, time
 from datetime import datetime
 import copra.rest
 from copra.websocket import Channel, Client
 import argparse
+
 
 class input_args(object):
     def __init__(self, currency_pair='ETH-USD',
@@ -18,7 +29,7 @@ class input_args(object):
         self.sides = sides
         self.filetype = filetype
 
-def check_input(input_str, reference_var):
+# def check_input(input_str, reference_var):
     
 
 
@@ -66,3 +77,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+    
