@@ -140,3 +140,11 @@ cython_debug/
 # manual support files
 docs/manual/*
 !docs/manual/manual.pdf
+
+# vscode directory
+.vscode/
+
+# output files unless zipped dont mean much
+*.xlsx
+*.csv
+*.pkl
