@@ -117,12 +117,7 @@ class ModuleTest(unittest.TestCase):
     """
 
     def setUp(self):
-        pass
-
-    # def test_add(self):
-    #     actual = 2 + 1 
-    #     expected = 4
-    #     self.assertEqual(actual, expected)        
+        pass     
 
     def test_docstrings_LOBfuncs(self):
         directory = dir(crobat_old.LOB_funcs).copy()

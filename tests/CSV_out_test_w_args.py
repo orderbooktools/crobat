@@ -1,4 +1,9 @@
-import recorder_full as rec
+import sys
+import os
+print(os.getcwd())
+sys.path.append(os.getcwd())
+import tests.crobat_old.recorder_full as rec
+
 import asyncio, time
 from datetime import datetime
 import copra.rest
@@ -10,13 +15,14 @@ preamble_recording_duration = "State to the nearest second how long you would li
 preamble_position_range = "State how many positions from the best bid/ask you would like to examine"
 preamble_sides = "State the sides you want to record separated by ',' "
 preamble_filetype = "State the filetypes you would like to export the recording session to separated by ','" 
-
+preamble_using_args = "artifact from using click for cli generator"
 parser  = argparse.ArgumentParser()
 parser.add_argument("-currency_pair", type=str, help=preamble_currency_pair)
 parser.add_argument("-recording_duration", type=int, help=preamble_recording_duration)
 parser.add_argument("-position_range", type=int, help=preamble_position_range)
 parser.add_argument("-sides", type=str, help=preamble_sides)
 parser.add_argument("-filetype", type=str, help= preamble_filetype)
+parser.add_argument("-using_args", type=str,help= preamble_using_args)
 args = parser.parse_args()
 print(args)
 class input_args(object):

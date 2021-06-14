@@ -1,14 +1,9 @@
-import os 
+import sys
+import os
+print(os.getcwd())
+sys.path.append(os.getcwd())
+import tests.crobat_old.recorder_full as rec
 
-cwd = os.getcwd()
-print(cwd)
-
-os.chdir('crobat_old')
-
-cwd = os.getcwd()
-print(cwd)
-
-from crobat_old import recorder_full as rec
 import asyncio, time
 from datetime import datetime
 import copra.rest
