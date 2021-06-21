@@ -5,6 +5,30 @@ import bisect
 
 # function that converts the time series list of orderbook states into a list of dictionaries for a single side.
 def convert_array_to_list_dict(history, pos_limit=5):
+    """
+    Passes history array and position limit to generate the a 
+    list of dictionaries containing the single sided order book for position
+    limit n the keys are:
+    [time, position_limit , position_limit-1, ..., position_limit n-1]
+    
+    Parameters
+    ----------
+    history : array_list list of lists 
+        see bid_history or ask_history in LOB_funcs.py 
+
+    pos_limit : int
+        position limit for the order book; default 5.
+
+    Returns
+    -------
+        return_list : list of dict
+
+    Raises
+    ------
+        TypeError
+            if anything other than array or something subscriptable
+            is passed it will not be able to iterate through it. 
+    """
     temp_dict = {}
     volm_list = []
     price_list = []
@@ -23,6 +47,33 @@ def convert_array_to_list_dict(history, pos_limit=5):
 
 # function that converts the time series list of orderbook states into a list of dictionaries for the signed order book
 def convert_array_to_list_dict_sob(history, events, pos_limit=5):
+    """
+    Passes history array, events array, and position limit to generate a 
+    list of dictionaries containing the signed order book for position
+    limit n the keys are:
+    [time, -n , -(n-1), ..., -1, 1, 2, ..., n-1, n]
+    
+    Parameters
+    ----------
+    history : array_list list of lists 
+        see attribute signed_history from class history in LOB_funcs.py 
+
+    events : array list of lists 
+        see attribute signed_events from class histroy in LOB_funcs.py
+
+    pos_limit : int
+        position limit for the order book; default 5.
+    
+    Returns
+    -------
+        return_list : list of dict
+
+    Raises
+    ------
+        TypeError
+            if anything other than array or something subscriptable
+            is passed it will not be able to iterate through it. 
+    """
     temp_dict = {}
     volm_list = []
     price_list = []
@@ -72,18 +123,103 @@ def convert_array_to_list_dict_sob(history, events, pos_limit=5):
 
 #converts pd dfs into an excel file 
 def pd_pkl_save(title, hist_obj_dict):
+    """
+    Saves the list of dict to a .pkl file named by param title (str) by
+    1. converting the list of dict to a pd.Dataframe object
+    2. using pd.Dataframe class function to_pickle('path/title') to convert
+       and save the df to title.pkl.
+    
+    Parameters
+    ----------
+    title : str 
+        title of the output file typically formatted as follows:
+        "QUOTE-BASE_L2_orderbook_"+"_ask"+"YYYY-MM-DD HH:MM:SS.ffffff"
+
+    hist_obj_dict : list of dict
+        list of dictionaries of the order book or events
+        see function convert_array_to_list_dict in filesave.py 
+        for details.
+    
+    Returns
+    -------
+        None
+        Outputs : .pkl file
+
+    Raises
+    ------
+        TypeError
+            if the list of dict or a subscriptable object compatible
+            with the pd.Dataframe(object) function is passed.
+    """
+
     hist_obj_df = pd.DataFrame(hist_obj_dict)
     hist_obj_df = hist_obj_df[1:]
     path = "./"+title+".pkl"
     hist_obj_df.to_pickle(path)
 
 def pd_csv_save(title, hist_obj_dict):
+    """
+    Saves the list of dict to a .csv file named by param title (str) by
+    1. converting the list of dict to a pd.Dataframe object
+    2. using pd.Dataframe class function to_csv('title') to convert
+       and save the df to title.csv.
+    
+    Parameters
+    ----------
+    title : str 
+        title of the output file typically formatted as follows:
+        "QUOTE-BASE_L2_orderbook_"+"_ask"+"YYYY-MM-DD HH:MM:SS.ffffff"
+
+    hist_obj_dict : list of dict
+        list of dictionaries of the order book or events
+        see function convert_array_to_list_dict in filesave.py 
+        for details.
+    
+    Returns
+    -------
+        None
+        Outputs : .csv file
+
+    Raises
+    ------
+        TypeError
+            if the list of dict or a subscriptable object compatible
+            with the pd.Dataframe(object) function is passed.
+    """
     hist_obj_df = pd.DataFrame(hist_obj_dict)
     hist_obj_df = hist_obj_df[1:]
     path = "./"+title+".pkl"
     hist_obj_df.to_csv(index=False)
 
 def pd_excel_save(title, hist_obj_dict):
+    """
+    Saves the list of dict to a .xlsx file named by param title (str) by
+    1. converting the list of dict to a pd.Dataframe object
+    2. using pd.Dataframe class function to_pickle('title') to convert
+       and save the df to title.xlsx.
+    
+    Parameters
+    ----------
+    title : str 
+        title of the output file typically formatted as follows:
+        "QUOTE-BASE_L2_orderbook_"+"_ask"+"YYYY-MM-DD HH:MM:SS.ffffff"
+
+    hist_obj_dict : list of dict
+        list of dictionaries of the order book or events
+        see function convert_array_to_list_dict in filesave.py 
+        for details.
+    
+    Returns
+    -------
+        None
+        Outputs : .xlsx file
+
+    Raises
+    ------
+        TypeError
+            if the list of dict or a subscriptable object compatible
+            with the pd.Dataframe(object) function is passed.
+    """
     title +=".xlsx"
     hist_obj_df = pd.DataFrame(hist_obj_dict)
     hist_obj_df = hist_obj_df[1:]
@@ -94,6 +230,45 @@ def pd_excel_save(title, hist_obj_dict):
 
 
 def filesaver(hist_obj, position_range, events=True, **kwargs):
+    """
+    Main method of controlling outfile formats based on args and kwargs. 
+    Uses functions convert_array_list_to_dict, convert_array_to_list_dict_sob,
+    pd_csv_save,pd_pkl_save, and pd_excel_save.
+
+    Parameters
+    ----------
+    hist_obj : class history object
+        The end form of the history object after closing the connection.
+        we are interested in attributes:
+            1. ????
+            2. ????
+            3. ????
+    
+    position_range : int
+        position range for the order book; default 5.
+        #note be more consistent about position range/limit
+    
+    events : Bool 
+        Boolean the triggers whether to save events.
+        default = True
+    
+    **kwargs
+    filetype : list of str
+        List containing the output file types.
+
+    sides : list of str
+        List containing the output sides.
+        e.g., ['bid', 'ask', 'signed']
+    
+    Returns
+    -------
+        None
+        Outputs :  files as determined to params   
+
+    Raises
+    ------
+        None
+    """
     #hf = converstion_functions()
     list_to_convert = []
     out_time = datetime.utcnow()

@@ -4,9 +4,9 @@ print(sys.path)
 import crobat 
 import asyncio, time
 
-from test import test_connection
+#from test import test_connection
 
-test_connection.main()
+#test_connection.main()
 
 
 # #from datetime import datetime
@@ -26,18 +26,18 @@ test_connection.main()
 # # 3b. if not you have the option of calling the class indiviudually within your own asyncio loop
 # # 4. error handling ? 
 
-# def main():
-#     settings = rec.input_args()
-#     loop = asyncio.get_event_loop()
-#     channel = Channel('level2', settings.currency_pair) 
-#     channel2 =Channel('ticker', settings.currency_pair)
-#     ws = rec.L2_Update(loop, channel, settings)
-#     ws.subscribe(channel2)
-#     try:
-#         loop.run_forever()
-#     except KeyboardInterrupt:
-#         loop.run_until_complete(ws.close())
-#         loop.close()
+def main():
+    settings = rec.input_args()
+    loop = asyncio.get_event_loop()
+    channel = Channel('level2', settings.currency_pair) 
+    channel2 =Channel('ticker', settings.currency_pair)
+    ws = rec.L2_Update(loop, channel, settings)
+    ws.subscribe(channel2)
+    try:
+        loop.run_forever()
+    except KeyboardInterrupt:
+        loop.run_until_complete(ws.close())
+        loop.close()
 
-# if __name__ == '__main__':
-#     main()
+if __name__ == '__main__':
+    main()
