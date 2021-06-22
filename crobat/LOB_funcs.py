@@ -2,7 +2,7 @@ import pandas as pd
 import copy
 import bisect
 import numpy as np
-import history_funcs as hf
+import orderbook_helpers as hf
 
 class history(object):
     """
@@ -759,7 +759,7 @@ def price_match(x,y):
 #     return min_dec_out
 
 
-class accessors(hist_object):
+class accessors(object):
     """
     Class of functions thats 
 
@@ -784,7 +784,7 @@ class accessors(hist_object):
         last_market_depth(side, pos_range='all')
             get the last market depth for a given side.
     """ 
-    def __init__(self, hist_object):
+    def __init__(self, object):
         """
         Initializes the class, by inheriting from the base class hist_object 
         hist_object is the instance of the order book class hist.
@@ -802,7 +802,7 @@ class accessors(hist_object):
         ------
             None 
         """
-        super().hist_object.__init__()
+        super().object.__init__()
 
     def last_inserted_order(self, side="signed"): #these args side, 
         """ 

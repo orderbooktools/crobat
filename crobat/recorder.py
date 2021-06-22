@@ -12,7 +12,70 @@ from .filesave import *
 pd.set_option('display.max_columns', 500)
 
 class L2_Update(Client):
+    """
+    class that inherits from copra.websocket Client. Contains methods for
+    receiving and interpretting l2_update and ticker messages. 
+    
+    Attributes
+    ----------
+    time_now : datetime 
+        local UTC time when the class initializes. used for the timeout.
+    
+    hist : history class object
+        instance of the history object from LOBf_funcs.py
+    
+    currency_pair : str
+        default 'ETH-USD'
+        currency pair to record, inherited from class input_args
+    
+    position_range : int
+        default 5
+        position range of interest, inherited from class input_args
+    
+    recording_duration : int
+        default 5
+        recording duration in seconds, (time between the initialization of the class
+        and the time of the last message received). 
+        
+    Methods
+    -------
+    __init__
+        initializes attributes and inherits attributes from input_args, 
+        loop and channel. 
+    
+    on_open 
+        calls the method on_open from Client
+    
+    on_message
+        interprets and executes messages received from the websocket
+
+    on_close
+        excutes steps to close the connection to the websocket and export
+        the collected data.    
+    """
     def __init__(self, loop, channel, input_args):
+        """
+        init method
+        
+        Paramaters
+        ----------
+        loop : Asyncio loop object
+            Loop object that is passed by copra (tbh i dont understand it)                
+        channel : copra.websocket Channel object
+            channel settings passed L2_Update class
+
+        input_args : class input_args object
+            input arguments and recording settings. 
+
+        Returns
+        -------
+        None
+        
+        Raises
+        ------
+        None 
+            
+        """
         self.time_now = datetime.utcnow() #initial start time
         self.hist = history()
         self.recording_settings = input_args
@@ -20,11 +83,52 @@ class L2_Update(Client):
         super().__init__(loop, channel) # something about a parent class sending attributes to the child class (Ticker)
 
     def on_open(self):
+        """
+        calls inherited on_open method from copra.websocket Client class
+        
+        Parameters
+        ----------
+        None
+        
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        None
+
+        See Also
+        --------
+        put a link to copra's on_open method
+        """
         print("Let's count the L2 messages!", self.time_now)
         super().on_open() # inheriting things from the parent class who really knows    
 
     def on_message(self, msg):
-        """ PERFORMING OPERATIONS ON self.x"""
+        """
+        calls inherited on_message method from copra.websocket Client class.
+        General section where one decides how incoming messages are handled.
+        
+        Parameters
+        ----------
+        msg : dict
+            json message from the websocket feed. see 
+            link to coinbase websocket feed, for details
+            on the layout of each message. 
+        
+        Returns
+        -------
+        None
+        
+        Raises
+        ------
+        TypeError
+            If the message is not a dictionary, the key cannot be called.
+    
+            Needs further testing, will generally ignore message if it doesn't contain
+            the key 'type'.
+        """
         if msg['type'] in ['snapshot']:
             print("received the snapshot")
             time = self.time_now
@@ -78,6 +182,27 @@ class L2_Update(Client):
             self.loop.create_task(self.close()) # ASyncIO nonsense
 
     def on_close(self, was_clean, code, reason):
+        """
+        calls on inherited method on_close from crobat.websocket Client class.
+        Sequence of steps initiated after self.close() method is called.
+        Creates the output files from the websocket session.
+
+        Parameters
+        ----------
+        was_clean : bool
+            True if the websocket connection was closed cleanly, else False.
+        
+        code : str 
+            Connection code. 0 if clean 1 if error. need to look into this.    
+        
+        reason : str
+            Reason the connection was closed. Look into this.
+
+        Raises
+        ------
+            Happens in current crobat. The connection never gets instructed to 
+            be closed. Gives rise to a warn error.   
+        """
         print("Connection to server is closed")
         print(was_clean)
         print(code)
