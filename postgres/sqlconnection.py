@@ -14,6 +14,9 @@ import json
 ### mac daddy of all postgres operations ###
 ### executes the actual query you want ###
 def execcommit(query, cur_obj, conn_obj):
+    """
+    ????
+    """
     if type(query) == type(list(query)):
         sql = query[0]
         record = query[1]

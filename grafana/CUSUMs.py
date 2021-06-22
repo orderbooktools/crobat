@@ -8,7 +8,7 @@ import copy
 import numpy as np
 import matplotlib.pyplot as plt
 import datetime 
-from SQL_connection import execcommit
+from sqlconnection import execcommit
 class CUSUM(object): 
     def __init__(self, l0, epsilon, volm, h, timestamp, SPRT_up=0, SPRT_dn=0, run_min_up=0, run_min_dn=0, CUSUM_dn=0, CUSUM_up=0, deltatime=0):
         # from args
