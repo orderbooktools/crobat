@@ -1,5 +1,5 @@
 .. crobat documentation master file, created by
-   sphinx-quickstart on Tue Jun 22 13:45:19 2021.
+   sphinx-quickstart on Tue Jun 22 13:29:31 2021.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
@@ -10,7 +10,7 @@ Welcome to crobat's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-   modules
+
 
 Indices and tables
 ==================
