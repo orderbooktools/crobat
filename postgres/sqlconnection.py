@@ -15,7 +15,33 @@ import json
 ### executes the actual query you want ###
 def execcommit(query, cur_obj, conn_obj):
     """
-    ????
+    Main driver for PostgreSQL statements. 
+
+    Parameters
+    ----------
+        query : str
+            PostgreSQL query in the form of a formatted string.
+        
+        cur_obj : cursor object
+            cursor object attribute (or object as instance of the subclass cursors)
+            from psycopg2.connect(**kwargs) instance.
+            used to establish the cursor when connected to the PostgreSQL server
+        
+        con_obj : connection object
+            psycopg2.connect(**params) object.
+            Used to establish a connection to a PostgreSQL database.
+        
+    Returns
+    -------
+        None
+
+    Raises
+    ------
+        None
+    
+    See Also
+    --------
+        class psycopg2.connection 
     """
     if type(query) == type(list(query)):
         sql = query[0]
@@ -26,9 +52,33 @@ def execcommit(query, cur_obj, conn_obj):
         conn_obj.commit()  
 
 def open_SQL_connection():
-    """ Connect to the PostgreSQL database server """
+    """
+    Connect to the PostgreSQL database server
+    
+    Parameters
+    ----------
+        None
+    
+    Returns
+    -------
+        cur : cursor object 
+            instance of the subclass cursor from instance of the class
+            psycopg2.connect(**params)
+        
+        con : connection object
+            instance of psycopg2.connect(**params).
+            Used to establish a connection to a PostgreSQL database.
+
+    Raises
+    ------
+        None
+
+    See Also
+    --------
+        class psycopg2.connect(**kwargs)
+    """
     conn = None
-    cur=None
+    cur = None
     try:
         # read connection parameters
         params = config(filename='database.ini', section='postgresql')
@@ -46,6 +96,28 @@ def open_SQL_connection():
     return cur, conn
 
 def close_SQL_connection(cur, conn):
+    """
+    Closes connection to the Postgres Server
+    
+    Parameters
+    ----------        
+        cur_obj : cursor object
+            cursor object attribute (or object as instance of the subclass cursors)
+            from psycopg2.connect(**kwargs) instance.
+            used to establish the cursor when connected to the PostgreSQL server
+        
+        con_obj : connection object
+            psycopg2.connect(**params) object.
+            Used to establish a connection to a PostgreSQL database.
+    
+    Returns 
+    -------
+        None
+    
+    Raises
+    ------
+        None
+    """
     cur.close()
     print("closed the cursor")
     if conn is not None:
@@ -53,15 +125,80 @@ def close_SQL_connection(cur, conn):
         print('Database connection closed.')
 
 class psql_insert_operations(object):
-    """ class of functions that contains the different
-        operations for the postgres inserts ?? should it call from something 
+    """
+    class of functions that contains the different
+    methods for the postgres inserts operations.
+        
+    Attributes
+    ----------
+        None
+
+
+    Methods
+    -------
+        __init__
+
+        insert_snapshot(msg)
+
+        insert_message(msg)
+
+        insert_minute_snapshot(self, hist_obj, snapshot_connection_id):
+            
+        insert_ticker_message(self, msg)
+
+        mkt_can_overlap(self, msg)
     """
     def __init__(self, cursor, connection):
+        """
+        inherits psqloperations? idk
+        
+        Parameters
+        ----------
+            cursor : cursor object
+                cursor object attribute (or object as instance of the subclass cursors)
+                from psycopg2.connect(**kwargs) instance.
+                used to establish the cursor when connected to the PostgreSQL server
+        
+            connection : connection object
+                psycopg2.connect(**params) object.
+                Used to establish a connection to a PostgreSQL database.
+
+        Returns
+        -------
+            None
+        
+        Raises
+        ------
+            None
+        """
         super(psqloperations, self).__init__()
         self.cursor = cursor
         self.connection = connection 
 
     def insert_snapshot(self, msg):
+        """
+        adds snapshot to the postgres table 
+
+        Parameters
+        ----------
+            msg : dict 
+                parsed json object containing the snapshot message in the form
+                msg = {
+                    bids : [[], []],
+                    asks : [[], []]
+                }
+        
+        Returns
+        -------
+            snapshot_connection_id : str
+            
+            snapshot_reference_id : str
+        
+        Raises
+        ------
+            hmmm
+             
+        """
         if msg['type'] == "snapshot":
             bids =json.dumps(msg['bids'][:2800])
             asks =json.dumps(msg['asks'][:2800])
@@ -76,7 +213,26 @@ class psql_insert_operations(object):
             print("not a snapshot message")
         return snapshot_connection_id, snapshot_reference_id
 
-    def insert_message(self, msg, snapshot_connection_id, snapshot_reference_id):    
+    def insert_message(self, msg, snapshot_connection_id, snapshot_reference_id):
+        """
+        inserts message inthe postgres table. uses snapshot connection id and snapshot reference id as primary and seconadary keys 
+
+        Parameters
+        ----------
+            msg : dict
+            
+            snapshot_connection_id : str
+            
+            snapshot_reference_id : str
+
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None
+        """    
         if msg['type'] == "l2update":
             changes=json.dumps(msg['changes'])
             postgres_insert_query =  """ INSERT INTO messages (tstamp, snapshot_connection_id, snapshot_reference_id, changes) VALUES (%s, %s, %s, %s)"""
@@ -90,6 +246,26 @@ class psql_insert_operations(object):
             print("unknown message type", msg)
 
     def insert_minute_snapshot(self, hist_obj, snapshot_connection_id):
+        """
+        inesrts the bids and asks into the snapshot table. generates the
+        snapshot reference id.
+
+        Parameters
+        ----------
+            hist_obj: class history object
+                dw??
+
+            snapshot_connection_id : str
+        
+        Returns
+        -------
+            snapshot_reference_id : str
+                ?????
+        
+        Raises
+        ------
+            None
+        """
         #generate the new snapshot by applying the current stuff
         bids, asks = json.dumps(hist_obj.snapshot_bid), json.dumps(hist_obj.snapshot_ask)
         snapshot_connection_id, _assoc_tstamp = snapshot_connection_id, int(snapshot_connection_id[7:])
@@ -103,6 +279,22 @@ class psql_insert_operations(object):
         return snapshot_reference_id
 
     def insert_ticker_message(self, msg):
+        """
+        inserts ticker message into the postgres table.
+        
+        Parameters
+        ----------
+            msg : dict 
+                YES
+        
+        Returns
+        -------
+            None
+        
+        Raises
+        ------
+            None
+        """
         if msg['type'] == 'ticker':
             postgres_insert_query = """ INSERT INTO ethusd (sequence, time, price, side, lastsize, bestbid, bestask) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
             record_to_insert = (int(msg['sequence']), msg['time'], float(msg['price']), msg['side'], float(msg['last_size']),float(msg['best_bid']), float(msg['best_ask']))
@@ -110,6 +302,21 @@ class psql_insert_operations(object):
             count = cur.rowcount
 
     def mkt_can_overlap(self, msg):
+        """
+        Supposed to check the postgres table for market cancelation overlaps. 
+        
+        Parameters
+        ----------
+            msg : dict
+        
+        Returns
+        -------
+            None
+        
+        Raises
+        ------
+            None
+        """
         #step 1. query the db to get a a short list of entries
         sql = """ select tstamp, changes from messages order by tstamp desc limit 5;"""
         execcommit(sql, cur, conn)
@@ -117,7 +324,21 @@ class psql_insert_operations(object):
         print(returns)
 
 class psql_setup_operations(object):
-    """ the psql stuff that helps"""
+    """
+    psql methods that help set the data model
+    
+    Attributes
+    ----------
+        None
+    
+    Methods
+    -------
+        check_db_settings
+            ?
+
+        set_data_model(cur, conn)
+            ??
+    """
     def check_db_settings():
         pass
 
@@ -133,6 +354,20 @@ class psql_setup_operations(object):
         execcommit(postgres_create_query_2, cur, conn)
         
 class psql_fetch_operations(object):
+    """
+    psql methods to fetch data from the postgres server
+
+    Attributes
+    ----------
+        None
+    
+    Methods
+    -------
+        get_last_tstamp(cur, conn)
+    
+        custom_sql_fetch(cur, conn, sql)
+            
+    """
     def get_last_tstamp(cur, conn):
         sql = """ select time from ethusd order by time desc limit 1;"""
         execcommit(sql, cur, conn)
@@ -150,6 +385,9 @@ class psql_fetch_operations(object):
 
 
 def main():
+    """
+    test methods to check the operation of the script. 
+    """
     cursor, connection = open_SQL_connection()
     print("doing some stuff in the meantime")
     latest_stamp = get_last_tstamp(cursor, connection)
