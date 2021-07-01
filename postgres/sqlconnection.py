@@ -124,7 +124,7 @@ def close_SQL_connection(cur, conn):
         conn.close()
         print('Database connection closed.')
 
-class psql_insert_operations(object):
+class psql_create_operations(object):
     """
     class of functions that contains the different
     methods for the postgres inserts operations.
@@ -300,7 +300,8 @@ class psql_insert_operations(object):
             record_to_insert = (int(msg['sequence']), msg['time'], float(msg['price']), msg['side'], float(msg['last_size']),float(msg['best_bid']), float(msg['best_ask']))
             execcommit([postgres_insert_query, record_to_insert], cur, conn)
             count = cur.rowcount
-
+#############
+class psql_update_operations():
     def mkt_can_overlap(self, msg):
         """
         Supposed to check the postgres table for market cancelation overlaps. 
@@ -353,7 +354,7 @@ class psql_setup_operations(object):
         execcommit(postgres_create_query_1, cur, conn)
         execcommit(postgres_create_query_2, cur, conn)
         
-class psql_fetch_operations(object):
+class psql_read_operations(object):
     """
     psql methods to fetch data from the postgres server
 
@@ -381,7 +382,11 @@ class psql_fetch_operations(object):
         print(returns)
         return returns[0][0]
 
-
+class psql_insert_operations():
+    def __init__(self):
+        pass
+    
+    def
 
 
 def main():

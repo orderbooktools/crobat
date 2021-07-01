@@ -158,3 +158,8 @@ def get_tick_distance(ref_price, input_price, ticksize=0.01):
     """
     tick_distance = abs(ref_price - input_price)/ticksize
     return tick_distance 
+
+
+if __name__ == '__main__':
+    pass
+
