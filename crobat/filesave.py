@@ -293,7 +293,7 @@ def filesaver(hist_obj, position_range, events=True, **kwargs):
             if events:
                 list_to_convert[-1].append([hist_obj.ask_events, titles_ask[2]])
         if 'signed' in kwargs['sides']:
-            final_signed_list, final_signed_prices = convert_array_to_list_dict_sob(hist_obj.signed_history, hist_obj.signed_events)
+            final_signed_list, final_signed_prices = convert_array_to_list_dict_sob(hist_obj.signed_history, hist_obj.signed_events, position_range)
             titles_signed = ["L2_orderbook_volm_signed"+str(out_time),
                 "L2_orderbook_prices_signed"+str(out_time),
                 "L2_orderbook_events_signed"+str(out_time)]

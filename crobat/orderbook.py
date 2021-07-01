@@ -472,13 +472,15 @@ class history(object):
             TypeError
                 If position is None or not an int it will throw this error.       
         """
-        if position>bound:
+        if abs(position)>bound:
             self.token = False
+            print("rejected:", position, ">", bound)
         else:
+            print("accepted", position, "<", bound)
             pass
         return self.token
 
-    def append_snapshot_bid(self, time, price_level):
+    def append_snapshot_bid(self, time, price_level, position_range):
         """
         appends the current snapshot to the self.bid_history list,
         appends the current event to the self.bid_events list.
@@ -500,12 +502,13 @@ class history(object):
             None 
         """
         mid_price = 0.5*(self.bid_range[0] + self.ask_range[0])
-        temp_snap = copy.deepcopy(self.snapshot_bid[:6])
+        temp_snap = copy.deepcopy(self.snapshot_bid[:position_range])
         spread = self.ask_range[0] - self.bid_range[0]
         self.bid_history.append([time, temp_snap])
-        self.bid_events.append([time, self.order_type, price_level, self.event_size, self.position+1, mid_price, spread])
+        self.position += 1 
+        self.bid_events.append([time, self.order_type, price_level, self.event_size, self.position, mid_price, spread])
 
-    def append_snapshot_ask(self, time, price_level):
+    def append_snapshot_ask(self, time, price_level, position_range):
         """
         appends the current snapshot to the self.ask_history list,
         appends the current event to the self.ask_events list.
@@ -528,11 +531,12 @@ class history(object):
         """
         mid_price = 0.5*(self.bid_range[0] + self.ask_range[0])
         spread = self.ask_range[0] - self.bid_range[0]
-        temp_snap = copy.deepcopy(self.snapshot_ask[:6])
+        temp_snap = copy.deepcopy(self.snapshot_ask[:position_range])
         self.ask_history.append([time, temp_snap])
+        self.position+=1
         self.ask_events.append([time, self.order_type, price_level, self.event_size, self.position+1, mid_price, spread])
     
-    def append_signed_book(self, time, price_level, side):
+    def append_signed_book(self, time, price_level, side, position_range):
         """
         Appends the current snapshot to the self.signed_history list,
         appends the current event to the self.signed_events list.
@@ -561,8 +565,8 @@ class history(object):
         sign = set_sign(self.event_size, side, self.order_type)
         self.event_size *= sign
         self.position = set_signed_position(self.position, side)
-        temp_snap_bid = [[i[0],-1*i[1]] for i in copy.deepcopy(self.snapshot_bid[:6])][::-1]
-        temp_snap_ask = copy.deepcopy(self.snapshot_ask[:6])        
+        temp_snap_bid = [[i[0],-1*i[1]] for i in copy.deepcopy(self.snapshot_bid[:position_range])][::-1]
+        temp_snap_ask = copy.deepcopy(self.snapshot_ask[:position_range])        
         self.signed_history.append([time, temp_snap_bid + temp_snap_ask])
         self.signed_events.append([time, self.order_type, price_level, self.event_size, self.position, side, mid_price, spread])
 
@@ -696,7 +700,7 @@ class history(object):
             depth += orderbook_snap[i][1] * orderbook_snap[i][0]
         return depth     
 
-def UpdateSnapshot_bid_Seq(hist_obj, time, side, price_level, level_depth, pre_level_depth, price_match_index):
+def UpdateSnapshot_bid_Seq(hist_obj, time, side, price_level, level_depth, pre_level_depth, price_match_index, position_range):
     """
     Sequence of class methods executed on an instance of the history object (hist_obj). 
     The order to try is:
@@ -746,10 +750,10 @@ def UpdateSnapshot_bid_Seq(hist_obj, time, side, price_level, level_depth, pre_l
     hist_obj.snapshot_bid = hist_obj.remove_price_level(hist_obj.snapshot_bid, level_depth, price_match_index) # needs price range update, 
     hist_obj.snapshot_bid, hist_obj.bid_range, pre_level_depth = hist_obj.update_price_index_buy(level_depth, price_level, pre_level_depth)
     hist_obj.snapshot_bid, hist_obj.bid_range = hist_obj.update_snapshot_bid()
-    hist_obj.token = hist_obj.trim_coordinator(hist_obj.position, 5)
+    hist_obj.token = hist_obj.trim_coordinator(hist_obj.position, position_range)
     if hist_obj.token:
-        hist_obj.append_snapshot_bid(time, price_level)
-        hist_obj.append_signed_book(time, price_level, side)
+        hist_obj.append_snapshot_bid(time, price_level, position_range)
+        hist_obj.append_signed_book(time, price_level, side, position_range)
         hist_obj.check_mkt_can_overlap(hist_obj.bid_events, hist_obj.order_type)
         hist_obj.check_mkt_can_overlap(hist_obj.signed_events, hist_obj.order_type)
         if hist_obj.bid_events[-1][-1] > 100:
@@ -763,7 +767,7 @@ def UpdateSnapshot_bid_Seq(hist_obj, time, side, price_level, level_depth, pre_l
             print("the bid book looks like NOW:", hist_obj.bid_history[-1])
             print("the ask book looks like NOW:", hist_obj.ask_history[-1])
 
-def UpdateSnapshot_ask_Seq(hist_obj, time, side, price_level, level_depth, pre_level_depth, price_match_index):
+def UpdateSnapshot_ask_Seq(hist_obj, time, side, price_level, level_depth, pre_level_depth, price_match_index, position_range):
     """
     Sequence of class methods executed on an instance of the history object (hist_obj). 
     The order to try is:
@@ -813,10 +817,10 @@ def UpdateSnapshot_ask_Seq(hist_obj, time, side, price_level, level_depth, pre_l
     hist_obj.snapshot_ask = hist_obj.remove_price_level(hist_obj.snapshot_ask, level_depth, price_match_index) # needs price range update, 
     hist_obj.snapshot_ask, hist_obj.ask_range, pre_level_depth = hist_obj.update_price_index_sell(level_depth, price_level, pre_level_depth)
     hist_obj.snapshot_ask, hist_obj.ask_range = hist_obj.update_snapshot_ask()
-    hist_obj.token = hist_obj.trim_coordinator(hist_obj.position, 5)
+    hist_obj.token = hist_obj.trim_coordinator(hist_obj.position, position_range)
     if hist_obj.token:
-        hist_obj.append_snapshot_ask(time, price_level)
-        hist_obj.append_signed_book(time, price_level, side)
+        hist_obj.append_snapshot_ask(time, price_level, position_range)
+        hist_obj.append_signed_book(time, price_level, side, position_range)
         hist_obj.check_mkt_can_overlap(hist_obj.ask_events, hist_obj.order_type)
         hist_obj.check_mkt_can_overlap(hist_obj.signed_events, hist_obj.order_type)
         if hist_obj.ask_events[-1][-1] > 100:
@@ -846,6 +850,6 @@ def price_match(x,y):
 #             break 
 #     return min_dec_out
 
-
-
+if __name__ == '__main__':
+    pass
 

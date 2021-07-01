@@ -1,8 +1,12 @@
 import asyncio, time
+#from postgres.main import input_args
 from datetime import datetime
 import copra.rest
 from copra.websocket import Channel, Client
 import pandas as pd
+# import orderbook
+# import orderbook_helpers
+import filesave
 from .orderbook import *
 from .orderbook_helpers import * 
 import gc
@@ -171,10 +175,10 @@ class L2_Update(Client):
             self.hist.token = False
             if side == "bid":
                 price_match_index = list(filter(lambda x: price_match(self.hist.bid_range[x], price_level), range(len(self.hist.bid_range))))
-                UpdateSnapshot_bid_Seq(self.hist, time, side, price_level, level_depth, pre_level_depth, price_match_index)
+                UpdateSnapshot_bid_Seq(self.hist, time, side, price_level, level_depth, pre_level_depth, price_match_index, self.recording_settings.position_range)
             elif side == "ask":
                 price_match_index = list(filter(lambda x: price_match(self.hist.ask_range[x], price_level), range(len(self.hist.ask_range))))
-                UpdateSnapshot_ask_Seq(self.hist, time, side, price_level, level_depth, pre_level_depth, price_match_index)                
+                UpdateSnapshot_ask_Seq(self.hist, time, side, price_level, level_depth, pre_level_depth, price_match_index, self.recording_settings.position_range)                
             else:
                 print("unknown message")
 
@@ -211,8 +215,7 @@ class L2_Update(Client):
         filesaver(self.hist,
                   self.recording_settings.position_range, 
                   sides=self.recording_settings.sides, 
-                  filetype=self.recording_settings.filetype)
-        
+                  filetype=self.recording_settings.filetype)         
 
         # """Massages my list of [time, [[price, volm], ... , [price,volm]]] into a clean dataframe""" 
         # final_bid_list, final_bid_prices = hf.convert_array_to_list_dict(self.hist.bid_history, self.position_range)
