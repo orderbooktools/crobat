@@ -565,8 +565,8 @@ class history(object):
         sign = set_sign(self.event_size, side, self.order_type)
         self.event_size *= sign
         self.position = set_signed_position(self.position, side)
-        temp_snap_bid = [[i[0],-1*i[1]] for i in copy.deepcopy(self.snapshot_bid[:position_range])][::-1]
-        temp_snap_ask = copy.deepcopy(self.snapshot_ask[:position_range])        
+        temp_snap_bid = [[i[0],-1*i[1]] for i in copy.deepcopy(self.snapshot_bid[:(position_range-1)])][::-1]
+        temp_snap_ask = copy.deepcopy(self.snapshot_ask[:(position_range-1)])        
         self.signed_history.append([time, temp_snap_bid + temp_snap_ask])
         self.signed_events.append([time, self.order_type, price_level, self.event_size, self.position, side, mid_price, spread])
 

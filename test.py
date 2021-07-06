@@ -30,9 +30,9 @@ from copra.websocket import Channel, Client
 
 class input_args(object):
     def __init__(self, currency_pair='ETH-USD',
-                       position_range=2,
+                       position_range=4,
                        recording_duration=5,
-                       sides=['bid'],
+                       sides=['bid','ask'],
                        filetype=['xlsx']):
     
         self.currency_pair = currency_pair
