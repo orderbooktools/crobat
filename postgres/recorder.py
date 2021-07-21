@@ -6,8 +6,12 @@ import pandas as pd
 
 import sys,os
 os.chdir('.')
-sys.path.append(os.getcwd()+'/crobat')
-sys.path.append(os.getcwd()+'/grafana')
+sys.path.append(os.getcwd()+'/crobat/crobat')
+sys.path.append(os.getcwd()+'/crobat/postgres')
+sys.path.append(os.getcwd()+'/crobat/grafana')
+print("printing the sub sys path for the recorder module for postgres")
+for _ in sys.path:
+    print(_)
 import orderbook as LOBf
 import orderbook_helpers as hf 
 import gc
@@ -134,7 +138,7 @@ class Ticker(Client):
         self.counter = 0 
         self.snapshot_connection_id = None
         self.snapshot_reference_id = None
-        self.cursor, self.connection = open_SQL_connection()
+        self.cursor, self.connection = sqlconnection.open_SQL_connection()
         self.updated_snap = False
         self.start_CUSUM = False
         self.l0 = 0
@@ -165,7 +169,7 @@ class Ticker(Client):
             copra.Client.on_open()
         """
         print("Let's count the L3 messages!", self.time_now)
-        set_data_model(self.cursor, self.connection)
+        sqlconnection.set_data_model(self.cursor, self.connection)
         super().on_open() # inheriting things from the parent class who really knows    
 
     def on_message(self, msg):
@@ -199,8 +203,8 @@ class Ticker(Client):
         """
         #print(msg['type'])
         if msg['type'] == "ticker": 
-            prev_timestamp = get_last_tstamp(self.cursor, self.connection)
-            insert_ticker_message(msg, self.cursor, self.connection)
+            prev_timestamp = sqlconnection.get_last_tstamp(self.cursor, self.connection)
+            sqlconnection.insert_ticker_message(msg, self.cursor, self.connection)
             #I need mkt can overlap for the postgresql
             if not self.start_stamp_arrived:
                 self.start_stamp = datetime.strptime(msg['time'],'%Y-%m-%dT%H:%M:%S.%fZ') # msg['time'] into a datetime object
@@ -223,9 +227,9 @@ class Ticker(Client):
                 self.start_stamp = datetime.strptime(msg['time'],'%Y-%m-%dT%H:%M:%S.%fZ') # msg['time'] into a datetime object
                 self.start_stamp_arrived = True
             
-            latest_stamp = get_last_tstamp(self.cursor, self.connection)
+            latest_stamp = sqlconnection.get_last_tstamp(self.cursor, self.connection)
             sql_cmd = """ SELECT SUM(lastsize) AS TOTAL FROM ethusd WHERE time BETWEEN '{}' AND '{}' ;""".format(self.start_stamp, latest_stamp)
-            sum_orders = float(custom_sql_fetch(self.cursor, self.connection, sql_cmd))
+            sum_orders = float(sqlconnection.custom_sql_fetch(self.cursor, self.connection, sql_cmd))
             self.l0 = float(sum_orders/((latest_stamp - self.start_stamp).total_seconds()))
             print("initial rate of market order arrival: ", self.l0, " ETH/s")  ## a way to recall wtf was posted
             h = 0.1
@@ -298,7 +302,7 @@ class Ticker(Client):
         ------
             There are issues i just don't understand them yet.
         """
-        close_SQL_connection(self.cursor, self.connection)
+        sqlconnection.close_SQL_connection(self.cursor, self.connection)
         print("Connection to server is closed")
         print(was_clean)
         print(code)

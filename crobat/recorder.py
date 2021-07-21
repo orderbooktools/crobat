@@ -6,12 +6,13 @@ from copra.websocket import Channel, Client
 import pandas as pd
 # import orderbook
 # import orderbook_helpers
-import filesave
+#import filesave
 from .orderbook import *
 from .orderbook_helpers import * 
 import gc
 import numpy as np
 from .filesave import *
+from sys import exit
 
 pd.set_option('display.max_columns', 500)
 

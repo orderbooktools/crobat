@@ -1,6 +1,6 @@
 # import psycopg2
 
-# conn = psycopg2.connect("dbname=suppliers user=ivan password=347.445.boAT")
+
 
 # print(conn)
 
@@ -11,8 +11,11 @@ from psycopg2.extras import execute_values
 from config import config
 import json
 
-### mac daddy of all postgres operations ###
-### executes the actual query you want ###
+##############################################################################
+#                                                                             
+#
+#
+#
 def execcommit(query, cur_obj, conn_obj):
     """
     Main driver for PostgreSQL statements. 
@@ -23,9 +26,10 @@ def execcommit(query, cur_obj, conn_obj):
             PostgreSQL query in the form of a formatted string.
         
         cur_obj : cursor object
-            cursor object attribute (or object as instance of the subclass cursors)
-            from psycopg2.connect(**kwargs) instance.
-            used to establish the cursor when connected to the PostgreSQL server
+            cursor object attribute (or object as instance of the subclass
+            cursors) from psycopg2.connect(**kwargs) instance.
+            used to establish the cursor when connected to the PostgreSQL
+            server
         
         con_obj : connection object
             psycopg2.connect(**params) object.
@@ -102,9 +106,10 @@ def close_SQL_connection(cur, conn):
     Parameters
     ----------        
         cur_obj : cursor object
-            cursor object attribute (or object as instance of the subclass cursors)
-            from psycopg2.connect(**kwargs) instance.
-            used to establish the cursor when connected to the PostgreSQL server
+            cursor object attribute (or object as instance of the subclass
+            cursors) from psycopg2.connect(**kwargs) instance.
+            used to establish the cursor when connected to the PostgreSQL
+            server
         
         con_obj : connection object
             psycopg2.connect(**params) object.
@@ -123,6 +128,11 @@ def close_SQL_connection(cur, conn):
     if conn is not None:
         conn.close()
         print('Database connection closed.')
+##############################################################################
+#                                                                            #
+#                   PSQL CRUD Classes: CREATE                                #
+#                                                                            #
+##############################################################################
 
 class psql_create_operations(object):
     """
@@ -148,16 +158,17 @@ class psql_create_operations(object):
 
         mkt_can_overlap(self, msg)
     """
-    def __init__(self, cursor, connection):
+    def __init__(self, cursor, connection, psqloperations):
         """
         inherits psqloperations? idk
         
         Parameters
         ----------
             cursor : cursor object
-                cursor object attribute (or object as instance of the subclass cursors)
-                from psycopg2.connect(**kwargs) instance.
-                used to establish the cursor when connected to the PostgreSQL server
+                cursor object attribute (or object as instance of the subclass
+                cursors) from psycopg2.connect(**kwargs) instance.
+                used to establish the cursor when connected to the PostgreSQL
+                server
         
             connection : connection object
                 psycopg2.connect(**params) object.
@@ -300,8 +311,15 @@ class psql_create_operations(object):
             record_to_insert = (int(msg['sequence']), msg['time'], float(msg['price']), msg['side'], float(msg['last_size']),float(msg['best_bid']), float(msg['best_ask']))
             execcommit([postgres_insert_query, record_to_insert], cur, conn)
             count = cur.rowcount
-#############
+##############################################################################
+#                                                                            #
+#                    PostgreSQL update operations                            #
+#                                                                            #
+##############################################################################
+
 class psql_update_operations():
+    def __init__():
+        pass
     def mkt_can_overlap(self, msg):
         """
         Supposed to check the postgres table for market cancelation overlaps. 
@@ -324,6 +342,11 @@ class psql_update_operations():
         returns = cur.fetchall()
         print(returns)
 
+##############################################################################
+#                                                                            #
+#                    PostgreSQL Delete operations                            #
+#                                                                            #
+##############################################################################
 class psql_setup_operations(object):
     """
     psql methods that help set the data model
@@ -385,8 +408,7 @@ class psql_read_operations(object):
 class psql_insert_operations():
     def __init__(self):
         pass
-    
-    def
+
 
 
 def main():
