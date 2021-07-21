@@ -474,9 +474,9 @@ class history(object):
         """
         if abs(position)>bound:
             self.token = False
-            print("rejected:", position, ">", bound)
+            #print("rejected:", position, ">", bound)
         else:
-            print("accepted", position, "<", bound)
+            #print("accepted", position, "<", bound)
             pass
         return self.token
 

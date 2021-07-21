@@ -10,3 +10,15 @@
 # from .recorder import *
 
 # ## i think everything is okay???
+#
+import sys, os
+# i need to add each wd to the syspath
+# 1 get the relative path
+#os.chdir('..')
+sys.path.append(os.getcwd())
+
+# # 2 i need to import everything independently
+# #import filesave
+# import orderbook
+# import orderbook_helpers
+# import recorder
