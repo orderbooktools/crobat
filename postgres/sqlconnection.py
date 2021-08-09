@@ -10,12 +10,13 @@ import psycopg2
 from psycopg2.extras import execute_values
 from config import config
 import json
-
+import sys
+import pandas as pd 
 ##############################################################################
-#                                                                             
-#
-#
-#
+#                                                                            # 
+#                Miscelaneous Functions                                      #
+#                                                                            #
+##############################################################################
 def execcommit(query, cur_obj, conn_obj):
     """
     Main driver for PostgreSQL statements. 
@@ -83,9 +84,11 @@ def open_SQL_connection():
     """
     conn = None
     cur = None
+
     try:
         # read connection parameters
-        params = config(filename='database.ini', section='postgresql')
+        inipath = sys.path[0]+'/database.ini'
+        params = config(filename=inipath, section='postgresql')
 
         # connect to the PostgreSQL server
         print('Connecting to the PostgreSQL database...')
@@ -128,9 +131,102 @@ def close_SQL_connection(cur, conn):
     if conn is not None:
         conn.close()
         print('Database connection closed.')
+
+class psql_setup_operations(object):
+    """
+    psql methods that help set the data model
+    
+    Attributes
+    ----------
+        None
+    
+    Methods
+    -------
+        check_db_settings
+            ?
+
+        set_data_model(cur, conn)
+            ??
+    """
+    def check_db_settings():
+        pass
+
+    def set_data_model(self, cur, conn):
+        """
+        Function that creates (if not done so already) the tables for 
+        1. generated snapshots AS snapshots 
+        2. messages from the l2update channel AS messages
+        3. messages from the ticker channel AS ticker 
+
+        Parameters
+        ----------
+            cur : cursor object
+                ?
+            conn : connection object
+                ?
+        
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None 
+        """
+        # Ensure we have timescaledb extention loaded
+        tsextload = """ CREATE EXTENSION IF NOT EXISTS timescaledb;"""
+        # create the snapshots table
+        create_snapshots = """ CREATE TABLE IF NOT EXISTS snapshots(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, bids json, asks json);""" 
+        # create the messages table for l2update messages
+        create_messages = """ CREATE TABLE IF NOT EXISTS messages(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, changes json);"""
+        # create the messages table for ticker messages
+        create_ticker = """ CREATE TABLE IF NOT EXISTS ticker(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, message json);"""
+        for query in [tsextload, create_snapshots, create_messages, create_ticker]:
+            execcommit(query, cur, conn)
+       
+        # turn things into timescale
+        timescale_queries = [
+            """ SELECT create_hypertable('snapshots', 'tstamp');""", 
+            """ SELECT create_hypertable('messages', 'tstamp');""", 
+            """ SELECT create_hypertable('ticker', 'tstamp');"""
+        ]
+        for query in [timescale_queries]:
+            execcommit(query, cur, conn)
+
+    # def custom_data_model(cur,conn):
+    #     """
+    #     testing Function that creates (if not done so already) the tables for 
+    #     1. generated snapshots AS snapshots 
+    #     2. messages from the l2update channel AS messages
+    #     3. messages from the ticker channel AS ticker 
+
+    #     Parameters
+    #     ----------
+    #         cur : cursor object
+    #             ?
+    #         conn : connection object
+    #             ?
+        
+    #     Returns
+    #     -------
+    #         None
+
+    #     Raises
+    #     ------
+    #         None 
+    #     """
+    #     # function that asks postgres if it can receive insert messages
+    #     # create the snapshots table
+    #     postgres_create_query_1 = """ CREATE TABLE IF NOT EXISTS snapshots(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, bids json, asks json);""" 
+    #     # create the messages table for l2update messages
+    #     postgres_create_query_2 = """ CREATE TABLE IF NOT EXISTS messages(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, changes json);"""
+    #     # create the messages table for ticker messages
+    #     #postgres_create_query_3 = """ CREATE TABLE IF NOT EXISTS ticker(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, message json);"""
+    #     execcommit(postgres_create_query_1, cur, conn)
+    #     execcommit(postgres_create_query_2, cur, conn)
 ##############################################################################
 #                                                                            #
-#                   PSQL CRUD Classes: CREATE                                #
+#                   PSQL CRUD Classes: CREATE operations                     #
 #                                                                            #
 ##############################################################################
 
@@ -158,7 +254,7 @@ class psql_create_operations(object):
 
         mkt_can_overlap(self, msg)
     """
-    def __init__(self, cursor, connection, psqloperations):
+    def __init__(self, cursor, connection, psqloperations=None):
         """
         inherits psqloperations? idk
         
@@ -182,9 +278,11 @@ class psql_create_operations(object):
         ------
             None
         """
-        super(psqloperations, self).__init__()
         self.cursor = cursor
         self.connection = connection 
+        if psqloperations:
+            super(psqloperations, self).__init__()
+            # this may throw an error if not a class 
 
     def insert_snapshot(self, msg):
         """
@@ -218,8 +316,8 @@ class psql_create_operations(object):
             snapshot_reference_id = msg['product_id'] + '0'
             postgres_insert_query =  """ INSERT INTO snapshots (tstamp, snapshot_connection_id, snapshot_reference_id, bids, asks) VALUES (%s, %s, %s, %s, %s)"""
             record_to_insert = (UTC_tstamp, snapshot_connection_id, snapshot_reference_id, bids, asks)
-            execcommit([postgres_insert_query, record_to_insert], cur, conn)
-            count = cur.rowcount
+            execcommit([postgres_insert_query, record_to_insert], self.cursor, self.connection)
+            count = self.cursor.rowcount
         else:
             print("not a snapshot message")
         return snapshot_connection_id, snapshot_reference_id
@@ -248,8 +346,8 @@ class psql_create_operations(object):
             changes=json.dumps(msg['changes'])
             postgres_insert_query =  """ INSERT INTO messages (tstamp, snapshot_connection_id, snapshot_reference_id, changes) VALUES (%s, %s, %s, %s)"""
             record_to_insert = (msg['time'], snapshot_connection_id, snapshot_reference_id, changes)
-            execcommit([postgres_insert_query, record_to_insert], cur, conn)
-            count = cur.rowcount
+            execcommit([postgres_insert_query, record_to_insert], self.cursor, self.conn)
+            count = self.cursor.rowcount
         elif msg['type'] =="ticker":
             postgres_insert_query = """ INSERT INTO ticker (tstamp, snapshot_connection_id, snapshot_reference_id, changes) VALUES (%s, %s, %s, %s)"""
             record_to_insert = (msg['time'], snapshot_connection_id, snapshot_reference_id, msg)
@@ -284,8 +382,8 @@ class psql_create_operations(object):
         snapshot_reference_id = snapshot_connection_id[:7]+ str(UTC_tstamp.timestamp()*(10 ** 6) - _assoc_tstamp)
         postgres_insert_query =  """ INSERT INTO snapshots (tstamp, snapshot_connection_id, snapshot_reference_id, bids, asks) VALUES (%s, %s, %s, %s, %s)"""
         record_to_insert = (UTC_tstamp, snapshot_connection_id, snapshot_reference_id, bids, asks)
-        execcommit([postgres_insert_query, record_to_insert], cur, conn)
-        count = cur.rowcount
+        execcommit([postgres_insert_query, record_to_insert], self.cursor, self.connection)
+        count = self.cursor.rowcount
         print(count, "snapshot_id: " + snapshot_reference_id + " inserted successfully into snapshots table")
         return snapshot_reference_id
 
@@ -307,19 +405,169 @@ class psql_create_operations(object):
             None
         """
         if msg['type'] == 'ticker':
-            postgres_insert_query = """ INSERT INTO ethusd (sequence, time, price, side, lastsize, bestbid, bestask) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
+            postgres_insert_query = """ INSERT INTO ticker (sequence, time, price, side, lastsize, bestbid, bestask) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
             record_to_insert = (int(msg['sequence']), msg['time'], float(msg['price']), msg['side'], float(msg['last_size']),float(msg['best_bid']), float(msg['best_ask']))
-            execcommit([postgres_insert_query, record_to_insert], cur, conn)
-            count = cur.rowcount
+            execcommit([postgres_insert_query, record_to_insert], self.cursor, self.connection)
+            count = self.cursor.rowcount
+
+
 ##############################################################################
 #                                                                            #
-#                    PostgreSQL update operations                            #
+#                    PostgreSQL CRUD Classes: READ operations                #
 #                                                                            #
 ##############################################################################
 
-class psql_update_operations():
-    def __init__():
-        pass
+
+class psql_read_operations(object):
+    """
+    psql methods to fetch data from the postgres server
+
+    Attributes
+    ----------
+        cursor : cursor object
+            ????
+        connection : connection object
+    
+    Methods
+    -------
+        get_last_tstamp(cur, conn)
+    
+        custom_sql_fetch(cur, conn, sql)
+            
+    """
+    def __init__(self, cursor, connection, psqloperations=None):
+        """
+        inherits psqloperations? idk
+        
+        Parameters
+        ----------
+            cursor : cursor object
+                cursor object attribute (or object as instance of the subclass
+                cursors) from psycopg2.connect(**kwargs) instance.
+                used to establish the cursor when connected to the PostgreSQL
+                server
+        
+            connection : connection object
+                psycopg2.connect(**params) object.
+                Used to establish a connection to a PostgreSQL database.
+
+        Returns
+        -------
+            None
+        
+        Raises
+        ------
+            None
+        """
+        self.cursor = cursor
+        self.connection = connection 
+        if psqloperations:
+            super(psqloperations, self).__init__()
+            # this may throw an error if not a class 
+
+
+    def get_last_tstamp(self):
+        """
+        Fetches the last timestamp from the PostgreSQL database.
+
+        Parameters
+        ----------
+            None
+
+        Returns
+        -------
+            timestamp : datetime object
+                Timestamp from the queried postgres db
+        
+        Raises
+        ------
+            If the queried Postgresdb does not have a time column
+            psycopg2 will throw an error. 
+        """
+        sql = """ SELECT tstamp FROM messages ORDER BY tstamp DESC LIMIT 1;"""
+        execcommit(sql, self.cursor, self.connection)
+        returns = self.cursor.fetchall()
+        print(returns[0][0])
+        return returns[0][0]
+
+    def custom_sql_fetch(self, sql):
+        """
+        Custom SQL fetch, leave the PostgreSQL code as a string.
+        
+        Parameters
+        ----------
+            sql : str
+                PostgreSQL code as a string.
+        
+        Returns
+        -------
+            returns : string, or JSON object
+                Custom fetch returns, needs further testing
+        
+        Raises
+        ------
+            Custom SQL fetches are complicated.
+        """
+        execcommit(sql, self.cursor, self.connection)
+        returns = self.cursor.fetchall()
+        if len(returns) > 1:
+            print("multi item return of len: ", len(returns))
+            returns_list = [] 
+            for _ in returns:
+                returns_list.append(_[0][0])
+            return returns_list
+        else:
+            return returns[0][0]
+
+##############################################################################
+#                                                                            #
+#                    PostgreSQL CRUD Classes: UPDATE operations              #
+#                                                                            #
+##############################################################################
+
+class psql_update_operations(object):
+    """
+    class of methods that update the PostgreSQL database.
+
+    Attributes
+    ----------
+        
+
+    Methods
+    -------
+        
+    """
+    def __init__(self, cursor, connection, psqloperations=None):
+        """
+        inherits psqloperations? idk
+        
+        Parameters
+        ----------
+            cursor : cursor object
+                cursor object attribute (or object as instance of the subclass
+                cursors) from psycopg2.connect(**kwargs) instance.
+                used to establish the cursor when connected to the PostgreSQL
+                server
+        
+            connection : connection object
+                psycopg2.connect(**params) object.
+                Used to establish a connection to a PostgreSQL database.
+
+        Returns
+        -------
+            None
+        
+        Raises
+        ------
+            None
+        """
+        self.cursor = cursor
+        self.connection = connection 
+        if psqloperations:
+            super(psqloperations, self).__init__()
+            print("interited sucessfully")
+            # this may throw an error if not a class 
+        
     def mkt_can_overlap(self, msg):
         """
         Supposed to check the postgres table for market cancelation overlaps. 
@@ -338,94 +586,119 @@ class psql_update_operations():
         """
         #step 1. query the db to get a a short list of entries
         sql = """ select tstamp, changes from messages order by tstamp desc limit 5;"""
-        execcommit(sql, cur, conn)
-        returns = cur.fetchall()
+        execcommit(sql, self.cursor, self.connection)
+        returns = self.cursor.fetchall()
         print(returns)
 
 ##############################################################################
 #                                                                            #
-#                    PostgreSQL Delete operations                            #
+#                    PostgreSQL CRUD Classes: Delete operations              #
 #                                                                            #
 ##############################################################################
-class psql_setup_operations(object):
+def psql_delete_operations(object):
     """
-    psql methods that help set the data model
-    
+    Class of methods with PostgreSQL delete operations
+
     Attributes
     ----------
-        None
-    
-    Methods
-    -------
-        check_db_settings
+        cursor : cursor object
             ?
-
-        set_data_model(cur, conn)
-            ??
-    """
-    def check_db_settings():
-        pass
-
-    def set_data_model(cur, conn):
-            # function that asks postgres if it can receive insert messages
-        # create the snapshots table
-        postgres_create_query_1 = """ CREATE TABLE IF NOT EXISTS snapshots(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, bids json, asks json);""" 
-        # create the messages table for l2update messages
-        postgres_create_query_2 = """ CREATE TABLE IF NOT EXISTS messages(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, changes json);"""
-        # create the messages table for ticker messages
-        #postgres_create_query_3 = """ CREATE TABLE IF NOT EXISTS ticker(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, message json);"""
-        execcommit(postgres_create_query_1, cur, conn)
-        execcommit(postgres_create_query_2, cur, conn)
+        connection : connection object
         
-class psql_read_operations(object):
-    """
-    psql methods to fetch data from the postgres server
-
-    Attributes
-    ----------
-        None
-    
     Methods
     -------
-        get_last_tstamp(cur, conn)
-    
-        custom_sql_fetch(cur, conn, sql)
-            
+        Delete Last entry
+        
+        Custom Delete
     """
-    def get_last_tstamp(cur, conn):
-        sql = """ select time from ethusd order by time desc limit 1;"""
-        execcommit(sql, cur, conn)
-        returns = cur.fetchall()
-        print(returns[0][0])
-        return returns[0][0]
-
-    def custom_sql_fetch(cur, conn, sql):
-        execcommit(sql, cur, conn)
-        returns = cur.fetchall()
-        print(returns)
-        return returns[0][0]
-
-class psql_insert_operations():
-    def __init__(self):
+    
+    def __init__(self, cursor, connection, read_operations):
+        super(read_operations)
+        if self.cursor == cursor:
+            print("cursor inherited sucessfully")
+        if self.connection == connection:
+            print("connection inherited successfully")            
         pass
 
+    def delete_last_message(self):
+        lasttstamp = self.get_last_tstamp() # lets pray to jesus it inherited correctly.
+        sql = """ DELETE * FROM messages WHERE tstamp = {} """.format(lasttstamp)
+        execcommit(sql, self.cursor, self.connection)
 
 
 def main():
     """
     test methods to check the operation of the script. 
+    TEST 1: checking CREATE functions
     """
+    # setup 
     cursor, connection = open_SQL_connection()
-    print("doing some stuff in the meantime")
-    latest_stamp = get_last_tstamp(cursor, connection)
-    print(latest_stamp)
-    start_stamp = latest_stamp - timedelta(seconds=10)
-    sql_cmd = """ SELECT SUM(lastsize) AS TOTAL FROM ethusd WHERE time BETWEEN '{}' AND '{}' ;""".format(start_stamp, latest_stamp);
-    sumout = custom_sql_fetch(cursor, connection, sql_cmd)
-    print(sumout)
+    print("sucessfully opened a connection to psql server")
+    #read_instance = psql_read_operations(cursor, connection)
     
+    # test 0: testing set data model functions
+    #     a.  Try seeing if create datamodel works
+    sdm_instance = psql_setup_operations()
+    sdm_instance.set_data_model(cursor, connection)
+
+    # test 1: testing insert operations with dummy data
+    # mock_snap = {
+    #     "type" : "snapshot",
+    #     "product_id" : "ETH-USD"
+    #     "bids" : [
+    #         [120]
+    #     ]
+    #     bids : [[][]]
+    # }
+    
+    # test 1: testing methods of the psql_read_operations
+    #     a. get last tstamp
+    read_instance = psql_read_operations(cursor, connection)
+    latest_stamp = read_instance.get_last_tstamp()
+    print(latest_stamp)
+
+    
+    #     b. custom sql fetch get a list of recorded change messages in the last 10 seconds
+    start_stamp = latest_stamp - timedelta(seconds=1)
+    print("10 seconds before the latest message message???", start_stamp)
+    sql_cmd = """ SELECT changes AS TOTAL FROM messages WHERE tstamp BETWEEN '{}' AND '{}' ;""".format(start_stamp, latest_stamp)
+    out = read_instance.custom_sql_fetch(sql_cmd)
+    out_df = pd.DataFrame(out)
+    print(out_df.head())
+    
+    # test 2: testing methods of the psql_update_operations
+    #      a. testing mkt can overlap
+    # setup by creating mkt and can messages with identical size
+    
+    mkt_msg = {
+    "type": "ticker",
+    "trade_id": 20153558,
+    "sequence": 3262786978,
+    "time": str(datetime.utcnow()),
+    "product_id": "ETH-USD",
+    "price": "4388.01000000",
+    "side": "buy",
+    "last_size": "0.03000000",
+    "best_bid": "4388",
+    "best_ask": "4388.01"
+    }
+
+    can_msg = {
+    "type": "ticker",
+    "trade_id": 20153558,
+    "sequence": 3262786978,
+    "time": str(datetime.utcnow()),
+    "product_id": "ETH-USD",
+    "price": "4388.01000000",
+    "side": "buy",
+    "last_size": "0.03000000",
+    "best_bid": "4388",
+    "best_ask": "4388.01"
+    }
+
+    # testing methods of psql
     # execute a statement
-    #msg = {'type':"snapshot", 'product_id':"ETH-USD", 'bids':[[123,0.1], [124, 0.5]], 'asks':[[125,0.5], [126,1]]}
+    # msg = {'type':"snapshot", 'product_id':"ETH-USD", 'bids':[[123,0.1], [124, 0.5]], 'asks':[[125,0.5], [126,1]]}
     # print("message to add", msg)
     # insert_message(msg, connection, cursor)
 
