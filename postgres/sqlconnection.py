@@ -151,18 +151,79 @@ class psql_setup_operations(object):
     def check_db_settings():
         pass
 
-    def set_data_model(cur, conn):
-        # function that asks postgres if it can receive insert messages
-        # create the snapshots table
-        postgres_create_query_1 = """ CREATE TABLE IF NOT EXISTS snapshots(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, bids json, asks json);""" 
-        # create the messages table for l2update messages
-        postgres_create_query_2 = """ CREATE TABLE IF NOT EXISTS messages(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, changes json);"""
-        # create the messages table for ticker messages
-        #postgres_create_query_3 = """ CREATE TABLE IF NOT EXISTS ticker(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, message json);"""
-        execcommit(postgres_create_query_1, cur, conn)
-        execcommit(postgres_create_query_2, cur, conn)
-        
+    def set_data_model(self, cur, conn):
+        """
+        Function that creates (if not done so already) the tables for 
+        1. generated snapshots AS snapshots 
+        2. messages from the l2update channel AS messages
+        3. messages from the ticker channel AS ticker 
 
+        Parameters
+        ----------
+            cur : cursor object
+                ?
+            conn : connection object
+                ?
+        
+        Returns
+        -------
+            None
+
+        Raises
+        ------
+            None 
+        """
+        # Ensure we have timescaledb extention loaded
+        tsextload = """ CREATE EXTENSION IF NOT EXISTS timescaledb;"""
+        # create the snapshots table
+        create_snapshots = """ CREATE TABLE IF NOT EXISTS snapshots(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, bids json, asks json);""" 
+        # create the messages table for l2update messages
+        create_messages = """ CREATE TABLE IF NOT EXISTS messages(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, changes json);"""
+        # create the messages table for ticker messages
+        create_ticker = """ CREATE TABLE IF NOT EXISTS ticker(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, message json);"""
+        for query in [tsextload, create_snapshots, create_messages, create_ticker]:
+            execcommit(query, cur, conn)
+       
+        # turn things into timescale
+        timescale_queries = [
+            """ SELECT create_hypertable('snapshots', 'tstamp');""", 
+            """ SELECT create_hypertable('messages', 'tstamp');""", 
+            """ SELECT create_hypertable('ticker', 'tstamp');"""
+        ]
+        for query in [timescale_queries]:
+            execcommit(query, cur, conn)
+
+    # def custom_data_model(cur,conn):
+    #     """
+    #     testing Function that creates (if not done so already) the tables for 
+    #     1. generated snapshots AS snapshots 
+    #     2. messages from the l2update channel AS messages
+    #     3. messages from the ticker channel AS ticker 
+
+    #     Parameters
+    #     ----------
+    #         cur : cursor object
+    #             ?
+    #         conn : connection object
+    #             ?
+        
+    #     Returns
+    #     -------
+    #         None
+
+    #     Raises
+    #     ------
+    #         None 
+    #     """
+    #     # function that asks postgres if it can receive insert messages
+    #     # create the snapshots table
+    #     postgres_create_query_1 = """ CREATE TABLE IF NOT EXISTS snapshots(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, bids json, asks json);""" 
+    #     # create the messages table for l2update messages
+    #     postgres_create_query_2 = """ CREATE TABLE IF NOT EXISTS messages(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, changes json);"""
+    #     # create the messages table for ticker messages
+    #     #postgres_create_query_3 = """ CREATE TABLE IF NOT EXISTS ticker(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, message json);"""
+    #     execcommit(postgres_create_query_1, cur, conn)
+    #     execcommit(postgres_create_query_2, cur, conn)
 ##############################################################################
 #                                                                            #
 #                   PSQL CRUD Classes: CREATE operations                     #
@@ -504,6 +565,7 @@ class psql_update_operations(object):
         self.connection = connection 
         if psqloperations:
             super(psqloperations, self).__init__()
+            print("interited sucessfully")
             # this may throw an error if not a class 
         
     def mkt_can_overlap(self, msg):
@@ -559,14 +621,9 @@ def psql_delete_operations(object):
         pass
 
     def delete_last_message(self):
-        
-        sql = """ DELETE FROM messages WHERE """
+        lasttstamp = self.get_last_tstamp() # lets pray to jesus it inherited correctly.
+        sql = """ DELETE * FROM messages WHERE tstamp = {} """.format(lasttstamp)
         execcommit(sql, self.cursor, self.connection)
-        # step 2 I then need to validate the entry exists?
-        # step 1 i need to inherit or pass the cursor connection from psycopg2 to the class
-        # step 2 I then need to validate the entry exists?
-        # step 3 then delete entry
-        # step 4 ? sanity check to ensure the delete worked correctly?
 
 
 def main():
@@ -577,7 +634,22 @@ def main():
     # setup 
     cursor, connection = open_SQL_connection()
     print("sucessfully opened a connection to psql server")
-    read_instance = psql_read_operations(cursor, connection)
+    #read_instance = psql_read_operations(cursor, connection)
+    
+    # test 0: testing set data model functions
+    #     a.  Try seeing if create datamodel works
+    sdm_instance = psql_setup_operations()
+    sdm_instance.set_data_model(cursor, connection)
+
+    # test 1: testing insert operations with dummy data
+    # mock_snap = {
+    #     "type" : "snapshot",
+    #     "product_id" : "ETH-USD"
+    #     "bids" : [
+    #         [120]
+    #     ]
+    #     bids : [[][]]
+    # }
     
     # test 1: testing methods of the psql_read_operations
     #     a. get last tstamp
@@ -594,9 +666,39 @@ def main():
     out_df = pd.DataFrame(out)
     print(out_df.head())
     
+    # test 2: testing methods of the psql_update_operations
+    #      a. testing mkt can overlap
+    # setup by creating mkt and can messages with identical size
+    
+    mkt_msg = {
+    "type": "ticker",
+    "trade_id": 20153558,
+    "sequence": 3262786978,
+    "time": str(datetime.utcnow()),
+    "product_id": "ETH-USD",
+    "price": "4388.01000000",
+    "side": "buy",
+    "last_size": "0.03000000",
+    "best_bid": "4388",
+    "best_ask": "4388.01"
+    }
+
+    can_msg = {
+    "type": "ticker",
+    "trade_id": 20153558,
+    "sequence": 3262786978,
+    "time": str(datetime.utcnow()),
+    "product_id": "ETH-USD",
+    "price": "4388.01000000",
+    "side": "buy",
+    "last_size": "0.03000000",
+    "best_bid": "4388",
+    "best_ask": "4388.01"
+    }
+
     # testing methods of psql
     # execute a statement
-    #msg = {'type':"snapshot", 'product_id':"ETH-USD", 'bids':[[123,0.1], [124, 0.5]], 'asks':[[125,0.5], [126,1]]}
+    # msg = {'type':"snapshot", 'product_id':"ETH-USD", 'bids':[[123,0.1], [124, 0.5]], 'asks':[[125,0.5], [126,1]]}
     # print("message to add", msg)
     # insert_message(msg, connection, cursor)
 
