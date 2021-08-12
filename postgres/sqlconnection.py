@@ -6,12 +6,22 @@
 
 from datetime import datetime
 from datetime import timedelta
+#from tests.mockobjects import l2_update_messages
 import psycopg2
 from psycopg2.extras import execute_values
 from config import config
 import json
 import sys
 import pandas as pd 
+import os
+# print("the starting working directory is: ", os.getcwd())
+# os.chdir('..')
+# print("the directory one level up is: ", os.getcwd())
+# print("we will now append tests to the sys.path")
+sys.path.append(os.getcwd()+'/tests')
+print("the last entry in sys.path is....", sys.path[-1])
+from mockobjects import *
+
 ##############################################################################
 #                                                                            # 
 #                Miscelaneous Functions                                      #
@@ -184,11 +194,11 @@ class psql_setup_operations(object):
         for query in [tsextload, create_snapshots, create_messages, create_ticker]:
             execcommit(query, cur, conn)
        
-        # turn things into timescale
+        # turn things into timescale        
         timescale_queries = [
-            """ SELECT create_hypertable('snapshots', 'tstamp');""", 
-            """ SELECT create_hypertable('messages', 'tstamp');""", 
-            """ SELECT create_hypertable('ticker', 'tstamp');"""
+            """ SELECT create_hypertable('snapshots', 'tstamp', if_not_exists=>TRUE);""", 
+            """ SELECT create_hypertable('messages', 'tstamp', if_not_exists=>TRUE);""", 
+            """ SELECT create_hypertable('ticker', 'tstamp', if_not_exists=>TRUE);"""
         ]
         for query in [timescale_queries]:
             execcommit(query, cur, conn)
@@ -346,7 +356,7 @@ class psql_create_operations(object):
             changes=json.dumps(msg['changes'])
             postgres_insert_query =  """ INSERT INTO messages (tstamp, snapshot_connection_id, snapshot_reference_id, changes) VALUES (%s, %s, %s, %s)"""
             record_to_insert = (msg['time'], snapshot_connection_id, snapshot_reference_id, changes)
-            execcommit([postgres_insert_query, record_to_insert], self.cursor, self.conn)
+            execcommit([postgres_insert_query, record_to_insert], self.cursor, self.connection)
             count = self.cursor.rowcount
         elif msg['type'] =="ticker":
             postgres_insert_query = """ INSERT INTO ticker (tstamp, snapshot_connection_id, snapshot_reference_id, changes) VALUES (%s, %s, %s, %s)"""
@@ -627,6 +637,7 @@ def psql_delete_operations(object):
 
 
 def main():
+
     """
     test methods to check the operation of the script. 
     TEST 1: checking CREATE functions
@@ -642,14 +653,13 @@ def main():
     sdm_instance.set_data_model(cursor, connection)
 
     # test 1: testing insert operations with dummy data
-    # mock_snap = {
-    #     "type" : "snapshot",
-    #     "product_id" : "ETH-USD"
-    #     "bids" : [
-    #         [120]
-    #     ]
-    #     bids : [[][]]
-    # }
+    l2updateinstance  = l2_update_messages()
+    snapmsg = l2updateinstance.gen_snapshot()
+    l2msg = l2updateinstance.gen_l2update(price=0.99, size=1)
+    print(snapmsg)
+    create_instance = psql_create_operations(cursor, connection)
+    snap_cid, snap_rid = create_instance.insert_snapshot(snapmsg)
+    create_instance.insert_message(l2msg, snap_cid, snap_rid)
     
     # test 1: testing methods of the psql_read_operations
     #     a. get last tstamp
@@ -670,32 +680,6 @@ def main():
     #      a. testing mkt can overlap
     # setup by creating mkt and can messages with identical size
     
-    mkt_msg = {
-    "type": "ticker",
-    "trade_id": 20153558,
-    "sequence": 3262786978,
-    "time": str(datetime.utcnow()),
-    "product_id": "ETH-USD",
-    "price": "4388.01000000",
-    "side": "buy",
-    "last_size": "0.03000000",
-    "best_bid": "4388",
-    "best_ask": "4388.01"
-    }
-
-    can_msg = {
-    "type": "ticker",
-    "trade_id": 20153558,
-    "sequence": 3262786978,
-    "time": str(datetime.utcnow()),
-    "product_id": "ETH-USD",
-    "price": "4388.01000000",
-    "side": "buy",
-    "last_size": "0.03000000",
-    "best_bid": "4388",
-    "best_ask": "4388.01"
-    }
-
     # testing methods of psql
     # execute a statement
     # msg = {'type':"snapshot", 'product_id':"ETH-USD", 'bids':[[123,0.1], [124, 0.5]], 'asks':[[125,0.5], [126,1]]}

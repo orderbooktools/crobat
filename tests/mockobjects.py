@@ -10,14 +10,6 @@ from datetime import datetime
 #                    Data Objects                                          #
 ############################################################################
 
-cb_snapshot_msg = {
-    "type": "snapshot",
-    "bids": [["10101.10", "0.45054140"], ["10100.00", "0.75"],
-        ["10001.93", "1.454053"]],
-    "asks": [["10102.55", "0.57753524"], ["10103.60", "0.767"],
-        ["10104.12", "1.57753524"]]
-}
-
 class l2_update_messages(object):
     """
     class of l2_update messages based on their different types.
@@ -46,6 +38,7 @@ class l2_update_messages(object):
             self.l2update_msg = {}
             self.snapshot_msg = {
                 "type": "snapshot",
+                "product_id": "MKC-USD",
                 "bids": [["0.99", "0.1"], ["0.98", "0.2"], ["0.97", "0.4"], ["0.96", "0.8"], ["0.95", "1.6"]],
                 "asks": [["1.01", "0.1"], ["1.02", "0.2"], ["1.03", "0.4"], ["1.04", "0.8"], ["1.05", "1.6"]]
                 }
@@ -92,6 +85,7 @@ class l2_update_messages(object):
         #for the bid side
         self.snapshot = {
             "type": "snapshot",
+            "product_id": "MKC-USD",
             "bids": [],
             "asks": []
         }
