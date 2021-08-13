@@ -161,7 +161,7 @@ class l2_update_messages(object):
             ]}
         return self.l2update_msg
 
-class ticker_messages(object):
+class ticker_messages(l2_update_messages):
     """
     class that holds info on how to handle ticker messages 
     should have ssupport for l2 updates
@@ -218,7 +218,6 @@ class ticker_messages(object):
         --------
 
         """
-        self.trade_id += 1 # we will have to figure out
         self.sequence += 1 # how to use trade_id and sequence
         # the sequence to create a ticker message is to 
         # 1. generate the l2update at the best bid/ask 0.0 size or whatever reduction we need
@@ -226,22 +225,23 @@ class ticker_messages(object):
         # 3. and then return either the ticker stream or both. 
         # the key is that the ticker is still contingent on the orderbook.
         mkt_side = side
-        if "wl" in kwargs.keys():
-            wl = kwargs['wl']
-        else:
-            wl = 0
+        
+        wl = kwargs['wl'] if "wl" in kwargs.keys() else 0
+        
         if mkt_side == "buy": # market buy at the best ask
             mkt_price = float(self.snapshot['asks'][wl][0]) # retrieve the best ask
-            mkt_size = max(float(self.snapshot['asks'][wl][1]), float(self.snapshot['asks'][wl][1]-size))
-
+            mkt_size = float(self.snapshot['asks'][wl][1]) if float(self.snapshot['asks'][wl][1]) - size< 0 else size
+            l2_size = 0.0 if float(self.snapshot['asks'][wl][1]) == mkt_size else float(self.snapshot['asks'][wl][1]) - size
+            
         else:
             mkt_price = float(self.snapshot['bids'][wl][0])
-            mkt_size = max(float(self.sn))float(self.snapshot['bids'][wl][1]-size)
-           
-        l2side = "sell" if mkt_side == "buy" else "buy" # we update the opposite side
+            mkt_size = float(self.snapshot['bids'][wl][1]) if float(self.snapshot['bids'][wl][1]) - size< 0 else size
+            l2_size = 0.0 if float(self.snapshot['bids'][wl][1]) == mkt_size else float(self.snapshot['bids'][wl][1]) - size
 
+
+        l2side = "sell" if mkt_side == "buy" else "buy" # we update the opposite side
         self.timenow = datetime.utcnow()
-        self.mkt_can_msg = self.gen_l2update(side=l2side, price=mkt_price, size=mkt_size)
+        self.mkt_can_msg = self.gen_l2update(side=l2side, price=mkt_price, size=l2_size)
         self.ticker_msg = { 
             "type": "ticker",
             "trade_id": self.trade_id,
@@ -254,25 +254,27 @@ class ticker_messages(object):
             "best_bid": str(self.snapshot['bids'][wl][0]),
             "best_ask": str(self.snapshot['asks'][wl][0])
         }
-
-        return self.ticker_msg, self.mkt_can_msg
+        if (l2_size == 0.0) and (size > mkt_size):
+            remaining_size = size - mkt_size
+            return self.ticker_msg, self.mkt_can_msg, remaining_size
+        else:
+            remaining_size = 0
+            return self.ticker_msg, self.mkt_can_msg, remaining_size
+            # that may be bad code
+            # needs to correct the best bid and best ask call for when the price level is extinguished
 
     def gen_multi_message_ticker(self, side="buy", size=0.0, **kwargs):
-        ticker_msgs, l2update_msgs = [],[]
-        agg_size = size
-        current_ticker_msg, current_l2_update_msg = self.gen_single_msg_ticker(side, agg_size)
-
-        while agg_size > 0:            
-            if side=="buy":
-                agg_size -= self.snapshot['asks'][]
-            current_ticker_msg.update({'last_size':str(size-agg_size)})
-            current_l2_update_msg['changes'][0][1] = str(0.0)
-            ticker_messages.append(current_ticker_msg)
+        self.trade_id += 1 # we will have to figure out
+        current_ticker_msg, current_l2_update_msg, remaining_size = self.gen_single_msg_ticker(side, size)
+        ticker_msgs, l2update_msgs = [current_ticker_msg],[current_l2_update_msg]
+        current_level=0
+        while remaining_size > 0:            
+            current_level +=1
+            current_ticker_msg, current_l2_update_msg, remaining_size = self.gen_single_msg_ticker(side, size, wl=current_level)
+            ticker_msgs.append(current_ticker_msg)
             l2update_msgs.append(current_l2_update_msg)
-        else:
-            pass
-
         return ticker_msgs, l2update_msgs
+
 
 
                      

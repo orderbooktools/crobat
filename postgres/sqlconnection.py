@@ -6,6 +6,7 @@
 
 from datetime import datetime
 from datetime import timedelta
+#from tests.mockobjects import ticker_messages
 #from tests.mockobjects import l2_update_messages
 import psycopg2
 from psycopg2.extras import execute_values
@@ -190,7 +191,7 @@ class psql_setup_operations(object):
         # create the messages table for l2update messages
         create_messages = """ CREATE TABLE IF NOT EXISTS messages(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, changes json);"""
         # create the messages table for ticker messages
-        create_ticker = """ CREATE TABLE IF NOT EXISTS ticker(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, message json);"""
+        create_ticker = """ CREATE TABLE IF NOT EXISTS ticker(tstamp TIMESTAMP, trade_id BIGINT, sequence BIGINT, price NUMERIC, side TEXT, lastsize NUMERIC, bestbid NUMERIC, bestask NUMERIC);"""
         for query in [tsextload, create_snapshots, create_messages, create_ticker]:
             execcommit(query, cur, conn)
        
@@ -415,8 +416,8 @@ class psql_create_operations(object):
             None
         """
         if msg['type'] == 'ticker':
-            postgres_insert_query = """ INSERT INTO ticker (sequence, time, price, side, lastsize, bestbid, bestask) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
-            record_to_insert = (int(msg['sequence']), msg['time'], float(msg['price']), msg['side'], float(msg['last_size']),float(msg['best_bid']), float(msg['best_ask']))
+            postgres_insert_query = """ INSERT INTO ticker (tstamp, trade_id, sequence, price, side, lastsize, bestbid, bestask) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
+            record_to_insert = (msg['time'], int(msg['trade_id']), int(msg['sequence']), float(msg['price']), msg['side'], float(msg['last_size']),float(msg['best_bid']), float(msg['best_ask']))
             execcommit([postgres_insert_query, record_to_insert], self.cursor, self.connection)
             count = self.cursor.rowcount
 
@@ -652,22 +653,30 @@ def main():
     sdm_instance = psql_setup_operations()
     sdm_instance.set_data_model(cursor, connection)
 
-    # test 1: testing insert operations with dummy data
+    # test 1: testing methods of the psql_create_operations
+    create_instance = psql_create_operations(cursor, connection)
+
+    #    a. testing snap messages
     l2updateinstance  = l2_update_messages()
     snapmsg = l2updateinstance.gen_snapshot()
-    l2msg = l2updateinstance.gen_l2update(price=0.99, size=1)
-    print(snapmsg)
-    create_instance = psql_create_operations(cursor, connection)
     snap_cid, snap_rid = create_instance.insert_snapshot(snapmsg)
+
+    #    b. testing l2update messages 
+    l2msg = l2updateinstance.gen_l2update(price=0.99, size=1)
     create_instance.insert_message(l2msg, snap_cid, snap_rid)
     
+    #    c. testing ticker messages 
+    tickerinstance = ticker_messages(snapmsg)
+    ticker_msg_list, l2_update_msg_list = tickerinstance.gen_multi_message_ticker(size=0.05)
+    print(ticker_msg_list[0], l2_update_msg_list[0])
+    create_instance.insert_ticker_message(ticker_msg_list[0])
+
     # test 1: testing methods of the psql_read_operations
     #     a. get last tstamp
     read_instance = psql_read_operations(cursor, connection)
     latest_stamp = read_instance.get_last_tstamp()
     print(latest_stamp)
 
-    
     #     b. custom sql fetch get a list of recorded change messages in the last 10 seconds
     start_stamp = latest_stamp - timedelta(seconds=1)
     print("10 seconds before the latest message message???", start_stamp)
@@ -678,7 +687,7 @@ def main():
     
     # test 2: testing methods of the psql_update_operations
     #      a. testing mkt can overlap
-    # setup by creating mkt and can messages with identical size
+    # setup by creating mkt and can messages wit
     
     # testing methods of psql
     # execute a statement
