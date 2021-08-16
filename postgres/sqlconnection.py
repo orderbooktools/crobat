@@ -21,7 +21,7 @@ import os
 # print("we will now append tests to the sys.path")
 sys.path.append(os.getcwd()+'/tests')
 print("the last entry in sys.path is....", sys.path[-1])
-from mockobjects import *
+#from mockobjects import *
 
 ##############################################################################
 #                                                                            # 
@@ -63,6 +63,7 @@ def execcommit(query, cur_obj, conn_obj):
         sql = query[0]
         record = query[1]
         cur_obj.execute(sql, record)
+        conn_obj.commit()
     else:
         cur_obj.execute(query)
         conn_obj.commit()  
@@ -159,6 +160,10 @@ class psql_setup_operations(object):
         set_data_model(cur, conn)
             ??
     """
+    def __init__(self):
+        print("initializing instance of the class psql setup operations")
+        pass
+
     def check_db_settings():
         pass
 
@@ -335,7 +340,7 @@ class psql_create_operations(object):
 
     def insert_message(self, msg, snapshot_connection_id, snapshot_reference_id):
         """
-        inserts message inthe postgres table. uses snapshot connection id and snapshot reference id as primary and seconadary keys 
+        inserts message in the postgres table. uses snapshot connection id and snapshot reference id as primary and seconadary keys 
 
         Parameters
         ----------
@@ -358,7 +363,8 @@ class psql_create_operations(object):
             postgres_insert_query =  """ INSERT INTO messages (tstamp, snapshot_connection_id, snapshot_reference_id, changes) VALUES (%s, %s, %s, %s)"""
             record_to_insert = (msg['time'], snapshot_connection_id, snapshot_reference_id, changes)
             execcommit([postgres_insert_query, record_to_insert], self.cursor, self.connection)
-            count = self.cursor.rowcount
+            #print("sucessfully inserted a message!")
+
         elif msg['type'] =="ticker":
             postgres_insert_query = """ INSERT INTO ticker (tstamp, snapshot_connection_id, snapshot_reference_id, changes) VALUES (%s, %s, %s, %s)"""
             record_to_insert = (msg['time'], snapshot_connection_id, snapshot_reference_id, msg)
@@ -419,7 +425,6 @@ class psql_create_operations(object):
             postgres_insert_query = """ INSERT INTO ticker (tstamp, trade_id, sequence, price, side, lastsize, bestbid, bestask) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
             record_to_insert = (msg['time'], int(msg['trade_id']), int(msg['sequence']), float(msg['price']), msg['side'], float(msg['last_size']),float(msg['best_bid']), float(msg['best_ask']))
             execcommit([postgres_insert_query, record_to_insert], self.cursor, self.connection)
-            count = self.cursor.rowcount
 
 
 ##############################################################################
@@ -582,6 +587,8 @@ class psql_update_operations(object):
     def mkt_can_overlap(self, msg):
         """
         Supposed to check the postgres table for market cancelation overlaps. 
+        Might not actually be necessary as there are two separate tables that
+        hold your info?
         
         Parameters
         ----------
@@ -596,10 +603,28 @@ class psql_update_operations(object):
             None
         """
         #step 1. query the db to get a a short list of entries
-        sql = """ select tstamp, changes from messages order by tstamp desc limit 5;"""
-        execcommit(sql, self.cursor, self.connection)
+        sql_can = """ select tstamp, changes from messages order by tstamp desc limit 5;"""
+        execcommit(sql_can, self.cursor, self.connection)
         returns = self.cursor.fetchall()
+        # excise the 
+        sql_mkt = """ select tstamp, """
         print(returns)
+
+    # def custom_change(self,table, tstamp, ,):
+    #     """
+    #     function to execute custom updates to a table
+    #     """        
+    #     execcommit(sql, self.cursor, self.connection)
+    #     returns = self.cursor.fetchall()
+    #     if len(returns) > 1:
+    #         print("multi item return of len: ", len(returns))
+    #         returns_list = [] 
+    #         for _ in returns:
+    #             returns_list.append(_[0][0])
+    #         return returns_list
+    #     else:
+    #         return returns[0][0]
+
 
 ##############################################################################
 #                                                                            #
@@ -635,7 +660,9 @@ def psql_delete_operations(object):
         lasttstamp = self.get_last_tstamp() # lets pray to jesus it inherited correctly.
         sql = """ DELETE * FROM messages WHERE tstamp = {} """.format(lasttstamp)
         execcommit(sql, self.cursor, self.connection)
-
+    
+    def delete_messages(self, **kwargs):
+        pass
 
 def main():
 
