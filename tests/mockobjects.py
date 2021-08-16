@@ -10,14 +10,6 @@ from datetime import datetime
 #                    Data Objects                                          #
 ############################################################################
 
-cb_snapshot_msg = {
-    "type": "snapshot",
-    "bids": [["10101.10", "0.45054140"], ["10100.00", "0.75"],
-        ["10001.93", "1.454053"]],
-    "asks": [["10102.55", "0.57753524"], ["10103.60", "0.767"],
-        ["10104.12", "1.57753524"]]
-}
-
 class l2_update_messages(object):
     """
     class of l2_update messages based on their different types.
@@ -38,7 +30,7 @@ class l2_update_messages(object):
     """
 
     def __init__(self, ws_feed_on=False):
-        self.starttime = datetime.utcnow()
+        self.timenow = datetime.utcnow()
         if ws_feed_on:
             pass
         else:
@@ -46,6 +38,7 @@ class l2_update_messages(object):
             self.l2update_msg = {}
             self.snapshot_msg = {
                 "type": "snapshot",
+                "product_id": "MKC-USD",
                 "bids": [["0.99", "0.1"], ["0.98", "0.2"], ["0.97", "0.4"], ["0.96", "0.8"], ["0.95", "1.6"]],
                 "asks": [["1.01", "0.1"], ["1.02", "0.2"], ["1.03", "0.4"], ["1.04", "0.8"], ["1.05", "1.6"]]
                 }
@@ -92,6 +85,7 @@ class l2_update_messages(object):
         #for the bid side
         self.snapshot = {
             "type": "snapshot",
+            "product_id": "MKC-USD",
             "bids": [],
             "asks": []
         }
@@ -157,7 +151,7 @@ class l2_update_messages(object):
         self.l2update_msg = {
             "type": "l2update",
             "product_id": "MKC-USD", #MKC-USD MocK Coin - USD
-            "time": str(self.starttime), #"2019-08-14T20:42:27.265Z",
+            "time": str(self.timenow), #"2019-08-14T20:42:27.265Z",
             "changes": [
                 [
                     str(side),
@@ -167,7 +161,7 @@ class l2_update_messages(object):
             ]}
         return self.l2update_msg
 
-class ticker_messages(object):
+class ticker_messages(l2_update_messages):
     """
     class that holds info on how to handle ticker messages 
     should have ssupport for l2 updates
@@ -191,11 +185,39 @@ class ticker_messages(object):
             }
         super(l2_update_messages).__init__()
 
-    def gen_ticker(self, side="buy", price=0.0, size=0.0, **kwargs):
+    def gen_single_msg_ticker(self, side="buy", size=0.0, **kwargs):
         """
         class function that generates ticker messages
+
+        Parameters
+        ----------
+            side : str
+                can be "buy" or "sell"
+            price : float64
+                price where the market order is executed
+            size : float64
+                size of the market order
+            kwargs : see below?
+                options to generate the associated cancellation l2 update.
+                however, I feel that this option should be taken away
+                because... market orders should always update the orderbook
+        
+        Returns
+        -------
+            ticker_msg : list of dict
+                ticker message(s) depending how hard the market order hit the order book.
+            l2update_msg : list of dict 
+                associated cancellation message(s) depending how hard the market order hit the 
+                order book.
+        
+        Raises
+        ------
+            None 
+        
+        See Also
+        --------
+
         """
-        self.trade_id += 1 # we will have to figure out
         self.sequence += 1 # how to use trade_id and sequence
         # the sequence to create a ticker message is to 
         # 1. generate the l2update at the best bid/ask 0.0 size or whatever reduction we need
@@ -203,15 +225,23 @@ class ticker_messages(object):
         # 3. and then return either the ticker stream or both. 
         # the key is that the ticker is still contingent on the orderbook.
         mkt_side = side
-        if mkt_side == "buy":
-            mkt_price = float(self.snapshot['asks'][0][0])
-            mkt_size = float(self.snapshot['asks'][0][1]-size)
+        
+        wl = kwargs['wl'] if "wl" in kwargs.keys() else 0
+        
+        if mkt_side == "buy": # market buy at the best ask
+            mkt_price = float(self.snapshot['asks'][wl][0]) # retrieve the best ask
+            mkt_size = float(self.snapshot['asks'][wl][1]) if float(self.snapshot['asks'][wl][1]) - size< 0 else size
+            l2_size = 0.0 if float(self.snapshot['asks'][wl][1]) == mkt_size else float(self.snapshot['asks'][wl][1]) - size
+            
         else:
-            mkt_price = float(self.snapshot['bids'][0][0])
-            mkt_size = float(self.snapshot['bids'][0][1]-size)
-        
-        mkt_can_msg = self.gen_l2update(side=mkt_side, price=mkt_price, size=mkt_size)
-        
+            mkt_price = float(self.snapshot['bids'][wl][0])
+            mkt_size = float(self.snapshot['bids'][wl][1]) if float(self.snapshot['bids'][wl][1]) - size< 0 else size
+            l2_size = 0.0 if float(self.snapshot['bids'][wl][1]) == mkt_size else float(self.snapshot['bids'][wl][1]) - size
+
+
+        l2side = "sell" if mkt_side == "buy" else "buy" # we update the opposite side
+        self.timenow = datetime.utcnow()
+        self.mkt_can_msg = self.gen_l2update(side=l2side, price=mkt_price, size=l2_size)
         self.ticker_msg = { 
             "type": "ticker",
             "trade_id": self.trade_id,
@@ -219,23 +249,35 @@ class ticker_messages(object):
             "time": str(self.timenow),
             "product_id": "MKC-USD",
             "price": str(mkt_price),
-            "side": "buy", # Taker side
+            "side": mkt_side, # Taker side
             "last_size": str(mkt_size),
-            "best_bid": "0.0",#str(self.snapshot['bids'][0][0]),
-            "best_ask": "0.0" #str(self.snapshot['asks'][0][0])
+            "best_bid": str(self.snapshot['bids'][wl][0]),
+            "best_ask": str(self.snapshot['asks'][wl][0])
         }
-        ##settings to consider in kwargs
-        #gen_l2update_msg
-        if 'gen_l2update_msg' in kwargs.keys():
-            pass
-            
-    def gen_aggregate_order(self,side, price, size, **kwargs):
-        """
-        this generates a sequence of ticker messages that extinguish a set size
-        returns the message sequence along with metadata about the execution price, time, and size
-        """
-        pass
+        if (l2_size == 0.0) and (size > mkt_size):
+            remaining_size = size - mkt_size
+            return self.ticker_msg, self.mkt_can_msg, remaining_size
+        else:
+            remaining_size = 0
+            return self.ticker_msg, self.mkt_can_msg, remaining_size
+            # that may be bad code
+            # needs to correct the best bid and best ask call for when the price level is extinguished
 
+    def gen_multi_message_ticker(self, side="buy", size=0.0, **kwargs):
+        self.trade_id += 1 # we will have to figure out
+        current_ticker_msg, current_l2_update_msg, remaining_size = self.gen_single_msg_ticker(side, size)
+        ticker_msgs, l2update_msgs = [current_ticker_msg],[current_l2_update_msg]
+        current_level=0
+        while remaining_size > 0:            
+            current_level +=1
+            current_ticker_msg, current_l2_update_msg, remaining_size = self.gen_single_msg_ticker(side, size, wl=current_level)
+            ticker_msgs.append(current_ticker_msg)
+            l2update_msgs.append(current_l2_update_msg)
+        return ticker_msgs, l2update_msgs
+
+
+
+                     
 # class gen_orderbook_updates(object):
 #     """
 #     Highler level test class that directly modifies the orderboook object.

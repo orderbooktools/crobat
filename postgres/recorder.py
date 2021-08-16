@@ -8,7 +8,7 @@ import sys,os
 os.chdir('.')
 sys.path.append(os.getcwd()+'/crobat/crobat')
 sys.path.append(os.getcwd()+'/crobat/postgres')
-sys.path.append(os.getcwd()+'/crobat/grafana')
+#sys.path.append(os.getcwd()+'/crobat/grafana')
 print("printing the sub sys path for the recorder module for postgres")
 for _ in sys.path:
     print(_)
@@ -16,11 +16,7 @@ import orderbook as LOBf
 import orderbook_helpers as hf 
 import gc
 import numpy as np
-import statistics
 import sqlconnection
-import CUSUMs
-
-
 
 class Ticker(Client):
     """
@@ -135,14 +131,13 @@ class Ticker(Client):
         self.hist = LOBf.history()
         self.position_range = input_args.position_range
         self.recording_duration = input_args.recording_duration
-        self.counter = 0 
         self.snapshot_connection_id = None
         self.snapshot_reference_id = None
         self.cursor, self.connection = sqlconnection.open_SQL_connection()
-        self.updated_snap = False
-        self.start_CUSUM = False
-        self.l0 = 0
+        self._snap = False
         self.start_stamp_arrived = False
+        self.create_instance = sqlconnection.psql_create_operations(self.cursor, self.connection)
+        self.read_instance = sqlconnection.psql_read_operations(self.cursor, self.connection)
         super().__init__(loop, channel) # something about a parent class sending attributes to the child class (Ticker)
 
     def on_open(self):
@@ -169,7 +164,6 @@ class Ticker(Client):
             copra.Client.on_open()
         """
         print("Let's count the L3 messages!", self.time_now)
-        sqlconnection.set_data_model(self.cursor, self.connection)
         super().on_open() # inheriting things from the parent class who really knows    
 
     def on_message(self, msg):
@@ -182,7 +176,7 @@ class Ticker(Client):
     
         Parameters
         ----------
-            msg : dict / json
+            msg : dict
                 message payload as a json object/dict 
                 see coinbasepro messages for message payload structure
             
@@ -203,78 +197,37 @@ class Ticker(Client):
         """
         #print(msg['type'])
         if msg['type'] == "ticker": 
-            prev_timestamp = sqlconnection.get_last_tstamp(self.cursor, self.connection)
-            sqlconnection.insert_ticker_message(msg, self.cursor, self.connection)
-            #I need mkt can overlap for the postgresql
-            if not self.start_stamp_arrived:
-                self.start_stamp = datetime.strptime(msg['time'],'%Y-%m-%dT%H:%M:%S.%fZ') # msg['time'] into a datetime object
-                self.start_stamp_arrived = True
-                
-            if self.start_CUSUM:
-                volm = float(msg['last_size'])
-                timestamp = datetime.strptime(msg['time'],'%Y-%m-%dT%H:%M:%S.%fZ')
-                #current_timestamp = get_last_tstamp(self.cursor, self.connection)
-                deltatime = (timestamp - prev_timestamp).total_seconds()
-                self.CUSUM.Update(self.l0, volm, deltatime, timestamp)
-                #current_state = self.CUSUM.get_vars()
-                #print(current_state)
-                self.CUSUM.write_to_tsdb(self.cursor, self.connection)
+            if self.snapshot_connection_id:   # needs functionality for ticker only
+                self.create_instance.insert_ticker_message(msg, self.cursor, self.connection)
 
-       
+        if msg['type'] == "snapshot":
+            self.snapshot_connection_id , self.snapshot_reference_id = self.create_instance.insert_snapshot(msg)
+            self.hist.initialize_snap_events(msg, self.time_now)
+            self.min_dec = self.hist.min_dec
+        
+        if msg['type'] == "l2update":
+            time=datetime.strptime(msg['time'],'%Y-%m-%dT%H:%M:%S.%fZ') 
+            changes = msg['changes'] 
+            side = 'bid' if changes[0][0] == "buy" else "ask" 
+            price_level = float(changes[0][1]) 
+            level_depth = np.around( float(changes[0][2]), decimals=self.min_dec)
+            pre_level_depth = 0 
+            self.create_instance.insert_message(msg, self.snapshot_connection_id, self.snapshot_reference_id)
+            if side =="bid":
+                price_match_index = list(filter(lambda x: LOBf.price_match(self.hist.bid_range[x], price_level), range(len(self.hist.bid_range))))
+                LOBf.UpdateSnapshot_bid_Seq(self.hist, time, side, price_level, level_depth, pre_level_depth, price_match_index, self.position_range)
+            elif side =="ask":
+                price_match_index = list(filter(lambda x: LOBf.price_match(self.hist.ask_range[x], price_level), range(len(self.hist.ask_range))))
+                LOBf.UpdateSnapshot_ask_Seq(self.hist, time, side, price_level, level_depth, pre_level_depth, price_match_index, self.position_range)
+            else:
+                print("unknown side")
+        if self.snapshot_connection_id:
+            if (datetime.utcnow()- datetime.fromtimestamp(int(self.snapshot_connection_id[7:-5]))) > timedelta(minutes=1):
+                self.snapshot_reference_id = self.create_instance.insert_minute_snapshot(msg, self.hist, self.snapshot_connection_id)
+                print("created minute snapshot")
 
-        if (datetime.utcnow() - self.time_now).total_seconds() > 10 and not self.start_CUSUM:  # after 1 second has passed
-            if not self.start_stamp_arrived:
-                self.start_stamp = datetime.strptime(msg['time'],'%Y-%m-%dT%H:%M:%S.%fZ') # msg['time'] into a datetime object
-                self.start_stamp_arrived = True
-            
-            latest_stamp = sqlconnection.get_last_tstamp(self.cursor, self.connection)
-            sql_cmd = """ SELECT SUM(lastsize) AS TOTAL FROM ethusd WHERE time BETWEEN '{}' AND '{}' ;""".format(self.start_stamp, latest_stamp)
-            sum_orders = float(sqlconnection.custom_sql_fetch(self.cursor, self.connection, sql_cmd))
-            self.l0 = float(sum_orders/((latest_stamp - self.start_stamp).total_seconds()))
-            print("initial rate of market order arrival: ", self.l0, " ETH/s")  ## a way to recall wtf was posted
-            h = 0.1
-            epsilon = 0.01
-            self.CUSUM = CUSUMs.CUSUM(self.l0, epsilon, float(msg['last_size']), h, latest_stamp)
-            self.start_CUSUM = True 
-
-            #self.loop.create_task(self.close()) # ASyncIO nonsense
-
-
-            
-            #i need a snapshot connection and reference id to asssign this to
-            #store the message 
-            
-        # if msg['type'] == "snapshot":
-        #     self.snapshot_connection_id , self.snapshot_reference_id= insert_snapshot(msg, self.cursor, self.connection)
-        #     self.hist.initialize_snap_events(msg, self.time_now)
-        #     self.min_dec = self.hist.min_dec
-        # if msg['type'] == "l2update":
-        #     time=datetime.strptime(msg['time'],'%Y-%m-%dT%H:%M:%S.%fZ') #from the message extract time
-        #     changes = msg['changes'] #from the message extract the changes
-        #     side = 'bid' if changes[0][0] == "buy" else "ask" #side in which the changes happend (don't worry its orderbook crap)
-        #     price_level = float(changes[0][1]) #the position in x_range that the change is affecting
-        #     level_depth = np.around( float(changes[0][2]), decimals=self.min_dec) #the value in x_volm that is changing
-        #     pre_level_depth = 0 
-        #     insert_message(msg, self.cursor, self.connection, self.snapshot_connection_id, self.snapshot_reference_id)
-        #     if side =="bid":
-        #         price_match_index = list(filter(lambda x: LOBf.price_match(self.hist.bid_range[x], price_level), range(len(self.hist.bid_range))))
-        #         LOBf.Update_bid_Seq(self.hist, time, side, price_level, level_depth, pre_level_depth, price_match_index)
-        #     elif side =="ask":
-        #         price_match_index = list(filter(lambda x: LOBf.price_match(self.hist.ask_range[x], price_level), range(len(self.hist.ask_range))))
-        #         LOBf.Update_ask_Seq(self.hist, time, side, price_level, level_depth, pre_level_depth, price_match_index)
-        #     else:
-        #         print("unknown side")               
-
-        if (datetime.utcnow() - self.time_now).total_seconds() > self.recording_duration:  # after 1 second has passed
-            self.loop.create_task(self.close()) # ASyncIO nonsense
-
-        # if datetime.utcnow().second == 00 and not self.updated_snap: # for now its do it every minute
-        #     self.snapshot_reference_id = insert_minute_snapshot(self.hist, self.cursor, self.connection, self.snapshot_connection_id)
-        #     self.updated_snap = True
-        # elif datetime.utcnow().second == 00 and self.updated_snap:
-        #     pass
-        # else:
-        #     self.updated_snap = False
+        if (datetime.utcnow() - self.time_now).total_seconds() > self.recording_duration:  
+            self.loop.create_task(self.close())
 
     def on_close(self, was_clean, code, reason):
         """
@@ -307,6 +260,7 @@ class Ticker(Client):
         print(was_clean)
         print(code)
         print(reason)
+        gc.collect()
 
 def main():
     pass

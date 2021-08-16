@@ -6,12 +6,23 @@
 
 from datetime import datetime
 from datetime import timedelta
+#from tests.mockobjects import ticker_messages
+#from tests.mockobjects import l2_update_messages
 import psycopg2
 from psycopg2.extras import execute_values
 from config import config
 import json
 import sys
 import pandas as pd 
+import os
+# print("the starting working directory is: ", os.getcwd())
+# os.chdir('..')
+# print("the directory one level up is: ", os.getcwd())
+# print("we will now append tests to the sys.path")
+sys.path.append(os.getcwd()+'/tests')
+print("the last entry in sys.path is....", sys.path[-1])
+#from mockobjects import *
+
 ##############################################################################
 #                                                                            # 
 #                Miscelaneous Functions                                      #
@@ -52,6 +63,7 @@ def execcommit(query, cur_obj, conn_obj):
         sql = query[0]
         record = query[1]
         cur_obj.execute(sql, record)
+        conn_obj.commit()
     else:
         cur_obj.execute(query)
         conn_obj.commit()  
@@ -148,6 +160,10 @@ class psql_setup_operations(object):
         set_data_model(cur, conn)
             ??
     """
+    def __init__(self):
+        print("initializing instance of the class psql setup operations")
+        pass
+
     def check_db_settings():
         pass
 
@@ -180,15 +196,15 @@ class psql_setup_operations(object):
         # create the messages table for l2update messages
         create_messages = """ CREATE TABLE IF NOT EXISTS messages(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, changes json);"""
         # create the messages table for ticker messages
-        create_ticker = """ CREATE TABLE IF NOT EXISTS ticker(tstamp TIMESTAMP, snapshot_connection_id TEXT, snapshot_reference_id TEXT, message json);"""
+        create_ticker = """ CREATE TABLE IF NOT EXISTS ticker(tstamp TIMESTAMP, trade_id BIGINT, sequence BIGINT, price NUMERIC, side TEXT, lastsize NUMERIC, bestbid NUMERIC, bestask NUMERIC);"""
         for query in [tsextload, create_snapshots, create_messages, create_ticker]:
             execcommit(query, cur, conn)
        
-        # turn things into timescale
+        # turn things into timescale        
         timescale_queries = [
-            """ SELECT create_hypertable('snapshots', 'tstamp');""", 
-            """ SELECT create_hypertable('messages', 'tstamp');""", 
-            """ SELECT create_hypertable('ticker', 'tstamp');"""
+            """ SELECT create_hypertable('snapshots', 'tstamp', if_not_exists=>TRUE);""", 
+            """ SELECT create_hypertable('messages', 'tstamp', if_not_exists=>TRUE);""", 
+            """ SELECT create_hypertable('ticker', 'tstamp', if_not_exists=>TRUE);"""
         ]
         for query in [timescale_queries]:
             execcommit(query, cur, conn)
@@ -324,7 +340,7 @@ class psql_create_operations(object):
 
     def insert_message(self, msg, snapshot_connection_id, snapshot_reference_id):
         """
-        inserts message inthe postgres table. uses snapshot connection id and snapshot reference id as primary and seconadary keys 
+        inserts message in the postgres table. uses snapshot connection id and snapshot reference id as primary and seconadary keys 
 
         Parameters
         ----------
@@ -346,8 +362,9 @@ class psql_create_operations(object):
             changes=json.dumps(msg['changes'])
             postgres_insert_query =  """ INSERT INTO messages (tstamp, snapshot_connection_id, snapshot_reference_id, changes) VALUES (%s, %s, %s, %s)"""
             record_to_insert = (msg['time'], snapshot_connection_id, snapshot_reference_id, changes)
-            execcommit([postgres_insert_query, record_to_insert], self.cursor, self.conn)
-            count = self.cursor.rowcount
+            execcommit([postgres_insert_query, record_to_insert], self.cursor, self.connection)
+            #print("sucessfully inserted a message!")
+
         elif msg['type'] =="ticker":
             postgres_insert_query = """ INSERT INTO ticker (tstamp, snapshot_connection_id, snapshot_reference_id, changes) VALUES (%s, %s, %s, %s)"""
             record_to_insert = (msg['time'], snapshot_connection_id, snapshot_reference_id, msg)
@@ -405,10 +422,9 @@ class psql_create_operations(object):
             None
         """
         if msg['type'] == 'ticker':
-            postgres_insert_query = """ INSERT INTO ticker (sequence, time, price, side, lastsize, bestbid, bestask) VALUES (%s, %s, %s, %s, %s, %s, %s)"""
-            record_to_insert = (int(msg['sequence']), msg['time'], float(msg['price']), msg['side'], float(msg['last_size']),float(msg['best_bid']), float(msg['best_ask']))
+            postgres_insert_query = """ INSERT INTO ticker (tstamp, trade_id, sequence, price, side, lastsize, bestbid, bestask) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
+            record_to_insert = (msg['time'], int(msg['trade_id']), int(msg['sequence']), float(msg['price']), msg['side'], float(msg['last_size']),float(msg['best_bid']), float(msg['best_ask']))
             execcommit([postgres_insert_query, record_to_insert], self.cursor, self.connection)
-            count = self.cursor.rowcount
 
 
 ##############################################################################
@@ -571,6 +587,8 @@ class psql_update_operations(object):
     def mkt_can_overlap(self, msg):
         """
         Supposed to check the postgres table for market cancelation overlaps. 
+        Might not actually be necessary as there are two separate tables that
+        hold your info?
         
         Parameters
         ----------
@@ -585,10 +603,28 @@ class psql_update_operations(object):
             None
         """
         #step 1. query the db to get a a short list of entries
-        sql = """ select tstamp, changes from messages order by tstamp desc limit 5;"""
-        execcommit(sql, self.cursor, self.connection)
+        sql_can = """ select tstamp, changes from messages order by tstamp desc limit 5;"""
+        execcommit(sql_can, self.cursor, self.connection)
         returns = self.cursor.fetchall()
+        # excise the 
+        sql_mkt = """ select tstamp, """
         print(returns)
+
+    # def custom_change(self,table, tstamp, ,):
+    #     """
+    #     function to execute custom updates to a table
+    #     """        
+    #     execcommit(sql, self.cursor, self.connection)
+    #     returns = self.cursor.fetchall()
+    #     if len(returns) > 1:
+    #         print("multi item return of len: ", len(returns))
+    #         returns_list = [] 
+    #         for _ in returns:
+    #             returns_list.append(_[0][0])
+    #         return returns_list
+    #     else:
+    #         return returns[0][0]
+
 
 ##############################################################################
 #                                                                            #
@@ -624,9 +660,12 @@ def psql_delete_operations(object):
         lasttstamp = self.get_last_tstamp() # lets pray to jesus it inherited correctly.
         sql = """ DELETE * FROM messages WHERE tstamp = {} """.format(lasttstamp)
         execcommit(sql, self.cursor, self.connection)
-
+    
+    def delete_messages(self, **kwargs):
+        pass
 
 def main():
+
     """
     test methods to check the operation of the script. 
     TEST 1: checking CREATE functions
@@ -641,23 +680,30 @@ def main():
     sdm_instance = psql_setup_operations()
     sdm_instance.set_data_model(cursor, connection)
 
-    # test 1: testing insert operations with dummy data
-    # mock_snap = {
-    #     "type" : "snapshot",
-    #     "product_id" : "ETH-USD"
-    #     "bids" : [
-    #         [120]
-    #     ]
-    #     bids : [[][]]
-    # }
+    # test 1: testing methods of the psql_create_operations
+    create_instance = psql_create_operations(cursor, connection)
+
+    #    a. testing snap messages
+    l2updateinstance  = l2_update_messages()
+    snapmsg = l2updateinstance.gen_snapshot()
+    snap_cid, snap_rid = create_instance.insert_snapshot(snapmsg)
+
+    #    b. testing l2update messages 
+    l2msg = l2updateinstance.gen_l2update(price=0.99, size=1)
+    create_instance.insert_message(l2msg, snap_cid, snap_rid)
     
+    #    c. testing ticker messages 
+    tickerinstance = ticker_messages(snapmsg)
+    ticker_msg_list, l2_update_msg_list = tickerinstance.gen_multi_message_ticker(size=0.05)
+    print(ticker_msg_list[0], l2_update_msg_list[0])
+    create_instance.insert_ticker_message(ticker_msg_list[0])
+
     # test 1: testing methods of the psql_read_operations
     #     a. get last tstamp
     read_instance = psql_read_operations(cursor, connection)
     latest_stamp = read_instance.get_last_tstamp()
     print(latest_stamp)
 
-    
     #     b. custom sql fetch get a list of recorded change messages in the last 10 seconds
     start_stamp = latest_stamp - timedelta(seconds=1)
     print("10 seconds before the latest message message???", start_stamp)
@@ -668,34 +714,8 @@ def main():
     
     # test 2: testing methods of the psql_update_operations
     #      a. testing mkt can overlap
-    # setup by creating mkt and can messages with identical size
+    # setup by creating mkt and can messages wit
     
-    mkt_msg = {
-    "type": "ticker",
-    "trade_id": 20153558,
-    "sequence": 3262786978,
-    "time": str(datetime.utcnow()),
-    "product_id": "ETH-USD",
-    "price": "4388.01000000",
-    "side": "buy",
-    "last_size": "0.03000000",
-    "best_bid": "4388",
-    "best_ask": "4388.01"
-    }
-
-    can_msg = {
-    "type": "ticker",
-    "trade_id": 20153558,
-    "sequence": 3262786978,
-    "time": str(datetime.utcnow()),
-    "product_id": "ETH-USD",
-    "price": "4388.01000000",
-    "side": "buy",
-    "last_size": "0.03000000",
-    "best_bid": "4388",
-    "best_ask": "4388.01"
-    }
-
     # testing methods of psql
     # execute a statement
     # msg = {'type':"snapshot", 'product_id':"ETH-USD", 'bids':[[123,0.1], [124, 0.5]], 'asks':[[125,0.5], [126,1]]}
