@@ -7,11 +7,11 @@ import pandas as pd
 # import orderbook
 # import orderbook_helpers
 #import filesave
-from .orderbook import *
-from .orderbook_helpers import * 
+from crobat.crobat  import orderbook as ob
+from crobat.crobat import orderbook_helpers as obh
 import gc
 import numpy as np
-from .filesave import *
+from crobat.crobat import filesave as fs
 from sys import exit
 
 pd.set_option('display.max_columns', 500)
@@ -82,7 +82,7 @@ class L2_Update(Client):
             
         """
         self.time_now = datetime.utcnow() #initial start time
-        self.hist = history()
+        self.hist = ob.history()
         self.recording_settings = input_args
         self.snap_received = False
         super().__init__(loop, channel) # something about a parent class sending attributes to the child class (Ticker)
@@ -135,7 +135,7 @@ class L2_Update(Client):
             the key 'type'.
         """
         if msg['type'] in ['snapshot']:
-            print("received the snapshot")
+            #print("received the snapshot")
             time = self.time_now
             self.hist.initialize_snap_events(msg,self.time_now)
             self.snap_received = True
@@ -175,11 +175,11 @@ class L2_Update(Client):
             pre_level_depth = 0 
             self.hist.token = False
             if side == "bid":
-                price_match_index = list(filter(lambda x: price_match(self.hist.bid_range[x], price_level), range(len(self.hist.bid_range))))
-                UpdateSnapshot_bid_Seq(self.hist, time, side, price_level, level_depth, pre_level_depth, price_match_index, self.recording_settings.position_range)
+                price_match_index = list(filter(lambda x: ob.price_match(self.hist.bid_range[x], price_level), range(len(self.hist.bid_range))))
+                ob.UpdateSnapshot_bid_Seq(self.hist, time, side, price_level, level_depth, pre_level_depth, price_match_index, self.recording_settings.position_range)
             elif side == "ask":
-                price_match_index = list(filter(lambda x: price_match(self.hist.ask_range[x], price_level), range(len(self.hist.ask_range))))
-                UpdateSnapshot_ask_Seq(self.hist, time, side, price_level, level_depth, pre_level_depth, price_match_index, self.recording_settings.position_range)                
+                price_match_index = list(filter(lambda x: ob.price_match(self.hist.ask_range[x], price_level), range(len(self.hist.ask_range))))
+                ob.UpdateSnapshot_ask_Seq(self.hist, time, side, price_level, level_depth, pre_level_depth, price_match_index, self.recording_settings.position_range)                
             else:
                 print("unknown message")
 
@@ -213,7 +213,7 @@ class L2_Update(Client):
         print(code)
         print(reason)
 
-        filesaver(self.hist,
+        fs.filesaver(self.hist,
                   self.recording_settings.position_range, 
                   sides=self.recording_settings.sides, 
                   filetype=self.recording_settings.filetype)         

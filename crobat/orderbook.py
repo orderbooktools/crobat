@@ -2,7 +2,7 @@ import pandas as pd
 import copy
 import bisect
 import numpy as np
-from orderbook_helpers import *
+from crobat.crobat import orderbook_helpers as obh
 
 class history(object):
     """
@@ -143,7 +143,7 @@ class history(object):
         self.snapshot_ask = msg['asks'][:3800] 
         self.bid_range = [float(self.snapshot_bid[i][0]) for i in range(len(self.snapshot_bid))]
         self.ask_range = [float(self.snapshot_ask[i][0]) for i in range(len(self.snapshot_ask))] 
-        self.min_dec = get_min_dec(0.01,self.bid_range[0])
+        self.min_dec = obh.get_min_dec(0.01,self.bid_range[0])
         self.bid_volm  = np.round([float(self.snapshot_bid[i][1]) for i in range(len(self.snapshot_bid))],decimals = self.min_dec)
         self.ask_volm  = np.round([float(self.snapshot_ask[i][1]) for i in range(len(self.snapshot_ask))],decimals = self.min_dec)
         self.snapshot_bid = [[self.bid_range[i], self.bid_volm[i]] for i in range(len(self.snapshot_bid))]
@@ -562,9 +562,9 @@ class history(object):
         """
         mid_price = 0.5*(self.bid_range[0] + self.ask_range[0])
         spread = self.ask_range[0] - self.bid_range[0]
-        sign = set_sign(self.event_size, side, self.order_type)
+        sign = obh.set_sign(self.event_size, side, self.order_type)
         self.event_size *= sign
-        self.position = set_signed_position(self.position, side)
+        self.position = obh.set_signed_position(self.position, side)
         temp_snap_bid = [[i[0],-1*i[1]] for i in copy.deepcopy(self.snapshot_bid[:(position_range-1)])][::-1]
         temp_snap_ask = copy.deepcopy(self.snapshot_ask[:(position_range-1)])        
         self.signed_history.append([time, temp_snap_bid + temp_snap_ask])

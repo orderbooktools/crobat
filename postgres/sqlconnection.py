@@ -324,18 +324,15 @@ class psql_create_operations(object):
             hmmm
              
         """
-        if msg['type'] == "snapshot":
-            bids =json.dumps(msg['bids'][:2800])
-            asks =json.dumps(msg['asks'][:2800])
-            UTC_tstamp = datetime.utcnow()
-            snapshot_connection_id =  msg['product_id'] + str(int(datetime.utcnow().timestamp()*(10 ** 6)))
-            snapshot_reference_id = msg['product_id'] + '0'
-            postgres_insert_query =  """ INSERT INTO snapshots (tstamp, snapshot_connection_id, snapshot_reference_id, bids, asks) VALUES (%s, %s, %s, %s, %s)"""
-            record_to_insert = (UTC_tstamp, snapshot_connection_id, snapshot_reference_id, bids, asks)
-            execcommit([postgres_insert_query, record_to_insert], self.cursor, self.connection)
-            count = self.cursor.rowcount
-        else:
-            print("not a snapshot message")
+        bids =json.dumps(msg['bids'][:2800])
+        asks =json.dumps(msg['asks'][:2800])
+        UTC_tstamp = datetime.utcnow()
+        snapshot_connection_id =  msg['product_id'] + str(int(datetime.utcnow().timestamp()*(10 ** 6)))
+        snapshot_reference_id = msg['product_id'] + '0'
+        postgres_insert_query =  """ INSERT INTO snapshots (tstamp, snapshot_connection_id, snapshot_reference_id, bids, asks) VALUES (%s, %s, %s, %s, %s)"""
+        record_to_insert = (UTC_tstamp, snapshot_connection_id, snapshot_reference_id, bids, asks)
+        execcommit([postgres_insert_query, record_to_insert], self.cursor, self.connection)
+        #print("apprently inserted a snapshot?")
         return snapshot_connection_id, snapshot_reference_id
 
     def insert_message(self, msg, snapshot_connection_id, snapshot_reference_id):
@@ -503,8 +500,19 @@ class psql_read_operations(object):
         sql = """ SELECT tstamp FROM messages ORDER BY tstamp DESC LIMIT 1;"""
         execcommit(sql, self.cursor, self.connection)
         returns = self.cursor.fetchall()
-        print(returns[0][0])
+        #print(returns[0][0])
         return returns[0][0]
+    
+    def fetch_snapshot():
+        """
+        
+        """
+        pass
+    
+    def fetch_messages():
+        pass
+    
+    
 
     def custom_sql_fetch(self, sql):
         """
@@ -526,14 +534,30 @@ class psql_read_operations(object):
         """
         execcommit(sql, self.cursor, self.connection)
         returns = self.cursor.fetchall()
+        ### 100 % this might the the dumbest thing ever
         if len(returns) > 1:
             print("multi item return of len: ", len(returns))
             returns_list = [] 
             for _ in returns:
-                returns_list.append(_[0][0])
+                if isinstance(_, list) or isinstance(_, tuple):
+                    #print(type(_))
+                    if isinstance(_[0],list) or isinstance(_[0], tuple):
+                        returns_list.append(_[0][0])
+                    else:
+                        returns_list.append(_[0])
+                else:
+                    returns_list.append(_)
             return returns_list
+        elif len(returns)==1:
+            print("only returning one item")
+            if isinstance(returns, list) or isinstance(returns, tuple):
+                return returns[0][0]
+            else:
+                return returns
         else:
-            return returns[0][0]
+            print(len(returns))
+            print("nothing to return, check the sql statement")
+            return returns
 
 ##############################################################################
 #                                                                            #
