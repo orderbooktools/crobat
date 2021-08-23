@@ -77,7 +77,7 @@ def convert_array_to_list_dict_sob(history, events, pos_limit=5):
     temp_dict = {}
     volm_list = []
     price_list = []
-    print(type(history))
+    #print(type(history))
     temp_dict.update({"time":history[0][0]})
     last_volm = history[0][1][0][1]
     for x in range(len(history[0][1])):
@@ -272,10 +272,10 @@ def filesaver(hist_obj, position_range, events=True, **kwargs):
     #hf = converstion_functions()
     list_to_convert = []
     out_time = datetime.utcnow()
-    print("recorded the time")
+    #print("recorded the time")
     if 'sides' in kwargs.keys():
         if 'bid' in kwargs['sides']:
-            print("found bid okay")
+            #print("found bid okay")
             final_bid_list, final_bid_prices = convert_array_to_list_dict(hist_obj.bid_history, position_range)
             titles_bid = ["L2_orderbook_volm_bid"+str(out_time),
                 "L2_orderbook_prices_bid"+str(out_time),
@@ -283,7 +283,7 @@ def filesaver(hist_obj, position_range, events=True, **kwargs):
             list_to_convert.append([[final_bid_list, titles_bid[0]], [final_bid_prices, titles_bid[1]]])
             if events:
                 list_to_convert[-1].append([hist_obj.bid_events, titles_bid[2]])
-                print("added events okay")
+                #print("added events okay")
         if 'ask' in kwargs['sides']:
             final_ask_list, final_ask_prices = convert_array_to_list_dict(hist_obj.ask_history, position_range)
             titles_ask = ["L2_orderbook_volm_ask"+str(out_time),
