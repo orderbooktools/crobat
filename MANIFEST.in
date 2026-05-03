@@ -1,0 +1,10 @@
+# Files to exclude from source distributions (pip install / PyPI)
+exclude ARCHITECTURE.md
+exclude run_tests.py
+exclude pytest.ini
+prune tests
+prune docs
+prune CLI
+prune Demo
+prune runs
+prune images
