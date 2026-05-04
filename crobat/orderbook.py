@@ -1,131 +1,88 @@
-import pandas as pd
 import copy
 import bisect
+from dataclasses import dataclass, field
+from typing import Optional
 import numpy as np
-from crobat.crobat import orderbook_helpers as obh
+from crobat import orderbook_helpers as obh
 
-class history(object):
+
+@dataclass
+class _UpdateResult:
     """
-    Class that contains the attributes and operations associated with order
-    book history
+    Carries the outcome of a single snapshot mutation sequence.
+
+    Passed forward through :func:`apply_update` so each step receives
+    explicit inputs rather than reading back side effects from shared
+    instance state.
+
+    Attributes
+    ----------
+    recorded : bool
+        ``True`` when a recordable change was found and is within depth.
+    position : int
+        0-based snapshot index where the change occurred.
+    event_size : float
+        Absolute size of the change.
+    order_type : Optional[str]
+        ``'insertion'``, ``'cancellation'``, or ``None`` if no change.
+    """
+    recorded: bool = False
+    position: int = 0
+    event_size: float = 0.0
+    order_type: Optional[str] = None
+
+
+class LimitOrderBook:
+    """
+    Maintains the state and full history of a Level 2 limit order book.
 
     Attributes
     ----------
     bid_history : list of list
-        initializes as an empty list that will hold the history of the order 
-        book states for the bid side.
-
-    ask_history : list of list 
-        initializes as an empty list that will hold the history of the order
-        book states for the bid side.
-
+        Time series of bid-side snapshots. Each entry is ``[datetime, snapshot]``.
+    ask_history : list of list
+        Time series of ask-side snapshots. Each entry is ``[datetime, snapshot]``.
+    signed_history : list of list
+        Time series of signed order book snapshots (bids negative, asks positive).
     snapshot_bid : list of list
-        initializes as an empty list that will contain the current snapshot
-        as a list of lists for the bid side. 
-
+        Current bid-side snapshot as ``[[price, volume], ...]`` best-to-worst.
     snapshot_ask : list of list
-        initializes as an empty list that will contain the current snapshot
-        as a list of lists for the ask side.
-
+        Current ask-side snapshot as ``[[price, volume], ...]`` best-to-worst.
     bid_events : list of list
-        initializes as an empty list that will contain the log of changes to
-        the order book on the bid side.
-
+        Log of recorded bid-side order book changes.
     ask_events : list of list
-        initializes as an empty list that will contain the log of changes to
-        the order book on the ask side. 
-
-    order_type : str
-        initializes as None but contains the order_type derived from the
-        message. The order types can be 'insertion', 'cancellation', 'market'
-
+        Log of recorded ask-side order book changes.
+    signed_events : list of list
+        Log of recorded signed order book changes.
+    order_type : str or None
+        Type of the most recent event: ``'insertion'``, ``'cancellation'``,
+        or ``'market'``. Written by :func:`apply_update` after each L2 update.
     token : bool
-        initializes as False. Its the flag that determines whether the change
-        to the order book is recorded in the log.
-
+        ``True`` if the most recent update was recorded (within depth limit).
+        Written by :func:`apply_update`.
     position : int
-        index position in the snapshot list where a change is occurring.
-    
-    event_size : float64
-        event size passed from the message, also computed based on the type
-        and size of the message. 
+        0-based snapshot index of the most recent change. Written by
+        :func:`apply_update`.
+    event_size : float
+        Absolute size of the most recent order book change. Written by
+        :func:`apply_update`.most recent order book change.
+    min_dec : int
+        Number of decimal places used to round volumes. Set by
+        :meth:`initialise_from_snapshot`.
 
-    snapshot token : bool
-        flag that tells the L2_Update class that it has received the snapshot
-        and can begin recording ticker and other operations to the order book.
-        This exists because after subscribing you can receive market orders
-        and order book changes before having a snapshot to commit changes to. 
-    
-    Methods
-    -------
-    add_market_order_message(message, events)
-        adds an aggregate market order at a unique timestamp to the list of
-        events. 
-
-    remove_price_level(snap_array, level_depth, match_index)
-        removes the price level in the snapshot array (snap_array )provided
-        it was found and saved in the match_index.
-
-    update_level_depth(snap_array, level_depth, match_index,
-                       pre_level_depth)
-        updates the level depth of a found price level.
-
-    update_price_index_buy(level_depth, price_level, pre_level_depth)
-        updates the list of available prices, and snapshot for the bid side
-
-    update_price_index_sell(level_depth, price_level, pre_level_depth)
-        updates the list of available prices, and snapshot for the ask side
-
-    update_snapshot_bid()
-        updates the bid snapshot, used as a check most of the time.
-
-    update_snapshot_ask()
-        updates the ask snapshot, used as a check most of the time.
-
-    trim_coordinator(position, bound)
-        sets self.token to True the order book change position is within the bound.
-
-    append_snapshot_bid(time, price_level)
-        appends the current snapshot to the self.bid_history list,
-        appends the current event to the self.bid_events list.
-
-    append_snapshot_ask(time, price_level)
-        appends the current snapshot to the self.ask_history list,
-        appends the current event to the self.ask_events list. 
-
-    check_mkt_can_overlap(events)
-        compares the recent events for changes interpretted as a cancelation
-        against a recent market order. if the sizes are the same then the 
-        cancelation event is deleted.
-
-    check_snapshot()
-        artifact method that might be deleted. for now, checks for the
-        snapshot_token to be True, and reinitilizes the history object
-        if the snapshot token has not arrived.
+    Notes
+    -----
+    ``bid_range`` and ``ask_range`` are read-only properties derived from the
+    price column of ``snapshot_bid`` and ``snapshot_ask`` respectively. They
+    are never stored separately — the snapshot is always the source of truth.
     """
+
     def __init__(self):
-        """
-        Generates the attributes for the class (see Attributes section)
-
-        Parameters
-        ----------
-            None
-
-        Returns
-        -------
-            None
-
-        Raises
-        ------
-            None
-
-        """
-        self.bid_history=[]
-        self.ask_history=[]
+        self.bid_history = []
+        self.ask_history = []
         self.signed_history = []
         self.snapshot_bid = []
         self.snapshot_ask = []
-        self.snapshot_signed = []
         self.bid_events = []
         self.ask_events = []
         self.signed_events = []
@@ -133,723 +90,563 @@ class history(object):
         self.token = False
         self.position = 0
         self.event_size = 0
-        #self.bid_price_hist = []
-        #self.ask_price_hist = []
-        #self.signed_price_hist = []
 
-    def initialize_snap_events(self, msg, time):
-        time = time
-        self.snapshot_bid = msg['bids'][:3800]
-        self.snapshot_ask = msg['asks'][:3800] 
-        self.bid_range = [float(self.snapshot_bid[i][0]) for i in range(len(self.snapshot_bid))]
-        self.ask_range = [float(self.snapshot_ask[i][0]) for i in range(len(self.snapshot_ask))] 
-        self.min_dec = obh.get_min_dec(0.01,self.bid_range[0])
-        self.bid_volm  = np.round([float(self.snapshot_bid[i][1]) for i in range(len(self.snapshot_bid))],decimals = self.min_dec)
-        self.ask_volm  = np.round([float(self.snapshot_ask[i][1]) for i in range(len(self.snapshot_ask))],decimals = self.min_dec)
-        self.snapshot_bid = [[self.bid_range[i], self.bid_volm[i]] for i in range(len(self.snapshot_bid))]
-        self.snapshot_ask = [[self.ask_range[i], self.ask_volm[i]] for i in range(len(self.snapshot_ask))] 
-        self.snapshot_signed = [[i[0], -1*i[1]] for i in self.snapshot_bid][::-1] + self.snapshot_ask
-        self.bid_history.append([time, self.snapshot_bid]) 
-        self.ask_history.append([time, self.snapshot_ask]) 
-        self.signed_history.append([time, self.snapshot_signed])
-        #print(self.snapshot_bid)
-        #self.round_digits = 0.01/self.ask_range[-1] # smallest rize i'll allow
-    def add_market_order_message(self, message, events):
+    # ------------------------------------------------------------------
+    # Derived price ranges — always in sync with the snapshot
+    # ------------------------------------------------------------------
+
+    @property
+    def bid_range(self):
+        """Prices of the current bid-side snapshot, best-to-worst (descending)."""
+        return [row[0] for row in self.snapshot_bid]
+
+    @property
+    def ask_range(self):
+        """Prices of the current ask-side snapshot, best-to-worst (ascending)."""
+        return [row[0] for row in self.snapshot_ask]
+
+    # ------------------------------------------------------------------
+    # Initialisation
+    # ------------------------------------------------------------------
+
+    def initialise_from_snapshot(self, msg, timestamp):
         """
-        Adds an aggregate market order at a unique timestamp to the list of
-        events.
+        Initialise the order book from a Level 2 snapshot message.
+
+        Populates ``snapshot_bid``, ``snapshot_ask``, and ``min_dec`` from
+        the snapshot data. Appends the initial state to ``bid_history``,
+        ``ask_history``, and ``signed_history``.
+
+        Called once per session by
+        :meth:`crobat.recorder.L2Recorder._handle_l2_data` when the first
+        ``snapshot`` event arrives.
 
         Parameters
         ----------
-            message : list
-                Message generated by the market order message.
-            
-            events : list of list 
-                Events being compared to the market order message.
-
-        Returns
-        -------
-            events : list of list
-                Trimmed list of events. 
-
-        Raises
-        ------
-            IndexError 
-                Hopefully the passes I have added won't raise anything but
-                events list isn't long enough, an IndexError may arise.
+        msg : dict
+            Snapshot dict with keys ``'bids'`` and ``'asks'``, each a list
+            of ``[price_str, quantity_str]`` pairs ordered from best to worst.
+        timestamp : datetime
+            UTC timestamp at session start, used as the first history entry.
         """
-        index_start = 0
-        index_stop = len(events) 
-        events.append(message)
-        if index_stop < 2:
-            pass
-        else:
-            index_start = max(0,len(events)-3)
-            index_stop  = len(events)-1
+        bid_prices = [float(row[0]) for row in msg['bids'][:3800]]
+        ask_prices = [float(row[0]) for row in msg['asks'][:3800]]
+        self.min_dec = obh.compute_min_decimals(0.01, bid_prices[0])
+        bid_volumes = np.round([float(row[1]) for row in msg['bids'][:3800]], decimals=self.min_dec)
+        ask_volumes = np.round([float(row[1]) for row in msg['asks'][:3800]], decimals=self.min_dec)
+        self.snapshot_bid = [[bid_prices[i], bid_volumes[i]] for i in range(len(bid_prices))]
+        self.snapshot_ask = [[ask_prices[i], ask_volumes[i]] for i in range(len(ask_prices))]
+        # Signed book init snapshot: bids negated and reversed, then asks appended
+        signed_init = [[p, -v] for p, v in self.snapshot_bid][::-1] + self.snapshot_ask
+        self.bid_history.append([timestamp, self.snapshot_bid])
+        self.ask_history.append([timestamp, self.snapshot_ask])
+        self.signed_history.append([timestamp, signed_init])
 
-        for i in range(index_start, index_stop):
-            if events[i][0] == events[i-1][0]:
-                events[i][3] += events[i-1][3]
-                del events[i-1]
-        return events
+    # ------------------------------------------------------------------
+    # Market order aggregation
+    # ------------------------------------------------------------------
 
-    # functions that modify the objects in __init__ on the arrival of L2 update. 
-    def remove_price_level(self, snap_array, level_depth, match_index):
+    def add_market_order(self, event, event_log):
         """
-        Removes the price level in the snapshot array (snap_array) provided
-        it was found and saved in the match_index.
-        
-        Parameters
-        ----------
-            snap_array : list of list
-                Snapshot array being edited.
-            
-            level_depth : float64
-                level depth passed through from the message, should be 0
+        Append a market order event to ``event_log``, aggregating consecutive
+        events at the same timestamp into a single entry.
 
-            match_index : list either [] or [int]
-                an empty or non empty list containing the position where a price
-                was found.
-
-        Returns
-        -------
-            snap_array : list of list
-                snapshot array where the prices with level depth of 0
-                have been removed.
-
-        Raises
-        ------
-            IndexError
-                Shouldn't happen but if someone passes something other than an array into
-                this function, it will have issues iterating through the snapshot. 
-        """
-        if level_depth == 0 and match_index:            
-            del snap_array[match_index[0]]
-            self.token=True
-        return snap_array
-
-    def update_level_depth(self, snap_array, level_depth, match_index, pre_level_depth):
-        """
-        updates the level depth of a found price level. Computes self.event_size, assigns
-        self.order_type, self.Token, and self.position based on the type of event.  
+        If aggregation produces a net size of zero — which happens when a buy
+        and sell of equal size arrive at the same timestamp — the combined
+        entry is removed entirely. A zero-size market event carries no
+        information about order flow direction.
 
         Parameters
         ----------
-            snap_array : list of list
-                Snapshot array being edited.
-
-            level_depth : float64
-                level depth passed through from the message.
-    
-            match_index : list either [] or [int]
-                an empty or non empty list containing the position where a
-                price was found.
-            
-            pre_level_depth : floa64
-                level depth before the operation began. default 0
-                changes to the level_depth of the found price level. 
+        event : list
+            The new market order event to append.
+        event_log : list of list
+            The event log to append to (e.g. ``signed_events``).
 
         Returns
         -------
-            snap_array : list of list 
-                snapshot array with the new level depth
-
-            pre_level_depth : float64
-                pre-level depth to compute partial insertions or cancelations.
-
-        Raises
-        ------
-            IndexError
-                If match_index isn't found in snapshot array, 
+        list of list
+            Updated event log.
         """
-        if match_index: 
-            update_index = match_index[0] 
-            self.event_size = abs(snap_array[update_index][1] - level_depth)
-            pre_level_depth = snap_array[update_index][1]
-            if snap_array[update_index][1] < level_depth:
-                self.order_type = 'insertion'
-            elif snap_array[update_index][1] > level_depth:
-                self.order_type = 'cancelation'
+        event_log.append(event)
+        # Only attempt aggregation when there are at least two entries to compare.
+        if len(event_log) < 2:
+            return event_log
+        i = len(event_log) - 1
+        if event_log[i][0] == event_log[i - 1][0]:
+            event_log[i][3] += event_log[i - 1][3]
+            del event_log[i - 1]
+            # Net size of zero means equal and opposite fills at the same
+            # timestamp — drop the combined entry, it carries no directional info.
+            if event_log[-1][3] == 0:
+                del event_log[-1]
+        return event_log
+
+    # ------------------------------------------------------------------
+    # Snapshot mutation methods
+    # ------------------------------------------------------------------
+
+    def remove_price_level(self, snapshot, level_depth, match_index, result):
+        """
+        Remove a price level from ``snapshot`` when its depth reaches zero.
+
+        Always runs after :meth:`update_level_depth`. If the level was found
+        and its new depth is zero, it is deleted and ``result.recorded`` is
+        set to ``True`` with the removal position.
+
+        Parameters
+        ----------
+        snapshot : list of list
+        level_depth : float
+        match_index : int or None
+        result : _UpdateResult
+            Result from :meth:`update_level_depth`. Returned unchanged if
+            ``level_depth != 0`` or ``match_index is None``.
+
+        Returns
+        -------
+        list of list
+            Updated snapshot.
+        _UpdateResult
+            Updated result.
+        """
+        if level_depth == 0 and match_index is not None:
+            del snapshot[match_index]
+            result = _UpdateResult(
+                recorded=True,
+                position=match_index,
+                event_size=result.event_size,
+                order_type=result.order_type,
+            )
+        return snapshot, result
+
+    def update_level_depth(self, snapshot, level_depth, match_index):
+        """
+        Update the volume of an existing price level in ``snapshot``.
+
+        Parameters
+        ----------
+        snapshot : list of list
+            The snapshot being edited.
+        level_depth : float
+            New quantity from the message.
+        match_index : int or None
+            Index of the matched price level, or ``None`` if not found.
+
+        Returns
+        -------
+        list of list
+            Updated snapshot.
+        _UpdateResult
+            Carries ``recorded``, ``position``, ``event_size``,
+            ``order_type``. ``recorded`` is ``False`` when the price was not
+            found or the quantity was unchanged.
+        """
+        result = _UpdateResult()
+        if match_index is not None:
+            event_size = abs(snapshot[match_index][1] - level_depth)
+            if snapshot[match_index][1] < level_depth:
+                order_type = 'insertion'
+            elif snapshot[match_index][1] > level_depth:
+                order_type = 'cancellation'
             else:
-                pass
-            snap_array[update_index][1] = level_depth 
-            self.token=True
-            self.position = update_index
-        else:
-            self.token = False
-        return snap_array, pre_level_depth 
+                order_type = None
+            snapshot[match_index][1] = level_depth
+            # Zero event_size means the exchange resent the same quantity —
+            # no actual change. Leave recorded=False so it is not appended.
+            if event_size > 0:
+                result = _UpdateResult(
+                    recorded=True,
+                    position=match_index,
+                    event_size=event_size,
+                    order_type=order_type,
+                )
+        return snapshot, result
 
-    def update_price_index_buy(self, level_depth, price_level, pre_level_depth):
+    def _insert_price_level(self, snapshot, level_depth, price_level, descending, prev_result):
         """
-        updates the list of available prices, and snapshot for the bid side.
-        Alters snapshot_bid by inserting a new price level. 
-        
-        Checks first to see that there was not another change before continuing.
-        Computes self.event_size, assigns self.order_type, self.Token, and
-        self.position based on the type of event. 
+        Insert a new price level into ``snapshot`` when the price was not
+        found by :meth:`update_level_depth` (``prev_result.recorded`` is
+        ``False``).
 
         Parameters
         ----------
-            level_depth : float64
-                level depth passed through from the message.
-        
-            price_level : float64
-                price level to insert into the snapshot. 
-
-            pre_level_depth : floa64
-                level depth before the operation began. default 0
-                changes to the level_depth of the found price level.       
-
-        Returns
-        -------
-            self.snapshot_bid : list of lists
-                updated snapshot bid
-
-           self.bid_range : list of float64
-                updated list of prices 
-
-            pre_level_depth : float64
-                pre-level depth to compute partial insertions or cancelations.
-
-        Raises
-        ------
-            None (that I know of)
-                
-        """
-        if not self.token:
-            self.order_type = 'cancelation' if level_depth == 0 else self.order_type
-            pre_level_depth = 0
-            self.event_size = level_depth
-            if price_level > self.bid_range[0]: 
-                self.bid_range.insert(0,price_level) 
-                self.snapshot_bid.insert(0,[price_level,level_depth]) 
-                self.order_type = "insertion"
-                self.token = True
-                self.position = 0
-            elif price_level < self.bid_range[-1]: 
-                self.token=False
-                self.position = len(self.bid_range)
-            else: 
-                self.position = bisect.bisect(self.bid_range, price_level)
-                if self.position == 0:
-                    self.token=False
-                    print("encountered problem ON BUY SIDE assigning correct bisect point for price level", price_level, "at position", self.position)
-                else:
-                    self.snapshot_bid.insert(self.position, [price_level, level_depth])
-                    self.bid_range.insert(self.position, price_level)
-                    self.order_type = "insertion"
-                    self.token=True
-        return self.snapshot_bid, self.bid_range, pre_level_depth
-
-    def update_price_index_sell(self, level_depth, price_level, pre_level_depth):
-        """
-        updates the list of available prices, and snapshot for the ask side.
-        Alters snapshot_ask by inserting a new price level. 
-        
-        Checks first to see that there was not another change before continuing.
-        Computes self.event_size, assigns self.order_type, self.Token, and
-        self.position based on the type of event. 
-
-        Parameters
-        ----------
-            level_depth : float64
-                level depth passed through from the message.
-        
-            price_level : float64
-                price level to insert into the snapshot. 
-
-            pre_level_depth : floa64
-                level depth before the operation began. default 0
-                changes to the level_depth of the found price level.       
+        snapshot : list of list
+            The snapshot being edited (bid or ask side), mutated in place.
+        level_depth : float
+            New quantity from the message.
+        price_level : float
+            Price of the new level.
+        descending : bool
+            ``True`` for the bid side (prices high-to-low);
+            ``False`` for the ask side (prices low-to-high).
+        prev_result : _UpdateResult
+            Result from the preceding mutation step. Returned unchanged if
+            ``prev_result.recorded`` is already ``True``.
 
         Returns
         -------
-            self.snapshot_ask : list of lists
-                updated snapshot bid
-
-           self.ask_range : list of float64
-                updated list of prices 
-
-            pre_level_depth : float64
-                pre-level depth to compute partial insertions or cancelations.
-
-        Raises
-        ------
-            None (that I know of)
-                
+        list of list
+            Updated snapshot.
+        _UpdateResult
+            Updated result.
         """
-        if not self.token:
-            self.order_type = 'cancelation' if level_depth == 0 else self.order_type
-            pre_level_depth = 0
-            self.event_size = level_depth
-            if price_level < min(self.ask_range): 
-                self.ask_range.insert(0, price_level) 
-                self.snapshot_ask.insert(0, [price_level,level_depth]) 
-                self.order_type = "insertion"
-                self.token = True
-                self.position = 0
-            elif price_level > max(self.ask_range): 
-                self.token=False
-                self.position = len(self.ask_range)
+        if prev_result.recorded:
+            return snapshot, prev_result
+
+        order_type = 'cancellation' if level_depth == 0 else prev_result.order_type
+        event_size = level_depth
+        result = _UpdateResult(order_type=order_type, event_size=event_size)
+
+        if descending:
+            best, worst = snapshot[0][0], snapshot[-1][0]
+            if price_level > best:
+                snapshot.insert(0, [price_level, level_depth])
+                result = _UpdateResult(recorded=True, position=0,
+                                       event_size=event_size, order_type='insertion')
+            elif price_level < worst:
+                pass  # out of range — recorded stays False
             else:
-                self.position = bisect.bisect(self.ask_range, price_level) 
-                if self.position == 0:
-                    self.token=False
-                    print("encountered problem ON SELL SIDE with assigning correct bisect point for price level", price_level, "at position", self.position)
-                else: 
-                    self.snapshot_ask.insert(self.position, [price_level, level_depth])
-                    self.ask_range.insert(self.position, price_level)
-                    self.order_type = "insertion"
-                    self.token=True
-        return self.snapshot_ask, self.ask_range, pre_level_depth
-
-    def update_snapshot_bid(self):
-        """
-        updates the bid snapshot, used as a check most of the time. 
-        Altesets self.token to True the order book change position is within the bound.rs self.snapshot_bid and self.bid_range by sorting 
-
-        Parameters
-        ----------
-            None
-
-        Returns
-        -------
-            self.snapshot_bid : list of lists
-                sorted snapshot bid
-
-           self.bid_range : list of float64
-                sorted list of prices 
-
-        Raises
-        ------
-            None       
-        """
-        self.bid_range = [self.snapshot_bid[i][0] for i in range(len(self.snapshot_bid))]
-        return self.snapshot_bid, self.bid_range
-
-    def update_snapshot_ask(self):
-        """
-        updates the ask snapshot, used as a check most of the time. 
-        Alters self.snapshot_ask and self.ask_range by sorting 
-
-        Parameters
-        ----------
-            None
-
-        Returns
-        -------
-            self.snapshot_ask : list of lists
-                sorted snapshot bid
-
-           self.ask_range : list of float64
-                sorted list of prices 
-
-        Raises
-        ------
-            None       
-        """
-        self.ask_range= [self.snapshot_ask[i][0] for i in range(len(self.snapshot_ask)) ]
-        return self.snapshot_ask, self.ask_range
-
-    def trim_coordinator(self, position, bound):
-        """
-        sets self.token to True the order book change position is within the bound.
-
-        Parameters
-        ----------
-            position : int
-                position where the change has occurred.
-
-            bound : int
-                position limit being checked against. 
-
-        Returns
-        -------
-            self.token : bool
-                True if position where the change occurred within bounds. 
-        Raises
-        ------
-            TypeError
-                If position is None or not an int it will throw this error.       
-        """
-        if abs(position)>bound:
-            self.token = False
-            #print("rejected:", position, ">", bound)
+                neg_prices = [-row[0] for row in snapshot]
+                pos = bisect.bisect_left(neg_prices, -price_level)
+                if 0 < pos < len(snapshot):
+                    snapshot.insert(pos, [price_level, level_depth])
+                    result = _UpdateResult(recorded=True, position=pos,
+                                          event_size=event_size, order_type='insertion')
         else:
-            #print("accepted", position, "<", bound)
-            pass
-        return self.token
-
-    def append_snapshot_bid(self, time, price_level, position_range):
-        """
-        appends the current snapshot to the self.bid_history list,
-        appends the current event to the self.bid_events list.
-        Alters self.bid_history, self.bid_events
-
-        Parameters
-        ----------
-            time : datetime object
-                timestamp when the message arrived.
-
-            price_level : float64
-                price level from  the message.
-
-        Returns
-        -------
-            None
-        Raises
-        ------
-            None 
-        """
-        mid_price = 0.5*(self.bid_range[0] + self.ask_range[0])
-        temp_snap = copy.deepcopy(self.snapshot_bid[:position_range])
-        spread = self.ask_range[0] - self.bid_range[0]
-        self.bid_history.append([time, temp_snap])
-        self.position += 1 
-        self.bid_events.append([time, self.order_type, price_level, self.event_size, self.position, mid_price, spread])
-
-    def append_snapshot_ask(self, time, price_level, position_range):
-        """
-        appends the current snapshot to the self.ask_history list,
-        appends the current event to the self.ask_events list.
-        Alters self.ask_history, self.ask_events.
-
-        Parameters
-        ----------
-            time : datetime object
-                timestamp when the message arrived.
-
-            price_level : float64
-                price level from  the message.
-
-        Returns
-        -------
-            None
-        Raises
-        ------
-            None 
-        """
-        mid_price = 0.5*(self.bid_range[0] + self.ask_range[0])
-        spread = self.ask_range[0] - self.bid_range[0]
-        temp_snap = copy.deepcopy(self.snapshot_ask[:position_range])
-        self.ask_history.append([time, temp_snap])
-        self.position+=1
-        self.ask_events.append([time, self.order_type, price_level, self.event_size, self.position+1, mid_price, spread])
-    
-    def append_signed_book(self, time, price_level, side, position_range):
-        """
-        Appends the current snapshot to the self.signed_history list,
-        appends the current event to the self.signed_events list.
-        Alters self.signed_history, self.signed_events.
-
-        Parameters
-        ----------
-            time : datetime object
-                timestamp when the message arrived.
-
-            price_level : float64
-                price level from  the message.
-
-            side : str 
-                bid or ask
-
-        Returns
-        -------
-            None
-        Raises
-        ------
-            None 
-        """
-        mid_price = 0.5*(self.bid_range[0] + self.ask_range[0])
-        spread = self.ask_range[0] - self.bid_range[0]
-        sign = obh.set_sign(self.event_size, side, self.order_type)
-        self.event_size *= sign
-        self.position = obh.set_signed_position(self.position, side)
-        temp_snap_bid = [[i[0],-1*i[1]] for i in copy.deepcopy(self.snapshot_bid[:(position_range-1)])][::-1]
-        temp_snap_ask = copy.deepcopy(self.snapshot_ask[:(position_range-1)])        
-        self.signed_history.append([time, temp_snap_bid + temp_snap_ask])
-        self.signed_events.append([time, self.order_type, price_level, self.event_size, self.position, side, mid_price, spread])
-
-    def check_mkt_can_overlap(self, events, order_type):
-        """
-        Checks recent events for matching market overlap and cancellation
-        messages. 
-
-        Parameters
-        ----------
-            events : list of list
-                events that we will check.
-            
-            order_type : str
-                current order type that is being checked against.
-            
-        Returns
-        -------
-            None
-            Edits : param events
-        
-        Raises
-        ------
-            None ?
-        """
-        set_of_order_of_arrival = [['market', 'cancelation'],['cancelation', 'market']]
-        if len(events)>2:
-            last_two = events[-2:]
-            orders = [last_two[0][1],last_two[1][1]]
-            sizes = [last_two[0][3], last_two[1][3]]
-            if sizes[0] - sizes[1] == float(0):
-                if order_type == 'market':
-                    #print("1a.market message initiated deleteing", events[-2])
-                    del events[-2]
-                elif (order_type == 'cancelation') and (orders[0] == 'market'):
-                    #print("1b. cancelation message initiated", events[-1])
-                    del events[-1]
-                else:
-                    #print("1c.sizes agree but neither mkt,can or can,mkt received")
-                    pass
+            best, worst = snapshot[0][0], snapshot[-1][0]
+            if price_level < best:
+                snapshot.insert(0, [price_level, level_depth])
+                result = _UpdateResult(recorded=True, position=0,
+                                       event_size=event_size, order_type='insertion')
+            elif price_level > worst:
+                pass  # out of range — recorded stays False
             else:
-                #print("sizes don't agree", sizes)
-                pass
+                pos = bisect.bisect_left([row[0] for row in snapshot], price_level)
+                if pos > 0:
+                    snapshot.insert(pos, [price_level, level_depth])
+                    result = _UpdateResult(recorded=True, position=pos,
+                                          event_size=event_size, order_type='insertion')
 
-    #### Accessors #####
-    def last_inserted_order(self, side="signed"): #these args side, 
-        out = []
-        if side == "buy":
-            event_list = self.bid_events
-        elif side == "sell":
-            event_list = self.ask_events
+        return snapshot, result
+
+    # ------------------------------------------------------------------
+    # Derived values
+    # ------------------------------------------------------------------
+
+    @property
+    def mid_price(self):
+        """Best-bid/best-ask midpoint."""
+        return 0.5 * (self.snapshot_bid[0][0] + self.snapshot_ask[0][0])
+
+    @property
+    def spread(self):
+        """Best-ask minus best-bid."""
+        return self.snapshot_ask[0][0] - self.snapshot_bid[0][0]
+
+    # ------------------------------------------------------------------
+    # Recording gate
+    # ------------------------------------------------------------------
+
+    def trim_coordinator(self, position, depth_limit):
+        """
+        Return ``True`` if ``position`` is within ``depth_limit`` levels of
+        the best price, ``False`` otherwise.
+
+        Parameters
+        ----------
+        position : int
+            Index where the change occurred.
+        depth_limit : int
+            Maximum recordable depth from the best price.
+
+        Returns
+        -------
+        bool
+        """
+        return abs(position) <= depth_limit
+
+    # ------------------------------------------------------------------
+    # History append methods
+    # ------------------------------------------------------------------
+
+    def append_snapshot_bid(self, timestamp, price_level, depth_limit, result):
+        """
+        Append the current bid snapshot and event to history.
+
+        Parameters
+        ----------
+        timestamp : datetime
+        price_level : float
+        depth_limit : int
+        result : _UpdateResult
+            Carries ``position``, ``event_size``, ``order_type`` for the event.
+        """
+        snapshot_copy = copy.deepcopy(self.snapshot_bid[:depth_limit])
+        self.bid_history.append([timestamp, snapshot_copy])
+        self.bid_events.append([
+            timestamp, result.order_type, price_level, result.event_size,
+            result.position + 1, self.mid_price, self.spread,
+        ])
+
+    def append_snapshot_ask(self, timestamp, price_level, depth_limit, result):
+        """
+        Append the current ask snapshot and event to history.
+
+        Parameters
+        ----------
+        timestamp : datetime
+        price_level : float
+        depth_limit : int
+        result : _UpdateResult
+            Carries ``position``, ``event_size``, ``order_type`` for the event.
+        """
+        snapshot_copy = copy.deepcopy(self.snapshot_ask[:depth_limit])
+        self.ask_history.append([timestamp, snapshot_copy])
+        self.ask_events.append([
+            timestamp, result.order_type, price_level, result.event_size,
+            result.position + 1, self.mid_price, self.spread,
+        ])
+
+    def append_signed_book(self, timestamp, price_level, side, depth_limit, result):
+        """
+        Append the current signed snapshot and event to history.
+
+        Parameters
+        ----------
+        timestamp : datetime
+        price_level : float
+        side : str
+            ``'bid'`` or ``'ask'``
+        depth_limit : int
+        result : _UpdateResult
+            Carries ``position``, ``event_size``, ``order_type`` for the event.
+        """
+        sign = obh.compute_sign(side, result.order_type)
+        signed_size = result.event_size * sign
+        signed_position = obh.compute_signed_position(result.position, side)
+        snap_bid = [[p, -v] for p, v in copy.deepcopy(self.snapshot_bid[:(depth_limit - 1)])][::-1]
+        snap_ask = copy.deepcopy(self.snapshot_ask[:(depth_limit - 1)])
+        self.signed_history.append([timestamp, snap_bid + snap_ask])
+        self.signed_events.append([
+            timestamp, result.order_type, price_level, signed_size,
+            signed_position, side, self.mid_price, self.spread,
+        ])
+
+    # ------------------------------------------------------------------
+    # Deduplication
+    # ------------------------------------------------------------------
+
+    def remove_market_cancel_duplicate(self, event_log, order_type):
+        """
+        Remove a duplicate event when a market order and a cancellation of the
+        same size arrive back-to-back (the cancellation is the exchange's
+        confirmation of the fill, not a separate order).
+
+        Checks the last two events in ``event_log``. If their sizes match and
+        the pair is a ``(market, cancellation)`` or ``(cancellation, market)``
+        sequence, the redundant entry is deleted in-place.
+
+        Parameters
+        ----------
+        event_log : list of list
+            The event log to check (e.g. ``bid_events``).
+        order_type : str
+            The type of the event that just triggered this check.
+        """
+        if len(event_log) <= 2:
+            return
+        last_two = event_log[-2:]
+        types = [last_two[0][1], last_two[1][1]]
+        sizes = [last_two[0][3], last_two[1][3]]
+        # Compare absolute sizes: signed events negate one side, so a raw
+        # subtraction would give 2x the size instead of zero.
+        if abs(abs(sizes[0]) - abs(sizes[1])) < 1e-9:
+            if order_type == 'market':
+                del event_log[-2]
+            elif order_type == 'cancellation' and types[0] == 'market':
+                del event_log[-1]
+
+    # ------------------------------------------------------------------
+    # Accessors
+    # ------------------------------------------------------------------
+
+    def last_inserted_order(self, side='signed'):
+        """
+        Return the most recent insertion event within the last 30 events.
+
+        Returns ``None`` if no insertion is found.
+        """
+        return self._last_event_of_type('insertion', side)
+
+    def last_canceled_order(self, side='signed'):
+        """
+        Return the most recent cancellation event within the last 30 events.
+
+        Returns ``None`` if no cancellation is found.
+        """
+        return self._last_event_of_type('cancellation', side)
+
+    def last_market_order(self, side='signed'):
+        """
+        Return the most recent market order event within the last 30 events.
+
+        Returns ``None`` if no market order is found.
+        """
+        return self._last_event_of_type('market', side)
+
+    def _last_event_of_type(self, event_type, side):
+        """
+        Shared implementation for the last_*_order accessors.
+
+        Returns the matching event list, or ``None`` if not found within the
+        last 30 events.
+        """
+        if side == 'buy':
+            event_log = self.bid_events
+        elif side == 'sell':
+            event_log = self.ask_events
         else:
-            event_list = self.signed_events
+            event_log = self.signed_events
 
-        len_check = min(len(event_list),30)
+        for event in reversed(event_log[-30:]):
+            if event[1] == event_type:
+                return event
+        return None
 
-        for i in range(len(event_list[-len_check:])):
-            if event_list[::-1][i][1] == "insertion":
-                out = event_list[::-1][i]
-                break
-            else:
-                out = []
-                print('no LO was found in last 30 messages')
-        return out
+    def latest_snapshot(self, side='signed'):
+        """
+        Return the most recent order book snapshot.
 
+        Parameters
+        ----------
+        side : str
+            ``'buy'``, ``'sell'``, or ``'signed'``. Default ``'signed'``.
 
-    def last_canceled_order(self, side="signed"):
-        out = []
-        if side == "buy":
-            event_list = self.bid_events
-        elif side == "sell":
-            event_list = self.ask_events
+        Returns
+        -------
+        list
+            ``[datetime, snapshot]``
+        """
+        if side == 'buy':
+            return self.bid_history[-1]
+        elif side == 'sell':
+            return self.ask_history[-1]
+        return self.signed_history[-1]
+
+    def last_market_depth(self, side, depth_limit='all'):
+        """
+        Compute the total notional depth (price × volume) of the order book.
+
+        Parameters
+        ----------
+        side : str
+            ``'buy'`` or ``'sell'``.
+        depth_limit : int or ``'all'``, optional
+            Number of levels to include. Default is all levels.
+
+        Returns
+        -------
+        float
+            Total notional depth.
+
+        Raises
+        ------
+        ValueError
+            If ``side`` is not ``'buy'`` or ``'sell'``.
+        """
+        if side == 'buy':
+            snapshot = self.bid_history[-1][1]
+        elif side == 'sell':
+            snapshot = self.ask_history[-1][1]
         else:
-            event_list = self.signed_events
-
-        len_check = min(len(event_list),30)
-
-        for i in range(len(event_list[-len_check:])):
-            if event_list[::-1][i][1] == "insertion":
-                out = event_list[::-1][i]
-                break
-            else:
-                out = []
-                print('no CO was found in last 30 messages')
-        return out
+            raise ValueError(f"last_market_depth: side must be 'buy' or 'sell', got {side!r}")
+        if depth_limit != 'all':
+            snapshot = snapshot[:depth_limit]
+        return sum(price * volume for price, volume in snapshot)
 
 
-    def last_market_order(self, side="signed"):
-        out = []
-        if side == "buy":
-            event_list = self.bid_events
-        elif side == "sell":
-            event_list = self.ask_events
-        else:
-            event_list = self.signed_events
+# ---------------------------------------------------------------------------
+# Module-level update sequence
+# ---------------------------------------------------------------------------
 
-        len_check = min(len(event_list),30)
-
-        for i in range(len(event_list[-len_check:])):
-            if event_list[::-1][i][1] == "market":
-                out = event_list[::-1][i]
-                break
-            else:
-                out = []
-                print('no MO was found in last 30 messages')
-        return out
-
-    def last_orderbook_image(self, side="signed"):
-        if side == "buy":
-            orderbook_list = self.bid_history
-        elif side == "sell":
-            orderbook_list = self.ask_history
-        else:
-            orderbook_list = self.signed_history
-
-        return orderbook_list[-1]
-
-    def last_market_depth(self, side, pos_range='all'): 
-        if side == "buy":
-            orderbook_snap = self.bid_history[-1][1]
-        elif side =="sell":
-            orderbook_snap = self.ask_history[-1][1]
-        else:
-            print("error, no side selected. please pick bid or ask")
-        if pos_range == 'all':
-            pass
-        else:
-            orderbook_snap = orderbook_snap[:pos_range]
-        depth = 0    
-        for i in range(len(orderbook_snap)):
-            depth += orderbook_snap[i][1] * orderbook_snap[i][0]
-        return depth     
-
-def UpdateSnapshot_bid_Seq(hist_obj, time, side, price_level, level_depth, pre_level_depth, price_match_index, position_range):
+def apply_update(book, timestamp, side, price_level, level_depth, match_index, depth_limit):
     """
-    Sequence of class methods executed on an instance of the history object (hist_obj). 
-    The order to try is:
-        1. update level depth for a known price level 
-        2. remove price level if the level depth = 0  
-        3. add new price levels
-    once the change has been committed you ensure the snapshot is sorted using
-    update_snapshot_bid()
-    then check if it is  change that is to be recorded in the bid_events variable
-    using trim_coordinator(position, bound)
-    if it is a change that is worth recording, thenappend the snapshot/event
-    and check if there is market cancellation overlap. 
+    Apply a single L2 update to ``book`` for either the bid or ask side.
+
+    Runs the full mutation sequence with explicit data flow — each step
+    receives the result of the previous one rather than reading back from
+    shared instance state:
+
+    1. Update volume of an existing level (:meth:`~LimitOrderBook.update_level_depth`)
+    2. Remove the level if volume is zero (:meth:`~LimitOrderBook.remove_price_level`)
+    3. Insert a new level if the price was not found
+       (:meth:`~LimitOrderBook._insert_price_level`)
+    4. Gate recording by depth (:meth:`~LimitOrderBook.trim_coordinator`)
+    5. Append to history and check for market/cancel duplicates if within depth.
+
+    The ``token``, ``position``, ``event_size``, and ``order_type`` attributes
+    on ``book`` are written once at the end from the final result, so the
+    public accessors (``last_inserted_order`` etc.) always reflect the most
+    recent update.
 
     Parameters
     ----------
-        hist_obj : class
-            An instance of the history class. 
-
-        time : datetime object
-                timestamp when the message arrived.
- 
-        side : str
-            side passed from message can be bid or ask, buy or sell,
-            depends on the verion.
-        
-        price_level : float64
-            price level passed from the message.
-
-        level_depth : float64
-            level depth passed from the message. 
-
-        pre_level_depth : float64
-            typically 0 until changed by the sequence of methods.
-        
-        price_match_index : list of len 1 or 0
-            contains a singular entry if there is price match otherwise empty.
-
-    Returns
-    -------
-        See individual class methods for returns and object operations.
-
-    Raises
-    ------
-        See individual class methods for raises. 
-    """    
-    hist_obj.snapshot_bid, pre_level_depth = hist_obj.update_level_depth(hist_obj.snapshot_bid, level_depth, price_match_index, pre_level_depth)        
-    hist_obj.snapshot_bid = hist_obj.remove_price_level(hist_obj.snapshot_bid, level_depth, price_match_index) # needs price range update, 
-    hist_obj.snapshot_bid, hist_obj.bid_range, pre_level_depth = hist_obj.update_price_index_buy(level_depth, price_level, pre_level_depth)
-    hist_obj.snapshot_bid, hist_obj.bid_range = hist_obj.update_snapshot_bid()
-    hist_obj.token = hist_obj.trim_coordinator(hist_obj.position, position_range)
-    if hist_obj.token:
-        hist_obj.append_snapshot_bid(time, price_level, position_range)
-        hist_obj.append_signed_book(time, price_level, side, position_range)
-        hist_obj.check_mkt_can_overlap(hist_obj.bid_events, hist_obj.order_type)
-        hist_obj.check_mkt_can_overlap(hist_obj.signed_events, hist_obj.order_type)
-        if hist_obj.bid_events[-1][-1] > 100:
-            print("it happened on this message", hist_obj.bid_events[-1])
-            print("the type of addition was: ", hist_obj.order_type)
-            print("   ")
-            print("the previous bid event was:", hist_obj.bid_events[-2])
-            print("the previous ask event was:", hist_obj.ask_events[-2])
-            print("the previous bid book looked like", hist_obj.bid_history[-2])
-            print("the previous ask book looked like", hist_obj.ask_history[-2])
-            print("the bid book looks like NOW:", hist_obj.bid_history[-1])
-            print("the ask book looks like NOW:", hist_obj.ask_history[-1])
-
-def UpdateSnapshot_ask_Seq(hist_obj, time, side, price_level, level_depth, pre_level_depth, price_match_index, position_range):
+    book : LimitOrderBook
+    timestamp : datetime
+    side : str
+        ``'bid'`` or ``'ask'``
+    price_level : float
+    level_depth : float
+    match_index : int or None
+        Index of the matched price level in the snapshot, or ``None``.
+    depth_limit : int
     """
-    Sequence of class methods executed on an instance of the history object (hist_obj). 
-    The order to try is:
-        1. update level depth for a known price level 
-        2. remove price level if the level depth = 0  
-        3. add new price levels
-    once the change has been committed you ensure the snapshot is sorted using
-    update_snapshot_bid()
-    then check if it is  change that is to be recorded in the bid_events variable
-    using trim_coordinator(position, bound)
-    if it is a change that is worth recording, thenappend the snapshot/event
-    and check if there is market cancellation overlap. 
-
-    Parameters
-    ----------
-        hist_obj : class
-            An instance of the history class. 
-
-        time : datetime object
-                timestamp when the message arrived.
- 
-        side : str
-            side passed from message can be bid or ask, buy or sell,
-            depends on the verion.
-        
-        price_level : float64
-            price level passed from the message.
-
-        level_depth : float64
-            level depth passed from the message. 
-
-        pre_level_depth : float64
-            typically 0 until changed by the sequence of methods.
-        
-        price_match_index : list of len 1 or 0
-            contains a singular entry if there is price match otherwise empty.
-
-    Returns
-    -------
-        See individual class methods for returns and object operations.
-
-    Raises
-    ------
-        See individual class methods for raises. 
-    """
-    hist_obj.snapshot_ask, pre_level_depth = hist_obj.update_level_depth(hist_obj.snapshot_ask, level_depth, price_match_index, pre_level_depth)        
-    hist_obj.snapshot_ask = hist_obj.remove_price_level(hist_obj.snapshot_ask, level_depth, price_match_index) # needs price range update, 
-    hist_obj.snapshot_ask, hist_obj.ask_range, pre_level_depth = hist_obj.update_price_index_sell(level_depth, price_level, pre_level_depth)
-    hist_obj.snapshot_ask, hist_obj.ask_range = hist_obj.update_snapshot_ask()
-    hist_obj.token = hist_obj.trim_coordinator(hist_obj.position, position_range)
-    if hist_obj.token:
-        hist_obj.append_snapshot_ask(time, price_level, position_range)
-        hist_obj.append_signed_book(time, price_level, side, position_range)
-        hist_obj.check_mkt_can_overlap(hist_obj.ask_events, hist_obj.order_type)
-        hist_obj.check_mkt_can_overlap(hist_obj.signed_events, hist_obj.order_type)
-        if hist_obj.ask_events[-1][-1] > 100:
-            print("it happened on this message", hist_obj.ask_events[-1])
-            print("the type of addition was: ", hist_obj.order_type)
-            print("   ")
-            print("the previous bid event was:", hist_obj.bid_events[-2])
-            print("the previous ask event was:", hist_obj.ask_events[-2])
-            print("the previous bid book looked like", hist_obj.bid_history[-2])
-            print("the previous ask book looked like", hist_obj.ask_history[-2])
-            print("the bid book looks like NOW:", hist_obj.bid_history[-1])
-            print("the ask book looks like NOW:", hist_obj.ask_history[-1])
-
-def price_match(x,y):
-    if y == x:
-        return True
+    if side == 'bid':
+        book.snapshot_bid, result = book.update_level_depth(book.snapshot_bid, level_depth, match_index)
+        book.snapshot_bid, result = book.remove_price_level(book.snapshot_bid, level_depth, match_index, result)
+        book.snapshot_bid, result = book._insert_price_level(book.snapshot_bid, level_depth, price_level, descending=True, prev_result=result)
+        within_depth = result.recorded and book.trim_coordinator(result.position, depth_limit)
+        if within_depth:
+            book.append_snapshot_bid(timestamp, price_level, depth_limit, result)
+            book.append_signed_book(timestamp, price_level, side, depth_limit, result)
+            book.remove_market_cancel_duplicate(book.bid_events, result.order_type)
+            book.remove_market_cancel_duplicate(book.signed_events, result.order_type)
     else:
-        return False 
+        book.snapshot_ask, result = book.update_level_depth(book.snapshot_ask, level_depth, match_index)
+        book.snapshot_ask, result = book.remove_price_level(book.snapshot_ask, level_depth, match_index, result)
+        book.snapshot_ask, result = book._insert_price_level(book.snapshot_ask, level_depth, price_level, descending=False, prev_result=result)
+        within_depth = result.recorded and book.trim_coordinator(result.position, depth_limit)
+        if within_depth:
+            book.append_snapshot_ask(timestamp, price_level, depth_limit, result)
+            book.append_signed_book(timestamp, price_level, side, depth_limit, result)
+            book.remove_market_cancel_duplicate(book.ask_events, result.order_type)
+            book.remove_market_cancel_duplicate(book.signed_events, result.order_type)
 
-# def get_min_dec(min_currency_denom, min_asset_value):
-#     min_tradable_amount = min_currency_denom/min_asset_value
-#     min_dec = 0
-#     while min_tradable_amount < 1:
-#         min_tradable_amount*=10
-#         min_dec += 1
-#         if min_dec_out > 15:
-#             break 
-#     return min_dec_out
+    # Write back to book attributes so public accessors reflect the last update.
+    book.token = within_depth if result.recorded else False
+    book.position = result.position
+    book.event_size = result.event_size
+    book.order_type = result.order_type
+
+
+# Keep the old names as thin aliases so any external code that imported them
+# directly continues to work without modification. The ``side`` parameter
+# these aliases previously accepted is dropped — it was always ignored.
+def apply_bid_update(book, timestamp, price_level, level_depth, match_index, depth_limit):
+    """Alias for :func:`apply_update` with ``side='bid'``."""
+    apply_update(book, timestamp, 'bid', price_level, level_depth, match_index, depth_limit)
+
+
+def apply_ask_update(book, timestamp, price_level, level_depth, match_index, depth_limit):
+    """Alias for :func:`apply_update` with ``side='ask'``."""
+    apply_update(book, timestamp, 'ask', price_level, level_depth, match_index, depth_limit)
+
+
+def price_match(x, y):
+    """Return ``True`` if two prices are equal."""
+    return x == y
+
 
 if __name__ == '__main__':
     pass
-

@@ -1,10 +1,10 @@
 """
-This file details the mock objects needed to test functions around crobat
-the objects for now are going to be listed plainly such that I can use
-module.object format to call the object. 
+This file details the mock objects needed to test functions around crobat.
+Contains generators for both the legacy copra format (kept for reference)
+and the current coinbase-advanced-py CDP wire format.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 ############################################################################
 #                    Data Objects                                          #
@@ -301,17 +301,125 @@ class ticker_messages(l2_update_messages):
 
 # print(cb_l2update_msg)
 
+############################################################################
+#                    CDP Wire Format Generators                            #
+############################################################################
+
+class cdp_messages:
+    """
+    Generates mock messages in the coinbase-advanced-py CDP wire format.
+    Used by test_recorder.py and test_integration_recorder.py.
+
+    All generators return a raw JSON string, matching exactly what
+    WSClient._message_handler delivers to the on_message callback.
+    """
+
+    # mid price 1.00, 10 levels each side, 0.01 tick
+    _BID_PRICES = [round(1.00 - 0.01 * i, 2) for i in range(1, 11)]
+    _ASK_PRICES = [round(1.00 + 0.01 * i, 2) for i in range(1, 11)]
+    _VOLM       = [round(1.1 + 0.1 * i, 2)   for i in range(10)]
+
+    @classmethod
+    def snapshot(cls, product_id="MKC-USD"):
+        """
+        CDP l2_data snapshot message.
+        Bids use side='bid', asks use side='offer'.
+        """
+        import json
+        updates = (
+            [{"side": "bid",   "price_level": str(p), "new_quantity": str(v), "event_time": _now()}
+             for p, v in zip(cls._BID_PRICES, cls._VOLM)]
+            +
+            [{"side": "offer", "price_level": str(p), "new_quantity": str(v), "event_time": _now()}
+             for p, v in zip(cls._ASK_PRICES, cls._VOLM)]
+        )
+        return json.dumps({
+            "channel": "l2_data",
+            "events": [{"type": "snapshot", "product_id": product_id, "updates": updates}],
+        })
+
+    @classmethod
+    def l2update(cls, side, price, quantity, product_id="MKC-USD"):
+        """
+        CDP l2_data update message.
+
+        Parameters
+        ----------
+        side : str
+            'bid' or 'offer'
+        price : float
+        quantity : float
+            0.0 signals a full removal of the price level.
+        """
+        import json
+        return json.dumps({
+            "channel": "l2_data",
+            "events": [{
+                "type": "update",
+                "product_id": product_id,
+                "updates": [{
+                    "side": side,
+                    "price_level": str(price),
+                    "new_quantity": str(quantity),
+                    "event_time": _now(),
+                }],
+            }],
+        })
+
+    @classmethod
+    def market_trade(cls, taker_side, price, size, product_id="MKC-USD"):
+        """
+        CDP market_trades message.
+
+        Parameters
+        ----------
+        taker_side : str
+            'BUY' or 'SELL' — the aggressor side.
+        price : float
+        size : float
+        """
+        import json
+        return json.dumps({
+            "channel": "market_trades",
+            "events": [{
+                "type": "update",
+                "trades": [{
+                    "product_id": product_id,
+                    "trade_id": "1",
+                    "price": str(price),
+                    "size": str(size),
+                    "side": taker_side,
+                    "time": _now(),
+                }],
+            }],
+        })
+
+    @classmethod
+    def ticker(cls, best_bid, best_ask, product_id="MKC-USD"):
+        """
+        CDP ticker message carrying best bid / ask quotes.
+        """
+        import json
+        return json.dumps({
+            "channel": "ticker",
+            "events": [{
+                "type": "update",
+                "tickers": [{
+                    "product_id": product_id,
+                    "best_bid": str(best_bid),
+                    "best_ask": str(best_ask),
+                }],
+            }],
+        })
+
+
+def _now():
+    return datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+
+
 def main():
-    l2_update_instance = l2_update_messages() 
-    snap = l2_update_instance.get_snapshot()
-    print(snap)
+    pass
 
-    def square(x):
-        return x**2
-    
-    snap2 = l2_update_instance.get_snapshot(bid_shape="custom", bid_shape_function=square)
-
-    print(snap2)
 
 if __name__ == '__main__':
     main()

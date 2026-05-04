@@ -1,260 +1,298 @@
-import asyncio, time
-#from postgres.main import input_args
-from datetime import datetime
-import copra.rest
-from copra.websocket import Channel, Client
-import pandas as pd
-# import orderbook
-# import orderbook_helpers
-#import filesave
-from crobat.crobat  import orderbook as ob
-from crobat.crobat import orderbook_helpers as obh
-import gc
+import json
+import time
+from datetime import datetime, timezone
+
+from coinbase.websocket import WSClient
 import numpy as np
-from crobat.crobat import filesave as fs
-from sys import exit
+import gc
 
-pd.set_option('display.max_columns', 500)
+from crobat import orderbook as ob
+from crobat import filesave as fs
+from crobat.config import coinbase_credentials
 
-class L2_Update(Client):
+# ---------------------------------------------------------------------------
+# Coinbase Advanced Trade WebSocket field names — concentrated here so that
+# a wire-format change only requires an update in one place.
+# ---------------------------------------------------------------------------
+_SIDE         = "side"
+_PRICE_LEVEL  = "price_level"
+_NEW_QUANTITY = "new_quantity"
+_EVENT_TIME   = "event_time"
+_TRADE_PRICE  = "price"
+_TRADE_SIZE   = "size"
+_TRADE_TIME   = "time"
+_SIDE_BID     = "bid"
+_SIDE_OFFER   = "offer"
+_TAKER_BUY    = "BUY"
+_TAKER_SELL   = "SELL"
+
+
+class SnapshotTimeoutError(Exception):
+    """Raised when the l2_data snapshot is not received within the allowed time."""
+
+
+class L2Recorder:
     """
-    class that inherits from copra.websocket Client. Contains methods for
-    receiving and interpretting l2_update and ticker messages. 
-    
+    Connects to the Coinbase Advanced Trade WebSocket feed and maintains a
+    live Level 2 limit order book using the coinbase-advanced-py WSClient.
+
+    Subscribes to three channels for a given product:
+        - level2        : snapshot + incremental order book updates
+        - market_trades : market order fills
+        - ticker        : best bid / ask quotes, cached for spread calculations
+
     Attributes
     ----------
-    time_now : datetime 
-        local UTC time when the class initializes. used for the timeout.
-    
-    hist : history class object
-        instance of the history object from LOBf_funcs.py
-    
-    currency_pair : str
-        default 'ETH-USD'
-        currency pair to record, inherited from class input_args
-    
-    position_range : int
-        default 5
-        position range of interest, inherited from class input_args
-    
-    recording_duration : int
-        default 5
-        recording duration in seconds, (time between the initialization of the class
-        and the time of the last message received). 
-        
-    Methods
-    -------
-    __init__
-        initializes attributes and inherits attributes from input_args, 
-        loop and channel. 
-    
-    on_open 
-        calls the method on_open from Client
-    
-    on_message
-        interprets and executes messages received from the websocket
-
-    on_close
-        excutes steps to close the connection to the websocket and export
-        the collected data.    
+    session_start : datetime
+        UTC time at initialisation, used as the session start reference.
+    book : LimitOrderBook
+        The live limit order book state and history.
+    settings : object
+        Holds ``currency_pair``, ``position_range``, ``recording_duration``,
+        ``sides``, ``filetype``.
+    snapshot_received : bool
+        Guards against processing updates before the snapshot arrives.
+    decimal_places : int
+        Volume rounding precision. Set from the snapshot; defaults to 8.
+    ws : WSClient
+        The underlying coinbase-advanced-py websocket client.
     """
-    def __init__(self, loop, channel, input_args):
-        """
-        init method
-        
-        Paramaters
-        ----------
-        loop : Asyncio loop object
-            Loop object that is passed by copra (tbh i dont understand it)                
-        channel : copra.websocket Channel object
-            channel settings passed L2_Update class
 
-        input_args : class input_args object
-            input arguments and recording settings. 
+    def __init__(self, settings):
+        self.session_start = datetime.now(timezone.utc)
+        self.book = ob.LimitOrderBook()
+        self.settings = settings
+        self.snapshot_received = False
+        self.decimal_places = 8  # safe default until snapshot sets it
 
-        Returns
-        -------
-        None
-        
-        Raises
-        ------
-        None 
-            
-        """
-        self.time_now = datetime.utcnow() #initial start time
-        self.hist = ob.history()
-        self.recording_settings = input_args
-        self.snap_received = False
-        super().__init__(loop, channel) # something about a parent class sending attributes to the child class (Ticker)
+        self.ws = WSClient(
+            **coinbase_credentials(),
+            on_message=self.on_message,
+            on_open=self.on_open,
+            on_close=self.on_close,
+        )
+
+    # ------------------------------------------------------------------
+    # WSClient callbacks
+    # ------------------------------------------------------------------
 
     def on_open(self):
+        print("Connection opened.", self.session_start)
+
+    def on_message(self, raw):
         """
-        calls inherited on_open method from copra.websocket Client class
-        
-        Parameters
-        ----------
-        None
-        
-        Returns
-        -------
-        None
-
-        Raises
-        ------
-        None
-
-        See Also
-        --------
-        put a link to copra's on_open method
-        """
-        print("Let's count the L2 messages!", self.time_now)
-        super().on_open() # inheriting things from the parent class who really knows    
-
-    def on_message(self, msg):
-        """
-        calls inherited on_message method from copra.websocket Client class.
-        General section where one decides how incoming messages are handled.
-        
-        Parameters
-        ----------
-        msg : dict
-            json message from the websocket feed. see 
-            link to coinbase websocket feed, for details
-            on the layout of each message. 
-        
-        Returns
-        -------
-        None
-        
-        Raises
-        ------
-        TypeError
-            If the message is not a dictionary, the key cannot be called.
-    
-            Needs further testing, will generally ignore message if it doesn't contain
-            the key 'type'.
-        """
-        if msg['type'] in ['snapshot']:
-            #print("received the snapshot")
-            time = self.time_now
-            self.hist.initialize_snap_events(msg,self.time_now)
-            self.snap_received = True
-            self.min_dec = self.hist.min_dec 
-        if msg['type'] in ['ticker']:
-            #print("received ticker message")
-            if self.snap_received:
-                time=datetime.strptime(msg['time'],'%Y-%m-%dT%H:%M:%S.%fZ') # msg['time'] into a datetime object
-                best_bid, best_ask = float(msg['best_bid']) , float(msg['best_ask'])
-                side = "bid" if msg['side'] == 'sell' else "ask"
-                spread = best_ask - best_bid
-                mid_price = 0.5*(best_bid + best_ask)
-                position = -1 if side == 'sell' else 1
-                size = np.around(float(msg['last_size']), decimals=self.min_dec)
-                size_signed = size if side == "bid" else size*(-1)
-                message = [time, 'market', float(msg['price']), size_signed, position, side, mid_price, spread]
-                sided_message = [time, 'market', float(msg['price']), size, position, mid_price, spread]
-                self.hist.signed_events = self.hist.add_market_order_message(message, self.hist.signed_events)
-                self.hist.check_mkt_can_overlap(self.hist.signed_events,'market')
-                if side == 'ask':
-                    self.hist.ask_events = self.hist.add_market_order_message(sided_message, self.hist.ask_events)
-                    self.hist.check_mkt_can_overlap(self.hist.ask_events, 'market')
-                elif side == 'bid':
-                    self.hist.bid_events = self.hist.add_market_order_message(sided_message, self.hist.bid_events)
-                    self.hist.check_mkt_can_overlap(self.hist.bid_events, 'market')
-                else:
-                    print("unknown matched order")
-            else:
-                print("mkt order arrived but no snapshot received yet")
-
-        if msg['type'] in ['l2update']:# update messages 
-            time=datetime.strptime(msg['time'],'%Y-%m-%dT%H:%M:%S.%fZ') #from the message extract time
-            changes = msg['changes'] #from the message extract the changes
-            side = 'bid' if changes[0][0] == "buy" else "ask" #side in which the changes happend (don't worry its orderbook crap)
-            price_level = float(changes[0][1]) #the position in x_range that the change is affecting
-            level_depth = np.around( float(changes[0][2]), decimals=self.min_dec) #the value in x_volm that is changing
-            pre_level_depth = 0 
-            self.hist.token = False
-            if side == "bid":
-                price_match_index = list(filter(lambda x: ob.price_match(self.hist.bid_range[x], price_level), range(len(self.hist.bid_range))))
-                ob.UpdateSnapshot_bid_Seq(self.hist, time, side, price_level, level_depth, pre_level_depth, price_match_index, self.recording_settings.position_range)
-            elif side == "ask":
-                price_match_index = list(filter(lambda x: ob.price_match(self.hist.ask_range[x], price_level), range(len(self.hist.ask_range))))
-                ob.UpdateSnapshot_ask_Seq(self.hist, time, side, price_level, level_depth, pre_level_depth, price_match_index, self.recording_settings.position_range)                
-            else:
-                print("unknown message")
-
-        if (datetime.utcnow() - self.time_now).total_seconds() > float(self.recording_settings.recording_duration):  # after 1 second has passed
-            self.loop.create_task(self.close()) # ASyncIO nonsense
-
-    def on_close(self, was_clean, code, reason):
-        """
-        calls on inherited method on_close from crobat.websocket Client class.
-        Sequence of steps initiated after self.close() method is called.
-        Creates the output files from the websocket session.
+        Route an incoming raw JSON string to the correct channel handler.
 
         Parameters
         ----------
-        was_clean : bool
-            True if the websocket connection was closed cleanly, else False.
-        
-        code : str 
-            Connection code. 0 if clean 1 if error. need to look into this.    
-        
-        reason : str
-            Reason the connection was closed. Look into this.
-
-        Raises
-        ------
-            Happens in current crobat. The connection never gets instructed to 
-            be closed. Gives rise to a warn error.   
+        raw : str
+            Raw JSON string delivered by WSClient.
         """
-        print("Connection to server is closed")
-        print(was_clean)
-        print(code)
-        print(reason)
+        msg = json.loads(raw)
+        channel = msg.get("channel")
 
-        fs.filesaver(self.hist,
-                  self.recording_settings.position_range, 
-                  sides=self.recording_settings.sides, 
-                  filetype=self.recording_settings.filetype)         
+        if channel == "l2_data":
+            self._handle_l2_data(msg)
+        elif channel == "market_trades":
+            self._handle_market_trades(msg)
+        elif channel == "ticker":
+            self._handle_ticker_quotes(msg)
 
-        # """Massages my list of [time, [[price, volm], ... , [price,volm]]] into a clean dataframe""" 
-        # final_bid_list, final_bid_prices = hf.convert_array_to_list_dict(self.hist.bid_history, self.position_range)
-        # final_ask_list, final_ask_prices = hf.convert_array_to_list_dict(self.hist.ask_history, self.position_range)
-        # final_signed_list, final_signed_prices = hf.convert_array_to_list_dict_sob(self.hist.signed_history, self.hist.signed_events)
-
-        # title1 = "L2_orderbook_volm_bid"+str(self.hist.bid_events[-1][0])+".xlsx"
-        # hf.pd_excel_save(title1, final_bid_list)
-
-        # title2 = "L2_orderbook_volm_ask"+str(self.hist.ask_events[-1][0])+".xlsx"
-        # hf.pd_excel_save(title2, final_ask_list)
-
-        # title3 = "L2_orderbook_events_bid" +str(self.hist.bid_events[-1][0])+".xlsx"
-        # hf.pd_excel_save(title3, self.hist.bid_events)
-
-        # title4 = "L2_orderbook_events_ask" +str(self.hist.ask_events[-1][0])+".xlsx"        
-        # hf.pd_excel_save(title4, self.hist.ask_events)
-
-        # title5 = "L2_orderbook_prices_bid"+str(self.hist.bid_events[-1][0])+".xlsx"
-        # hf.pd_excel_save(title5, final_bid_prices)
-
-        # title6 = "L2_orderbook_prices_ask"+str(self.hist.ask_events[-1][0])+".xlsx"
-        # hf.pd_excel_save(title6, final_ask_prices)
-
-        # title7 = "L2_orderbook_volm_signed"+str(self.hist.signed_events[-1][0])+".xlsx"
-        # hf.pd_excel_save(title7, final_signed_list)
-
-        # title8 = "L2_orderbook_events_signed" +str(self.hist.signed_events[-1][0])+".xlsx"
-        # hf.pd_excel_save(title8, self.hist.signed_events)
-
-        # title8 = "L2_orderbook_prices_signed"+str(self.hist.signed_events[-1][0])+".xlsx"
-        # hf.pd_excel_save(title8, final_signed_prices)
-
+    def on_close(self):
+        print("Connection closed.")
+        fs.export_session(
+            self.book,
+            self.settings.position_range,
+            sides=self.settings.sides,
+            filetype=self.settings.filetype,
+            output_dir=getattr(self.settings, 'output_dir', '.'),
+        )
         gc.collect()
-        exit() #dusty but w/e
+
+    # ------------------------------------------------------------------
+    # Public entry point
+    # ------------------------------------------------------------------
+
+    def start(self, snap_timeout=8.0, max_retries=2, retry_backoff=5.0):
+        """
+        Open the WebSocket, subscribe to all channels, wait for
+        ``recording_duration`` seconds, then close cleanly.
+
+        The recording timer only starts once the l2_data snapshot is confirmed.
+        If the snapshot is not received within ``snap_timeout`` seconds, the
+        connection is closed and reopened after ``retry_backoff`` seconds.
+
+        Parameters
+        ----------
+        snap_timeout : float
+            Seconds to wait for the snapshot before treating the attempt as
+            failed. Default 8s.
+        max_retries : int
+            Number of reconnection attempts after the first failure. Default 2.
+        retry_backoff : float
+            Seconds to wait between a failed attempt and the next reconnect.
+            Default 5s.
+
+        Raises
+        ------
+        SnapshotTimeoutError
+            If the snapshot is not received after all attempts are exhausted.
+        """
+        pair = [self.settings.currency_pair]
+        total_attempts = 1 + max_retries
+
+        for attempt in range(1, total_attempts + 1):
+            self.snapshot_received = False
+
+            self.ws.open()
+            self.ws.level2(pair)
+            self.ws.market_trades(pair)
+            self.ws.ticker(pair)
+
+            deadline = time.monotonic() + snap_timeout
+            while not self.snapshot_received and time.monotonic() < deadline:
+                time.sleep(0.1)
+
+            if self.snapshot_received:
+                break
+
+            print(f"Snapshot not received (attempt {attempt}/{total_attempts}). Closing connection.")
+            try:
+                self.ws.close()
+            except Exception:
+                pass
+
+            if attempt < total_attempts:
+                print(f"Waiting {retry_backoff}s before reconnecting.")
+                time.sleep(retry_backoff)
+                self.ws = WSClient(
+                    **coinbase_credentials(),
+                    on_message=self.on_message,
+                    on_open=self.on_open,
+                    on_close=self.on_close,
+                )
+            else:
+                raise SnapshotTimeoutError(
+                    f"l2_data snapshot not received after {total_attempts} attempt(s) "
+                    f"for {self.settings.currency_pair}."
+                )
+
+        try:
+            self.ws.sleep_with_exception_check(float(self.settings.recording_duration))
+        finally:
+            self.ws.close()
+
+    # ------------------------------------------------------------------
+    # Private channel handlers
+    # ------------------------------------------------------------------
+
+    def _handle_l2_data(self, msg):
+        """
+        Handle l2_data channel messages.
+
+        The first event with type ``'snapshot'`` initialises the order book.
+        Subsequent ``'update'`` events are applied incrementally.
+
+        Coinbase field names (see module-level constants):
+            ``side``          ``'bid'`` | ``'offer'``
+            ``price_level``   price of the changed level
+            ``new_quantity``  new volume (0 = remove the level)
+            ``event_time``    ISO-8601 timestamp of the change
+        """
+        for event in msg.get("events", []):
+            if event["type"] == "snapshot":
+                bids, asks = [], []
+                for u in event.get("updates", []):
+                    entry = [u[_PRICE_LEVEL], u[_NEW_QUANTITY]]
+                    if u[_SIDE] == _SIDE_BID:
+                        bids.append(entry)
+                    else:
+                        asks.append(entry)
+                self.book.initialise_from_snapshot(
+                    {"bids": bids, "asks": asks}, self.session_start
+                )
+                self.snapshot_received = True
+                self.decimal_places = self.book.min_dec
+
+            elif event["type"] == "update" and self.snapshot_received:
+                for u in event.get("updates", []):
+                    side = _SIDE_BID if u[_SIDE] == _SIDE_BID else "ask"
+                    price_level = float(u[_PRICE_LEVEL])
+                    level_depth = np.around(float(u[_NEW_QUANTITY]), decimals=self.decimal_places)
+                    timestamp = datetime.fromisoformat(u[_EVENT_TIME].replace("Z", "+00:00"))
+
+                    price_range = self.book.bid_range if side == "bid" else self.book.ask_range
+                    match_index = next(
+                        (i for i, p in enumerate(price_range) if ob.price_match(p, price_level)),
+                        None,
+                    )
+                    ob.apply_update(
+                        self.book, timestamp, side, price_level, level_depth,
+                        match_index, self.settings.position_range,
+                    )
+
+    def _handle_market_trades(self, msg):
+        """
+        Handle market_trades channel messages.
+
+        Coinbase field names (see module-level constants):
+            ``side``   ``'BUY'`` | ``'SELL'`` — the aggressor (taker) side
+            ``price``  execution price
+            ``size``   executed quantity
+            ``time``   ISO-8601 timestamp
+        """
+        if not self.snapshot_received:
+            return
+
+        for event in msg.get("events", []):
+            for trade in event.get("trades", []):
+                timestamp = datetime.fromisoformat(trade[_TRADE_TIME].replace("Z", "+00:00"))
+                taker_side = trade[_SIDE].lower()
+                # crobat convention: side is the resting order side that was hit
+                side = "bid" if taker_side == _TAKER_SELL.lower() else "ask"
+
+                # Use the live order book for mid/spread — always current from L2 updates.
+                # The ticker cache (self.best_bid/ask) is intentionally not used here
+                # because it can lag behind L2 updates and produce stale values.
+                mid_price = self.book.mid_price
+                spread = self.book.spread
+                position = -1 if side == "bid" else 1
+
+                size = np.around(float(trade[_TRADE_SIZE]), decimals=self.decimal_places)
+                # A trade whose size rounds to zero is not a real fill — drop it.
+                if size == 0:
+                    continue
+                size_signed = size if side == "bid" else -size
+
+                signed_event = [timestamp, "market", float(trade[_TRADE_PRICE]), size_signed, position, side, mid_price, spread]
+                sided_event  = [timestamp, "market", float(trade[_TRADE_PRICE]), size,        position, mid_price, spread]
+
+                self.book.signed_events = self.book.add_market_order(signed_event, self.book.signed_events)
+                self.book.remove_market_cancel_duplicate(self.book.signed_events, "market")
+
+                if side == "ask":
+                    self.book.ask_events = self.book.add_market_order(sided_event, self.book.ask_events)
+                    self.book.remove_market_cancel_duplicate(self.book.ask_events, "market")
+                else:
+                    self.book.bid_events = self.book.add_market_order(sided_event, self.book.bid_events)
+                    self.book.remove_market_cancel_duplicate(self.book.bid_events, "market")
+
+    def _handle_ticker_quotes(self, msg):
+        """
+        Receive ticker channel messages.
+
+        The ticker channel is subscribed to keep the WebSocket connection
+        active and to receive best-bid/ask updates. Mid-price and spread for
+        all event types are computed directly from the live L2 order book
+        (``self.book.mid_price`` / ``self.book.spread``) rather than from
+        ticker data, so no values are cached here.
+        """
+        pass
+
 
 def main():
     pass
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()

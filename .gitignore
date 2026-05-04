@@ -144,7 +144,24 @@ docs/manual/*
 # vscode directory
 .vscode/
 
+# kiro directory
+.kiro/
+
+# macOS metadata
+.DS_Store
+
 # output files unless zipped dont mean much
 *.xlsx
 *.csv
 *.pkl
+
+# recorded session output
+runs/*
+!runs/.gitkeep
+
+# credentials — never commit these
+config.ini
+cdp_api_key.json
+
+# LibreOffice / Excel lock files
+.~lock.*

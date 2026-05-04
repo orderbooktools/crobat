@@ -1,165 +1,109 @@
+"""
+crobat/orderbook_helpers.py
 
-## Functions that help the history class 
-import pandas as pd
-import bisect
+Pure utility functions used by :class:`crobat.orderbook.LimitOrderBook`.
+No state, no side effects — each function takes plain values and returns
+a result.
+"""
 
-def check_order(snapshot,side):
+
+def compute_sign(side, order_type):
     """
-    test function that checks that the snapshot is sorted correctly.
+    Return the sign (+1 or -1) for an order book event in the signed order book.
+
+    Follows the order flow convention from Cont, Kukanov and Stoikov (2011):
+
+    - **Ask side:** insertions and market orders are positive; cancellations
+      are negative.
+    - **Bid side:** the sign is flipped relative to the ask side.
 
     Parameters
     ----------
-        snapshot : list of list
-            snapshot array ordered as follows [[price, volm],[price,volm]]
-        
-        side : str
-            side being checked, can be "bid" or "ask"
-    
+    side : str
+        Side of the order book where the event occurred. ``'ask'`` or
+        ``'bid'``.
+    order_type : str
+        Type of order book event. One of ``'insertion'``, ``'cancellation'``,
+        or ``'market'``.
+
     Returns
     -------
-        None
-
-    Raises
-    ------
-        None
-    
-    Remarks
-    ------- 
-        edits the snapshot argument using function sorted(list_object)
-
+    int
+        ``1`` or ``-1``.
     """
+    sign = 1
+    if order_type == "cancellation":
+        sign = -1
     if side == "bid":
-        ans = sorted(snapshot, key=lambda x: x[0])[::-1]  
-    else:
-        ans = sorted(snapshot, key=lambda x: x[0])
-    if snapshot == ans:
-        pass
-    else:
-        pass  
-
-
-# used to set the sign in OFI for signed order book events
-def set_sign(event_size, side, order_type):
-    """
-    Sets the sign for the order book event in the signed order book.
-    if side is ask:
-        POSITIVE sign for market orders and limit insertions
-        NEGATIVE sign for limit cancellations
-    if side is bid:
-        NEGATIVE sign for market orders and limit insertions
-        POSITIVE sign for limit cancellations
-    
-    Parameters
-    ----------
-        event_size : float64
-            size of the event
-        
-        side : str
-            given side of the event can be "bid" or "ask"
-        
-        order_type : str
-            type of order can be "market", "insertion", "cancelation"
-    
-    Returns
-    -------
-        sign : int
-            1 or -1 depending on conditions inferred. 
-
-    Raises
-    ------ 
-        None
-        default sign := 1 
-    """
-    sign=1
-    if order_type in ["insertion", "market"]:
-        sign = 1
-    elif order_type == "cancelation":
-        sign = -1 
-    else:
-        pass
-    if side == "bid":
-        sign *= -1 
-    else:
-        pass
+        sign *= -1
     return sign
 
 
-def set_signed_position(position, side):
+def compute_signed_position(position, side):
     """
-    Understand the order book is really two assumed separate order books.
-    used to flip position for bid side. 
+    Convert a zero-indexed ordinal position to a signed position.
+
+    The signed order book uses negative positions for the bid side and
+    positive positions for the ask side, with position 0 skipped (best bid
+    is ``-1``, best ask is ``1``).
 
     Parameters
     ----------
-        position : int
-            position where the order book was updated [0,len(snapshot)-1]
-        
-        side : str
-            side where the event occurred, can be "bid" or "ask"
-    
+    position : int
+        Zero-indexed ordinal distance from the best bid or best ask.
+    side : str
+        Side of the order book. ``'bid'`` or ``'ask'``.
+
     Returns
     -------
-        position : int
-            The signed position:
-                -1 * position if side == "bid"
-                +1 * position if side == "ask"
-    
-    Raises
-    ------ 
-        Type error if parameter passed isn't an int
+    int
+        Signed position: negative for bid, positive for ask.
     """
     position += 1
-    if side =="bid":
+    if side == "bid":
         position *= -1
     return position
 
-def get_min_dec(min_currency_denom, min_asset_value):
+
+def compute_min_decimals(min_currency_denom, min_asset_value):
     """
-    Computes the smallest tradable amount of XTC base currency for a given
-    tick size in the float currency (i.e., 0.01 USD)
-    
+    Compute the number of decimal places needed to represent the smallest
+    tradable quantity at the current price.
+
+    Uses the worst (deepest) bid price as a conservative floor. The result
+    is used to round all volume values consistently throughout a session.
+
     Parameters
     ----------
-        min_currency_denom : float64
-            Minimum currency denomination of the float currency
-            (e.g., 0.01 USD)
-        
-        min_asset_value : float64
-            Minimum observed price of the base currency in
-            denominated by the float currency.
-            i.e., the worst bid in the order book
+    min_currency_denom : float
+        Minimum currency denomination of the quote currency (e.g., ``0.01``
+        for one cent in USD).
+    min_asset_value : float
+        Lowest observed price of the base asset in the quote currency
+        (e.g., the worst bid price in the order book snapshot).
 
     Returns
     -------
-        min_dec_out : float64
-            the smallest tradable amount for the lowest observed price.
-            This gives a floor as to how small trades can be locally. 
+    int
+        Number of decimal places for the smallest tradable amount at the
+        given price. Capped at 10 to avoid runaway precision on very cheap
+        assets.
 
     Raises
     ------
-        TypeError 
-            If you try to pass anything that isn't int or float64.
-            can occurr if you forget to use float(msg['price']).     
+    TypeError
+        If non-numeric values are passed. Ensure prices are cast to
+        ``float`` before calling (e.g., ``float(msg['price'])``).
     """
-    min_tradable_amount = min_currency_denom/min_asset_value
-    min_dec_out = 0
+    min_tradable_amount = min_currency_denom / min_asset_value
+    decimals = 0
     while min_tradable_amount < 1:
-        min_tradable_amount*=10
-        min_dec_out += 1
-        if min_dec_out > 10:
-            print("min_dec >10")
-            break 
-    return min_dec_out
-
-def get_tick_distance(ref_price, input_price, ticksize=0.01):
-    """
-        WIP. some papers like to use tick distance
-        I do not understand yet how this helps.
-    """
-    tick_distance = abs(ref_price - input_price)/ticksize
-    return tick_distance 
+        min_tradable_amount *= 10
+        decimals += 1
+        if decimals > 10:
+            break
+    return decimals
 
 
 if __name__ == '__main__':
     pass
-

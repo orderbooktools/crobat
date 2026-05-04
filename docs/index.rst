@@ -1,16 +1,19 @@
-.. crobat documentation master file, created by
-   sphinx-quickstart on Tue Jun 22 13:45:19 2021.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+crobat documentation
+====================
 
-Welcome to crobat's documentation!
-==================================
+crobat is a Python library for recording live Level 2 order book data
+from the Coinbase Advanced Trade WebSocket feed. It captures limit order
+insertions, cancellations, and market orders in real time and saves them
+as structured time series files.
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
-   modules
+   getting_started
+   output_format
+   api
+   references
 
 Indices and tables
 ==================

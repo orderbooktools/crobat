@@ -1,24 +1,33 @@
-## this is the crobat init 
-## very straight forward import everything so that we can run crobat
+"""
+crobat — Cryptocurrency Order Book Analysis Tool.
 
+Connects to the Coinbase Advanced Trade WebSocket feed, reconstructs a
+live Level 2 limit order book, and records insertions, cancellations, and
+market orders as structured time series files.
 
+Public API
+----------
+Primary entry point::
 
-# # filesave shit 
-# from .filesave import *
-# from .orderbook import *
-# from .orderbook_helpers import * 
-# from .recorder import *
+    from crobat import L2Recorder, SnapshotTimeoutError
 
-# ## i think everything is okay???
-#
-import sys, os
-# i need to add each wd to the syspath
-# 1 get the relative path
-#os.chdir('..')
-sys.path.append(os.getcwd())
+    recorder = L2Recorder(settings)
+    recorder.start()
 
-# # 2 i need to import everything independently
-# #import filesave
-# import orderbook
-# import orderbook_helpers
-# import recorder
+Direct access to the order book state::
+
+    from crobat import LimitOrderBook
+
+Lower-level imports::
+
+    from crobat.recorder import L2Recorder
+    from crobat.orderbook import LimitOrderBook
+    from crobat.config import recording_defaults, coinbase_credentials
+    from crobat.filesave import export_session
+"""
+
+from .recorder import L2Recorder, SnapshotTimeoutError
+from .orderbook import LimitOrderBook
+
+__all__ = ["L2Recorder", "SnapshotTimeoutError", "LimitOrderBook"]
+__version__ = "1.0.0"
